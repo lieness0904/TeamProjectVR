@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "Orange",
+      "itemType": "Common",
+      "description": "달콤한 귤",
+      "iconPath": "09_UI/Sprites/Orange_Sprite",
+      "value": 10
+    },
+    {
+      "id": 2,
+      "name": "미끼",
+      "itemType": "Consumable",
+      "description": "물고기가 싫어할것만 같은 미끼다,,",
+      "iconPath": "09_UI/Sprites/Bait_Sprite",
+      "value": 20
+    }
+  ]
+}

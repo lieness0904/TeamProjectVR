@@ -1,8 +1,8 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using System.Collections;
-using TMPro; // TextMeshPro¸¦ »ç¿ëÇÏ±â À§ÇØ ÇÊ¿äÇÕ´Ï´Ù.
+using TMPro; // TextMeshProÂ¸Â¦ Â»Ã§Â¿Ã«Ã‡ÃÂ±Ã¢ Ã€Â§Ã‡Ã˜ Ã‡ÃŠÂ¿Ã¤Ã‡Ã•Â´ÃÂ´Ã™.
 using UnityEngine.SceneManagement;
 
 public class LoginManager : MonoBehaviour
@@ -32,63 +32,62 @@ public class LoginManager : MonoBehaviour
         string userId = idInputField.text;
         string password = passwordInputField.text;
 
-        // ¾ÆÀÌµğ³ª ºñ¹Ğ¹øÈ£°¡ ºñ¾îÀÖ´ÂÁö È®ÀÎÇÕ´Ï´Ù.
+        // Â¾Ã†Ã€ÃŒÂµÃ°Â³Âª ÂºÃ±Â¹ÃÂ¹Ã¸ÃˆÂ£Â°Â¡ ÂºÃ±Â¾Ã®Ã€Ã–Â´Ã‚ÃÃ¶ ÃˆÂ®Ã€ÃÃ‡Ã•Â´ÃÂ´Ã™.
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
         {
-            statusText.text = "¾ÆÀÌµğ¿Í ºñ¹Ğ¹øÈ£¸¦ ¸ğµÎ ÀÔ·ÂÇÏ¼¼¿ä.";
+            statusText.text = "Â¾Ã†Ã€ÃŒÂµÃ°Â¿Ã ÂºÃ±Â¹ÃÂ¹Ã¸ÃˆÂ£Â¸Â¦ Â¸Ã°ÂµÃ Ã€Ã”Â·Ã‚Ã‡ÃÂ¼Â¼Â¿Ã¤.";
             return;
         }
 
-        statusText.text = "·Î±×ÀÎ Áß...";
+        statusText.text = "Â·ÃÂ±Ã—Ã€Ã ÃÃŸ...";
 
-        // ÄÚ·çÆ¾À» »ç¿ëÇÏ¿© ºñµ¿±â À¥ ¿äÃ»À» ½ÃÀÛÇÕ´Ï´Ù.
+        // Ã„ÃšÂ·Ã§Ã†Â¾Ã€Â» Â»Ã§Â¿Ã«Ã‡ÃÂ¿Â© ÂºÃ±ÂµÂ¿Â±Ã¢ Ã€Â¥ Â¿Ã¤ÃƒÂ»Ã€Â» Â½ÃƒÃ€Ã›Ã‡Ã•Â´ÃÂ´Ã™.
         StartCoroutine(LoginRequest(userId, password));
     }
 
 
-    /// <param name="userId">»ç¿ëÀÚ ¾ÆÀÌµğ</param>
-    /// <param name="password">»ç¿ëÀÚ ºñ¹Ğ¹øÈ£</param>
+    /// <param name="userId">Â»Ã§Â¿Ã«Ã€Ãš Â¾Ã†Ã€ÃŒÂµÃ°</param>
+    /// <param name="password">Â»Ã§Â¿Ã«Ã€Ãš ÂºÃ±Â¹ÃÂ¹Ã¸ÃˆÂ£</param>
     IEnumerator LoginRequest(string userId, string password)
     {
-        // À¥¿¡ º¸³¾ µ¥ÀÌÅÍ ¾ç½ÄÀ» ¸¸µì´Ï´Ù.
+        // Ã€Â¥Â¿Â¡ ÂºÂ¸Â³Â¾ ÂµÂ¥Ã€ÃŒÃ…Ã Â¾Ã§Â½Ã„Ã€Â» Â¸Â¸ÂµÃ¬Â´ÃÂ´Ã™.
         WWWForm form = new WWWForm();
-        form.AddField("action", "login"); // Apps ScriptÀÇ ¾î¶² ±â´ÉÀ» È£ÃâÇÒÁö ÁöÁ¤
+        form.AddField("action", "login"); // Apps ScriptÃ€Ã‡ Â¾Ã®Â¶Â² Â±Ã¢Â´Ã‰Ã€Â» ÃˆÂ£ÃƒÃ¢Ã‡Ã’ÃÃ¶ ÃÃ¶ÃÂ¤
         form.AddField("userId", userId);
         form.AddField("password", password);
 
-        // POST ¹æ½ÄÀ¸·Î À¥ ¿äÃ»À» »ı¼ºÇÏ°í º¸³À´Ï´Ù.
+        // POST Â¹Ã¦Â½Ã„Ã€Â¸Â·Ã Ã€Â¥ Â¿Ã¤ÃƒÂ»Ã€Â» Â»Ã½Â¼ÂºÃ‡ÃÂ°Ã­ ÂºÂ¸Â³Ã€Â´ÃÂ´Ã™.
         using (UnityWebRequest www = UnityWebRequest.Post(scriptURL, form))
         {
-            yield return www.SendWebRequest(); // ¿äÃ»ÀÌ ³¡³¯ ¶§±îÁö ¿©±â¼­ ´ë±âÇÕ´Ï´Ù.
+            yield return www.SendWebRequest(); // Â¿Ã¤ÃƒÂ»Ã€ÃŒ Â³Â¡Â³Â¯ Â¶Â§Â±Ã®ÃÃ¶ Â¿Â©Â±Ã¢Â¼Â­ Â´Ã«Â±Ã¢Ã‡Ã•Â´ÃÂ´Ã™.
 
-            // À¥ ¿äÃ»¿¡ ¼º°øÇßÀ» °æ¿ì
+            // Ã€Â¥ Â¿Ã¤ÃƒÂ»Â¿Â¡ Â¼ÂºÂ°Ã¸Ã‡ÃŸÃ€Â» Â°Ã¦Â¿Ã¬
             if (www.result == UnityWebRequest.Result.Success)
             {
-                // ¼­¹ö·ÎºÎÅÍ ¹ŞÀº JSON Çü½ÄÀÇ ÀÀ´ä ÅØ½ºÆ®¸¦ ÆÄ½Ì(ÇØ¼®)ÇÕ´Ï´Ù.
+                // Â¼Â­Â¹Ã¶Â·ÃÂºÃÃ…Ã Â¹ÃÃ€Âº JSON Ã‡Ã¼Â½Ã„Ã€Ã‡ Ã€Ã€Â´Ã¤ Ã…Ã˜Â½ÂºÃ†Â®Â¸Â¦ Ã†Ã„Â½ÃŒ(Ã‡Ã˜Â¼Â®)Ã‡Ã•Â´ÃÂ´Ã™.
                 string jsonResponse = www.downloadHandler.text;
                 LoginResponse response = JsonUtility.FromJson<LoginResponse>(jsonResponse);
 
-                // ¼­¹ö¿¡¼­ "¼º°ø" ÀÀ´äÀ» º¸³ÂÀ» °æ¿ì
+                // Â¼Â­Â¹Ã¶Â¿Â¡Â¼Â­ "Â¼ÂºÂ°Ã¸" Ã€Ã€Â´Ã¤Ã€Â» ÂºÂ¸Â³Ã‚Ã€Â» Â°Ã¦Â¿Ã¬
                 if (response.status == "success")
                 {
-                    statusText.text = response.message; // "Login successful" ¶Ç´Â "New user registered"
-                    Debug.Log("·Î±×ÀÎ ¼º°ø! µ¥ÀÌÅÍ ·Îµå ¿Ï·á.");
+                    statusText.text = response.message; // "Login successful" Â¶Ã‡Â´Ã‚ "New user registered"
+                    Debug.Log("Â·ÃÂ±Ã—Ã€Ã Â¼ÂºÂ°Ã¸! ÂµÂ¥Ã€ÃŒÃ…Ã Â·ÃÂµÃ¥ Â¿ÃÂ·Ã¡.");
 
-                    // DontDestroyOnLoad·Î ¼³Á¤µÈ PlayerData ½Ì±ÛÅæ ÀÎ½ºÅÏ½º¿¡ ÇÃ·¹ÀÌ¾î Á¤º¸¸¦ ÀúÀåÇÕ´Ï´Ù.
-                    PlayerData.Instance.SetData(response.data.userId, response.data.maxFishSize, response.data.fishCaughtList, response.data.points);
+                    // DontDestroyOnLoadÂ·Ã Â¼Â³ÃÂ¤ÂµÃˆ PlayerData Â½ÃŒÂ±Ã›Ã…Ã¦ Ã€ÃÂ½ÂºÃ…ÃÂ½ÂºÂ¿Â¡ Ã‡ÃƒÂ·Â¹Ã€ÃŒÂ¾Ã® ÃÂ¤ÂºÂ¸Â¸Â¦ Ã€ÃºÃ€Ã¥Ã‡Ã•Â´ÃÂ´Ã™.
 
-                    // 1ÃÊ ÈÄ ·Îºñ ¾ÀÀ¸·Î ÀÌµ¿ÇÕ´Ï´Ù.
+                    // 1ÃƒÃŠ ÃˆÃ„ Â·ÃÂºÃ± Â¾Ã€Ã€Â¸Â·Ã Ã€ÃŒÂµÂ¿Ã‡Ã•Â´ÃÂ´Ã™.
                     yield return new WaitForSeconds(1);
                     SceneManager.LoadScene("Lobby");
                 }
-                else // ¼­¹ö¿¡¼­ "½ÇÆĞ" ÀÀ´äÀ» º¸³ÂÀ» °æ¿ì (¿¹: ºñ¹Ğ¹øÈ£ ¿À·ù)
+                else // Â¼Â­Â¹Ã¶Â¿Â¡Â¼Â­ "Â½Ã‡Ã†Ã" Ã€Ã€Â´Ã¤Ã€Â» ÂºÂ¸Â³Ã‚Ã€Â» Â°Ã¦Â¿Ã¬ (Â¿Â¹: ÂºÃ±Â¹ÃÂ¹Ã¸ÃˆÂ£ Â¿Ã€Â·Ã¹)
                 {
-                    statusText.text = "·Î±×ÀÎ ½ÇÆĞ: " + response.message;
+                    statusText.text = "Â·ÃÂ±Ã—Ã€Ã Â½Ã‡Ã†Ã: " + response.message;
                 }
             }
-            else // ³×Æ®¿öÅ© ¿¬°á ÀÚÃ¼¿¡ ½ÇÆĞÇßÀ» °æ¿ì
+            else // Â³Ã—Ã†Â®Â¿Ã¶Ã…Â© Â¿Â¬Â°Ã¡ Ã€ÃšÃƒÂ¼Â¿Â¡ Â½Ã‡Ã†ÃÃ‡ÃŸÃ€Â» Â°Ã¦Â¿Ã¬
             {
-                statusText.text = "³×Æ®¿öÅ© ¿À·ù: " + www.error;
+                statusText.text = "Â³Ã—Ã†Â®Â¿Ã¶Ã…Â© Â¿Ã€Â·Ã¹: " + www.error;
                 Debug.LogError("Web Request Error: " + www.error);
             }
         }
