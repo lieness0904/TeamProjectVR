@@ -14,9 +14,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/01_Scenes/MainGameScene.unity
     guid: 6985f1fcde8637049ad2027e8e7b6e32
-  - enabled: 1
+  - enabled: 0
     path: Assets/TempAssets/TestScene.unity
     guid: 5eecc7e13112e184da104d3c6321710b
+  - enabled: 1
+    path: Assets/TempAssets/TestFishingScene.unity
+    guid: 389ff9f2f27f1a94faa02443e4554f27
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: c4410426002259c4a9b7be0ad2f51028,
       type: 2}
