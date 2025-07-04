@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using System.Collections;
-using TMPro; // TextMeshPro¸¦ »ç¿ëÇÏ±â À§ÇØ ÇÊ¿äÇÕ´Ï´Ù.
+using TMPro; // TextMeshPro를 사용하기 위해 필요합니다.
 using UnityEngine.SceneManagement;
 
 public class LoginManager : MonoBehaviour
@@ -32,62 +32,62 @@ public class LoginManager : MonoBehaviour
         string userId = idInputField.text;
         string password = passwordInputField.text;
 
-        // ¾ÆÀÌµð³ª ºñ¹Ð¹øÈ£°¡ ºñ¾îÀÖ´ÂÁö È®ÀÎÇÕ´Ï´Ù.
+        // 아이디나 비밀번호가 비어있는지 확인합니다.
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
         {
-            statusText.text = "¾ÆÀÌµð¿Í ºñ¹Ð¹øÈ£¸¦ ¸ðµÎ ÀÔ·ÂÇÏ¼¼¿ä.";
+            statusText.text = "아이디와 비밀번호를 모두 입력하세요.";
             return;
         }
 
-        statusText.text = "·Î±×ÀÎ Áß...";
+        statusText.text = "로그인 중...";
 
-        // ÄÚ·çÆ¾À» »ç¿ëÇÏ¿© ºñµ¿±â À¥ ¿äÃ»À» ½ÃÀÛÇÕ´Ï´Ù.
+        // 코루틴을 사용하여 비동기 웹 요청을 시작합니다.
         StartCoroutine(LoginRequest(userId, password));
     }
 
 
-    /// <param name="userId">»ç¿ëÀÚ ¾ÆÀÌµð</param>
-    /// <param name="password">»ç¿ëÀÚ ºñ¹Ð¹øÈ£</param>
+    /// <param name="userId">사용자 아이디</param>
+    /// <param name="password">사용자 비밀번호</param>
     IEnumerator LoginRequest(string userId, string password)
     {
-        // À¥¿¡ º¸³¾ µ¥ÀÌÅÍ ¾ç½ÄÀ» ¸¸µì´Ï´Ù.
+        // 웹에 보낼 데이터 양식을 만듭니다.
         WWWForm form = new WWWForm();
-        form.AddField("action", "login"); // Apps ScriptÀÇ ¾î¶² ±â´ÉÀ» È£ÃâÇÒÁö ÁöÁ¤
+        form.AddField("action", "login"); // Apps Script의 어떤 기능을 호출할지 지정
         form.AddField("userId", userId);
         form.AddField("password", password);
 
-        // POST ¹æ½ÄÀ¸·Î À¥ ¿äÃ»À» »ý¼ºÇÏ°í º¸³À´Ï´Ù.
+        // POST 방식으로 웹 요청을 생성하고 보냅니다.
         using (UnityWebRequest www = UnityWebRequest.Post(scriptURL, form))
         {
-            yield return www.SendWebRequest(); // ¿äÃ»ÀÌ ³¡³¯ ¶§±îÁö ¿©±â¼­ ´ë±âÇÕ´Ï´Ù.
+            yield return www.SendWebRequest(); // 요청이 끝날 때까지 여기서 대기합니다.
 
-            // À¥ ¿äÃ»¿¡ ¼º°øÇßÀ» °æ¿ì
+            // 웹 요청에 성공했을 경우
             if (www.result == UnityWebRequest.Result.Success)
             {
-                // ¼­¹ö·ÎºÎÅÍ ¹ÞÀº JSON Çü½ÄÀÇ ÀÀ´ä ÅØ½ºÆ®¸¦ ÆÄ½Ì(ÇØ¼®)ÇÕ´Ï´Ù.
+                // 서버로부터 받은 JSON 형식의 응답 텍스트를 파싱(해석)합니다.
                 string jsonResponse = www.downloadHandler.text;
                 LoginResponse response = JsonUtility.FromJson<LoginResponse>(jsonResponse);
 
-                // ¼­¹ö¿¡¼­ "¼º°ø" ÀÀ´äÀ» º¸³ÂÀ» °æ¿ì
+                // 서버에서 "성공" 응답을 보냈을 경우
                 if (response.status == "success")
                 {
-                    statusText.text = response.message; // "Login successful" ¶Ç´Â "New user registered"
-                    Debug.Log("·Î±×ÀÎ ¼º°ø! µ¥ÀÌÅÍ ·Îµå ¿Ï·á.");
+                    statusText.text = response.message; // "Login successful" 또는 "New user registered"
+                    Debug.Log("로그인 성공! 데이터 로드 완료.");
 
-                    // DontDestroyOnLoad·Î ¼³Á¤µÈ PlayerData ½Ì±ÛÅæ ÀÎ½ºÅÏ½º¿¡ ÇÃ·¹ÀÌ¾î Á¤º¸¸¦ ÀúÀåÇÕ´Ï´Ù.
+                    // DontDestroyOnLoad로 설정된 PlayerData 싱글톤 인스턴스에 플레이어 정보를 저장합니다.
 
-                    // 1ÃÊ ÈÄ ·Îºñ ¾ÀÀ¸·Î ÀÌµ¿ÇÕ´Ï´Ù.
+                    // 1초 후 로비 씬으로 이동합니다.
                     yield return new WaitForSeconds(1);
                     SceneManager.LoadScene("Lobby");
                 }
-                else // ¼­¹ö¿¡¼­ "½ÇÆÐ" ÀÀ´äÀ» º¸³ÂÀ» °æ¿ì (¿¹: ºñ¹Ð¹øÈ£ ¿À·ù)
+                else // 서버에서 "실패" 응답을 보냈을 경우 (예: 비밀번호 오류)
                 {
-                    statusText.text = "·Î±×ÀÎ ½ÇÆÐ: " + response.message;
+                    statusText.text = "로그인 실패: " + response.message;
                 }
             }
-            else // ³×Æ®¿öÅ© ¿¬°á ÀÚÃ¼¿¡ ½ÇÆÐÇßÀ» °æ¿ì
+            else // 네트워크 연결 자체에 실패했을 경우
             {
-                statusText.text = "³×Æ®¿öÅ© ¿À·ù: " + www.error;
+                statusText.text = "네트워크 오류: " + www.error;
                 Debug.LogError("Web Request Error: " + www.error);
             }
         }
