@@ -78,7 +78,7 @@ public class LoginManager : MonoBehaviour
 
                     // 1초 후 로비 씬으로 이동합니다.
                     yield return new WaitForSeconds(1);
-                    SceneManager.LoadScene("Lobby");
+                    SceneManager.LoadScene("TestScene");
                 }
                 else // 서버에서 "실패" 응답을 보냈을 경우 (예: 비밀번호 오류)
                 {
