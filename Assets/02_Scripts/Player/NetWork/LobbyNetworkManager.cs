@@ -10,6 +10,10 @@ using TMPro;
 
 public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
+    // --- 추가된 부분 ---
+    public static LobbyNetworkManager Instance { get; private set; }
+    // -----------------
+
     private NetworkRunner _runner;
 
     [Header("Network Prefabs")]
@@ -24,10 +28,21 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     private const int MAX_PLAYERS_PER_ROOM = 8;
 
+    // --- 수정된 부분 ---
     void Awake()
     {
-        DontDestroyOnLoad(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            // 이미 인스턴스가 존재하면 이 새 인스턴스는 파괴합니다.
+            Destroy(gameObject);
+        }
     }
+    // ------------------
 
     void Start()
     {
@@ -121,7 +136,6 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    // --- 여기부터 핵심 수정 부분 ---
     private void UpdatePlayerListUI()
     {
         if (_runner == null || !_runner.IsRunning)
@@ -139,16 +153,12 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             playerCountText.text = $"'{_runner.SessionInfo.Name}' 현재 인원: {_runner.ActivePlayers.Count()} 명 입니다.";
         }
 
-        // --- UI 업데이트 로직 변경 ---
-        // 1. 기존 목록을 모두 삭제합니다.
         if (playerListContent == null || playerListItemPrefab == null) return;
         foreach (Transform child in playerListContent.transform)
         {
             Destroy(child.gameObject);
         }
 
-        // 2. 현재 씬에 있는 모든 PlayerNetworkData 객체를 찾아서 목록을 다시 만듭니다.
-        // 이 방법은 클라이언트/서버 모두에게 동일하게 동작합니다.
         foreach (var player in FindObjectsOfType<PlayerNetworkData>())
         {
             GameObject item = Instantiate(playerListItemPrefab, playerListContent.transform);
@@ -162,7 +172,6 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             item.GetComponent<TextMeshProUGUI>().text = playerName;
         }
     }
-    // --- 여기까지 핵심 수정 부분 ---
 
 
     // --- INetworkRunnerCallbacks ---
