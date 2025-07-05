@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using System.Collections;
-using TMPro; // TextMeshPro를 사용하기 위해 필요합니다.
+using TMPro;
 using UnityEngine.SceneManagement;
 
 public class LoginManager : MonoBehaviour
@@ -19,7 +19,6 @@ public class LoginManager : MonoBehaviour
 
     void Start()
     {
-
         if (loginButton != null)
         {
             loginButton.onClick.AddListener(OnLoginButtonClick);
@@ -71,14 +70,19 @@ public class LoginManager : MonoBehaviour
                 // 서버에서 "성공" 응답을 보냈을 경우
                 if (response.status == "success")
                 {
-                    statusText.text = response.message; // "Login successful" 또는 "New user registered"
+                    statusText.text = response.message;
                     Debug.Log("로그인 성공! 데이터 로드 완료.");
 
-                    // DontDestroyOnLoad로 설정된 PlayerData 싱글톤 인스턴스에 플레이어 정보를 저장합니다.
+                    // --- 추가된 부분 ---
+                    // PlayerDataManager에 아이디를 저장하고, 확인을 위해 로그를 출력합니다.
+                    Debug.Log($"[LoginManager] 저장할 UserID: '{response.data.userId}'");
+                    PlayerDataManager.Instance.UserID = response.data.userId;
+                    Debug.Log($"[LoginManager] 저장된 UserID: '{PlayerDataManager.Instance.UserID}'");
+                    // --------------------
 
                     // 1초 후 로비 씬으로 이동합니다.
                     yield return new WaitForSeconds(1);
-                    SceneManager.LoadScene("TestScene");
+                    SceneManager.LoadScene("Lobby");
                 }
                 else // 서버에서 "실패" 응답을 보냈을 경우 (예: 비밀번호 오류)
                 {
@@ -96,7 +100,6 @@ public class LoginManager : MonoBehaviour
 
     private void OnDestroy()
     {
-
         if (loginButton != null)
         {
             loginButton.onClick.RemoveListener(OnLoginButtonClick);
@@ -105,7 +108,8 @@ public class LoginManager : MonoBehaviour
 }
 
 
-
+// 아래 두 클래스는 LoginManager.cs 파일의 일부입니다.
+// 이 부분까지 모두 포함되어야 합니다.
 [System.Serializable]
 public class LoginResponse
 {

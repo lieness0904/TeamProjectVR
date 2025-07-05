@@ -179,6 +179,8 @@ GameObject:
   - component: {fileID: 8275009392970729874}
   - component: {fileID: 7711829283172984528}
   - component: {fileID: 8683832032891268002}
+  - component: {fileID: 1926520542727274914}
+  - component: {fileID: 1549196885469829214}
   m_Layer: 2
   m_Name: XR Origin (Action-based)
   m_TagString: Untagged
@@ -345,6 +347,42 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_StartingHoverFilters: []
   m_StartingSelectFilters: []
+--- !u!114 &1926520542727274914
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2784451929903050069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 821d7b92050d6c44a82d600db43d29b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _PlayerName:
+    _length: 0
+    _data:
+      Data: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  nameText: {fileID: 0}
+--- !u!114 &1549196885469829214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2784451929903050069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 3410954873
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 1926520542727274914}
+  ForceRemoteRenderTimeframe: 0
 --- !u!1 &3137840575138374644
 GameObject:
   m_ObjectHideFlags: 0
