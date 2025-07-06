@@ -10,14 +10,19 @@ using TMPro;
 
 public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
-    // --- Ãß°¡µÈ ºÎºĞ ---
     public static LobbyNetworkManager Instance { get; private set; }
-    // -----------------
+
+    private static bool _hasConnectedOnce = false;
 
     private NetworkRunner _runner;
 
     [Header("Network Prefabs")]
     public NetworkObject playerPrefab;
+
+    // --- [1] ì´ ì¤„ì„ ì¶”ê°€í•©ë‹ˆë‹¤ ---
+    [Header("ìŠ¤í° ìœ„ì¹˜")]
+    public Transform spawnPoint;
+    // -------------------------
 
     [Header("UI Elements")]
     public TextMeshProUGUI playerCountText;
@@ -28,7 +33,6 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     private const int MAX_PLAYERS_PER_ROOM = 8;
 
-    // --- ¼öÁ¤µÈ ºÎºĞ ---
     void Awake()
     {
         if (Instance == null)
@@ -38,11 +42,10 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         }
         else
         {
-            // ÀÌ¹Ì ÀÎ½ºÅÏ½º°¡ Á¸ÀçÇÏ¸é ÀÌ »õ ÀÎ½ºÅÏ½º´Â ÆÄ±«ÇÕ´Ï´Ù.
             Destroy(gameObject);
+            return;
         }
     }
-    // ------------------
 
     void Start()
     {
@@ -51,12 +54,17 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     void Update()
     {
-        // ¸Å ÇÁ·¹ÀÓ UI¸¦ ¾÷µ¥ÀÌÆ®ÇÏ¿© ÀÌ¸§ º¯°æ µîÀ» ½Ç½Ã°£À¸·Î ¹İ¿µÇÕ´Ï´Ù.
         UpdatePlayerListUI();
     }
 
     async void ConnectToLobby()
     {
+        if (_hasConnectedOnce)
+        {
+            return;
+        }
+        _hasConnectedOnce = true;
+
         if (_runner != null && _runner.IsRunning) return;
 
         _runner = gameObject.AddComponent<NetworkRunner>();
@@ -65,7 +73,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         await _runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
-            SessionName = "°Ô½ºÆ® ÇÏ¿ì½º",
+            SessionName = "ê²ŒìŠ¤íŠ¸ í•˜ìš°ìŠ¤",
         });
     }
 
@@ -76,12 +84,13 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public async void QuitGame()
     {
-        Debug.Log("°ÔÀÓÀ» Á¾·áÇÕ´Ï´Ù...");
+        Debug.Log("ê²Œì„ì„ ì¢…ë£Œí•©ë‹ˆë‹¤...");
         if (_runner != null && _runner.IsRunning)
         {
             await _runner.Shutdown();
         }
 #if UNITY_EDITOR
+        _hasConnectedOnce = false;
         UnityEditor.EditorApplication.isPlaying = false;
 #else
         Application.Quit();
@@ -93,7 +102,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         int sceneIndex = SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/" + sceneName + ".unity");
         if (sceneIndex < 0)
         {
-            Debug.LogError($"'{sceneName}' ¾ÀÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù. File > Build Settings¿¡ ¾ÀÀ» Ãß°¡Çß´ÂÁö, °æ·Î°¡ ¿Ã¹Ù¸¥Áö È®ÀÎÇÏ¼¼¿ä.");
+            Debug.LogError($"'{sceneName}' ì”¬ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. File > Build Settingsì— ì”¬ì„ ì¶”ê°€í–ˆëŠ”ì§€, ê²½ë¡œê°€ ì˜¬ë°”ë¥¸ì§€ í™•ì¸í•˜ì„¸ìš”.");
             return;
         }
 
@@ -120,16 +129,16 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
             if (result.Ok)
             {
-                Debug.Log($"¼º°øÀûÀ¸·Î {sessionName}¿¡ Á¢¼ÓÇß½À´Ï´Ù.");
+                Debug.Log($"ì„±ê³µì ìœ¼ë¡œ {sessionName}ì— ì ‘ì†í–ˆìŠµë‹ˆë‹¤.");
                 break;
             }
             else
             {
-                Debug.LogWarning($"{sessionName}¿¡ Á¢¼ÓÇÒ ¼ö ¾ø°Å³ª ²Ë Ã¡À» ¼ö ÀÖ½À´Ï´Ù. ´ÙÀ½ Ã¤³ÎÀ» ½ÃµµÇÕ´Ï´Ù. ÀÌÀ¯: {result.ShutdownReason}");
+                Debug.LogWarning($"{sessionName}ì— ì ‘ì†í•  ìˆ˜ ì—†ê±°ë‚˜ ê½‰ ì°¼ì„ ìˆ˜ ìˆìŠµë‹ˆë‹¤. ë‹¤ìŒ ì±„ë„ì„ ì‹œë„í•©ë‹ˆë‹¤. ì´ìœ : {result.ShutdownReason}");
                 channelNumber++;
                 if (channelNumber > 100)
                 {
-                    Debug.LogError("Á¢¼ÓÇÒ ¼ö ÀÖ´Â Ã¤³ÎÀ» Ã£Áö ¸øÇß½À´Ï´Ù.");
+                    Debug.LogError("ì ‘ì†í•  ìˆ˜ ìˆëŠ” ì±„ë„ì„ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤.");
                     break;
                 }
             }
@@ -140,7 +149,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (_runner == null || !_runner.IsRunning)
         {
-            if (playerCountText != null) playerCountText.text = "Á¢¼Ó Á¤º¸ ¾øÀ½";
+            if (playerCountText != null) playerCountText.text = "ì ‘ì† ì •ë³´ ì—†ìŒ";
             if (playerListContent != null)
             {
                 foreach (Transform child in playerListContent.transform) Destroy(child.gameObject);
@@ -150,10 +159,11 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         if (playerCountText != null)
         {
-            playerCountText.text = $"'{_runner.SessionInfo.Name}' ÇöÀç ÀÎ¿ø: {_runner.ActivePlayers.Count()} ¸í ÀÔ´Ï´Ù.";
+            playerCountText.text = $"'{_runner.SessionInfo.Name}' í˜„ì¬ ì¸ì›: {_runner.ActivePlayers.Count()} ëª… ì…ë‹ˆë‹¤.";
         }
 
         if (playerListContent == null || playerListItemPrefab == null) return;
+
         foreach (Transform child in playerListContent.transform)
         {
             Destroy(child.gameObject);
@@ -166,7 +176,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
             if (string.IsNullOrEmpty(playerName))
             {
-                playerName = "¿¬°á Áß...";
+                playerName = "ì—°ê²° ì¤‘...";
             }
 
             item.GetComponent<TextMeshProUGUI>().text = playerName;
@@ -178,25 +188,32 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log($"OnPlayerJoined: ÇÃ·¹ÀÌ¾î {player.PlayerId}°¡ ÀÔÀå. ÇöÀç ¼¼¼Ç: {runner.SessionInfo.Name}");
+        Debug.Log($"OnPlayerJoined: í”Œë ˆì´ì–´ {player.PlayerId}ê°€ ì…ì¥. í˜„ì¬ ì„¸ì…˜: {runner.SessionInfo.Name}");
 
         if (runner.IsServer)
         {
             if (playerPrefab != null)
             {
-                NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, Vector3.zero, Quaternion.identity, player);
+                // --- [2] ì´ ë¶€ë¶„ì„ ìˆ˜ì •í•©ë‹ˆë‹¤ ---
+                // spawnPointê°€ í• ë‹¹ë˜ì—ˆë‹¤ë©´ ê·¸ ìœ„ì¹˜ë¥¼ ì‚¬ìš©í•˜ê³ , ì•„ë‹ˆë©´ ê¸°ë³¸ ìœ„ì¹˜(0,0,0)ë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤.
+                Vector3 position = spawnPoint ? spawnPoint.position : Vector3.zero;
+                Quaternion rotation = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
+
+                NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, position, rotation, player);
+                // ---------------------------
+
                 _spawnedCharacters.Add(player, networkPlayerObject);
             }
             else
             {
-                Debug.LogError("Player PrefabÀÌ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+                Debug.LogError("Player Prefabì´ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
             }
         }
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log($"OnPlayerLeft: ÇÃ·¹ÀÌ¾î {player.PlayerId}°¡ ÅğÀå. ÇöÀç ¼¼¼Ç: {runner.SessionInfo.Name}");
+        Debug.Log($"OnPlayerLeft: í”Œë ˆì´ì–´ {player.PlayerId}ê°€ í‡´ì¥. í˜„ì¬ ì„¸ì…˜: {runner.SessionInfo.Name}");
 
         if (_spawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
         {
@@ -210,7 +227,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
-        Debug.Log($"OnShutdown: NetworkRunner°¡ Á¾·áµÇ¾ú½À´Ï´Ù. ÀÌÀ¯: {shutdownReason}");
+        Debug.Log($"OnShutdown: NetworkRunnerê°€ ì¢…ë£Œë˜ì—ˆìŠµë‹ˆë‹¤. ì´ìœ : {shutdownReason}");
         _spawnedCharacters.Clear();
     }
 
