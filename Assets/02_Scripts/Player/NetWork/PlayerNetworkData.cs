@@ -1,54 +1,101 @@
 using Fusion;
 using TMPro;
 using UnityEngine;
-using Photon.Voice.Unity; // --- [1] º¸ÀÌ½º ³×ÀÓ½ºÆäÀÌ½º Ãß°¡ ---
+using Photon.Voice.Unity;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class PlayerNetworkData : NetworkBehaviour
 {
     [Networked]
     public NetworkString<_16> PlayerName { get; set; }
 
+    [Header("ìŠ¤í° ìœ„ì¹˜")]
+    public Transform spawnPoint;
+
     [Header("UI")]
     public TextMeshProUGUI nameText;
 
-    // --- [2] Recorder ÄÄÆ÷³ÍÆ®¸¦ ´ãÀ» º¯¼ö Ãß°¡ ---
     private Recorder voiceRecorder;
 
-    // --- [3] Awake ÇÔ¼ö Ãß°¡ ---
-    // ³×Æ®¿öÅ©¿¡ ½ºÆùµÇ±â Àü, ÀÚ±â ÀÚ½ÅÀÇ ÄÄÆ÷³ÍÆ®¸¦ ¹Ì¸® Ã£¾ÆµÓ´Ï´Ù.
+    [Header("ëª¨ë“œ ì „í™˜ ì»´í¬ë„ŒíŠ¸")]
+    [SerializeField] private DesktopPlayerController desktopController;
+    [SerializeField] private CharacterControllerDriver characterControllerDriver;
+
+    // --- [1] ì´ ì¤„ì„ ì£¼ì„ ì²˜ë¦¬í•˜ì—¬ ì»´íŒŒì¼ ì˜¤ë¥˜ë¥¼ ìš°íšŒí•©ë‹ˆë‹¤ ---
+    //[SerializeField] private XRInputModalityManager inputModalityManager; 
+
+    [SerializeField] private CastingController vrCastingController;
+    [SerializeField] private Camera playerCamera;
+
     private void Awake()
     {
         voiceRecorder = GetComponent<Recorder>();
     }
 
-    // ÀÌ °´Ã¼°¡ ³×Æ®¿öÅ©»ó¿¡ ½ºÆùµÇ¾úÀ» ¶§ Fusion¿¡ ÀÇÇØ ÀÚµ¿À¸·Î È£ÃâµË´Ï´Ù.
     public override void Spawned()
     {
-        // Object.HasInputAuthority´Â ÀÌ ¿ÀºêÁ§Æ®ÀÇ ÁÖÀÎÀÌ ÀÚ±â ÀÚ½ÅÀÎÁö¸¦ È®ÀÎÇÕ´Ï´Ù.
-        // Áï, ÀÌ ÄÚµå´Â °¢ Å¬¶óÀÌ¾ğÆ®ÀÇ ÀÚ±â ÀÚ½Å Ä³¸¯ÅÍ¿¡¼­¸¸ ½ÇÇàµË´Ï´Ù.
         if (Object.HasInputAuthority)
         {
-            Debug.Log("[PlayerNetworkData] ³» Ä³¸¯ÅÍ°¡ ½ºÆùµÇ¾ú½À´Ï´Ù. ID¸¦ ¼³Á¤ÇÕ´Ï´Ù.");
-            string id = PlayerDataManager.Instance.UserID;
-            Debug.Log($"[PlayerNetworkData] PlayerDataManager¿¡¼­ °¡Á®¿Â UserID: '{id}'");
+            Debug.Log("[PlayerNetworkData] ë‚´ ìºë¦­í„°ê°€ ìŠ¤í°ë˜ì—ˆìŠµë‹ˆë‹¤. ID ë° ì»¨íŠ¸ë¡¤ ëª¨ë“œë¥¼ ì„¤ì •í•©ë‹ˆë‹¤.");
 
+            string id = PlayerDataManager.Instance.UserID;
             PlayerName = id;
 
-            // --- [4] ³» Ä³¸¯ÅÍÀÇ Recorder¸¸ È°¼ºÈ­ ---
+            if (GameModeManager.Instance != null)
+            {
+                SetupControllerForMode(GameModeManager.Instance.CurrentMode);
+            }
+            else
+            {
+                Debug.LogError("[PlayerNetworkData] GameModeManager.Instanceë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤! ì»¨íŠ¸ë¡¤ëŸ¬ ì„¤ì •ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.");
+                SetupControllerForMode(GameModeManager.ControlMode.VR);
+            }
+
             if (voiceRecorder != null)
             {
                 voiceRecorder.enabled = true;
-                Debug.Log("[PlayerNetworkData] º¸ÀÌ½º ·¹ÄÚ´õ¸¦ È°¼ºÈ­Çß½À´Ï´Ù.");
             }
         }
 
-        // ½ºÆùµÉ ¶§ ÇöÀç ÀÌ¸§À¸·Î UI¸¦ ÇÑ¹ø ¾÷µ¥ÀÌÆ®ÇÕ´Ï´Ù.
         UpdateNameUI();
+    }
+
+    private void SetupControllerForMode(GameModeManager.ControlMode mode)
+    {
+        if (mode == GameModeManager.ControlMode.Desktop)
+        {
+            Debug.Log("ë°ìŠ¤í¬í†± ëª¨ë“œë¡œ ì»¨íŠ¸ë¡¤ëŸ¬ë¥¼ ì„¤ì •í•©ë‹ˆë‹¤.");
+
+            if (desktopController != null)
+            {
+                desktopController.enabled = true;
+                desktopController.cameraTransform = playerCamera.transform;
+            }
+
+            if (characterControllerDriver != null) characterControllerDriver.enabled = false;
+
+            // --- [2] ì´ ì¤„ì„ ì£¼ì„ ì²˜ë¦¬í•©ë‹ˆë‹¤ ---
+            //if (inputModalityManager != null) inputModalityManager.enabled = false;
+
+            if (vrCastingController != null) vrCastingController.enabled = false;
+        }
+        else // VR ëª¨ë“œì¼ ê²½ìš°
+        {
+            Debug.Log("VR ëª¨ë“œë¡œ ì»¨íŠ¸ë¡¤ëŸ¬ë¥¼ ì„¤ì •í•©ë‹ˆë‹¤.");
+
+            if (desktopController != null) desktopController.enabled = false;
+
+            if (characterControllerDriver != null) characterControllerDriver.enabled = true;
+
+            // --- [3] ì´ ì¤„ì„ ì£¼ì„ ì²˜ë¦¬í•©ë‹ˆë‹¤ ---
+            //if (inputModalityManager != null) inputModalityManager.enabled = true;
+
+            if (vrCastingController != null) vrCastingController.enabled = true;
+        }
     }
 
     public override void Render()
     {
-        // Render¿¡¼­ UI¸¦ °è¼Ó ¾÷µ¥ÀÌÆ®ÇÏ¿© ÀÌ¸§ º¯°æÀÌ ½Ç½Ã°£À¸·Î º¸ÀÌ°Ô ÇÕ´Ï´Ù.
         UpdateNameUI();
     }
 

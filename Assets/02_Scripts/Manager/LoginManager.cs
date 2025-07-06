@@ -10,6 +10,8 @@ public class LoginManager : MonoBehaviour
 
     private string scriptURL = "https://script.google.com/macros/s/AKfycbxsVIFFP0aRSLTljhqnSI0KAso8jv3Hx3UPdIiWsl1UynSyyk1EVABCf2Fpz6WwzcNn/exec";
 
+    [Header("파괴할 오브젝트")]
+    public GameObject xrOriginInTitle;
 
     [Header("UI Elements")]
     public TMP_InputField idInputField;
@@ -73,16 +75,21 @@ public class LoginManager : MonoBehaviour
                     statusText.text = response.message;
                     Debug.Log("로그인 성공! 데이터 로드 완료.");
 
-                    // --- 추가된 부분 ---
-                    // PlayerDataManager에 아이디를 저장하고, 확인을 위해 로그를 출력합니다.
+                   
                     Debug.Log($"[LoginManager] 저장할 UserID: '{response.data.userId}'");
                     PlayerDataManager.Instance.UserID = response.data.userId;
                     Debug.Log($"[LoginManager] 저장된 UserID: '{PlayerDataManager.Instance.UserID}'");
-                    // --------------------
+                    
+
+                    if (xrOriginInTitle != null)
+                    {
+                        Destroy(xrOriginInTitle);
+                    }
 
                     // 1초 후 로비 씬으로 이동합니다.
                     yield return new WaitForSeconds(1);
                     SceneManager.LoadScene("Lobby");
+                    
                 }
                 else // 서버에서 "실패" 응답을 보냈을 경우 (예: 비밀번호 오류)
                 {
