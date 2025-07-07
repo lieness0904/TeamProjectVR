@@ -130,7 +130,7 @@ public class LoginResponse
 public class PlayerDataFields
 {
     public string userId;
-    public float maxFishSize;
-    public string fishCaughtList;
+    public float maxFishSize; // 수정 필요
+    public string fishCaughtList; // 수정 필요
     public int points;
 }

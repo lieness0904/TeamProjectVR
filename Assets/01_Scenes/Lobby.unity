@@ -283,7 +283,7 @@ Transform:
   m_GameObject: {fileID: 774242366}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -818,7 +818,7 @@ Transform:
   m_GameObject: {fileID: 1089742136}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3.24, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1244,7 +1244,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34fa16d1808854e4a8611b23ca07e210, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 3161589012237476250, guid: 7e40d430e3bb0624b91dd37539566ea7,
+  playerPrefab: {fileID: 1549196885469829214, guid: 11facc719b505e549abbc097fdb9ff07,
     type: 3}
   spawnPoint: {fileID: 1089742137}
   playerCountText: {fileID: 1260317243}
