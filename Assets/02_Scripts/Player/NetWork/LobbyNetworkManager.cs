@@ -18,9 +18,13 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     [Header("Network Prefabs")]
     public NetworkObject playerPrefab;
+    public NetworkObject xrOriginPrefab;
 
     [Header("스폰 위치")]
-    public Transform spawnPoint;
+
+    public Transform[] spawnPoint;
+    // -------------------------
+
 
     [Header("UI Elements")]
     public TextMeshProUGUI playerCountText;
@@ -231,17 +235,27 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         _spawnedCharacters.Clear();
     }
 
-    // --- [추가] 인터페이스 구현에 필요한 필수 콜백 함수 ---
+
     public void OnConnectedToServer(NetworkRunner runner)
     {
-        // 연결 성공 시 필요한 로직이 있다면 여기에 작성합니다.
-    }
+        if (runner.IsRunning && runner.LocalPlayer != null)
+        {
+            runner.TryGetPlayerObject(runner.LocalPlayer, out NetworkObject playerObj);
 
-    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
-    {
-        // 연결 종료 시 필요한 로직이 있다면 여기에 작성합니다.
+            if (playerObj != null && playerObj.HasInputAuthority)
+            {
+                NetworkObject player = Instantiate(playerPrefab);
+
+                var rigManager = playerPrefab.GetComponent<RiggingManager>();
+                rigManager.headIK = playerObj.transform.Find("HeadIK");
+                rigManager.leftHandIK = playerObj.transform.Find("LeftHandIK");
+                rigManager.rightHandIK = playerObj.transform.Find("RightHandIK");
+
+                rigManager.transform.SetParent(playerObj.transform);
+            }
+        }
     }
-    // ------------------------------------------------
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
 
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
