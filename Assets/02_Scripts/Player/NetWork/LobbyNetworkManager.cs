@@ -18,10 +18,11 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     [Header("Network Prefabs")]
     public NetworkObject playerPrefab;
+    public NetworkObject xrOriginPrefab;
 
     // --- [1] 이 줄을 추가합니다 ---
     [Header("스폰 위치")]
-    public Transform spawnPoint;
+    public Transform[] spawnPoint;
     // -------------------------
 
     [Header("UI Elements")]
@@ -231,7 +232,25 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         _spawnedCharacters.Clear();
     }
 
-    public void OnConnectedToServer(NetworkRunner runner) { }
+    public void OnConnectedToServer(NetworkRunner runner)
+    {
+        if (runner.IsRunning && runner.LocalPlayer != null)
+        {
+            runner.TryGetPlayerObject(runner.LocalPlayer, out NetworkObject playerObj);
+
+            if (playerObj != null && playerObj.HasInputAuthority)
+            {
+                NetworkObject player = Instantiate(playerPrefab);
+
+                var rigManager = playerPrefab.GetComponent<RiggingManager>();
+                rigManager.headIK = playerObj.transform.Find("HeadIK");
+                rigManager.leftHandIK = playerObj.transform.Find("LeftHandIK");
+                rigManager.rightHandIK = playerObj.transform.Find("RightHandIK");
+
+                rigManager.transform.SetParent(playerObj.transform);
+            }
+        }
+    }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
