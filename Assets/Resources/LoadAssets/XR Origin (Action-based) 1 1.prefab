@@ -569,7 +569,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6803edce0201f574f923fd9d10e5b30a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_InteractionManager: {fileID: 6831547835191424327}
+  m_InteractionManager: {fileID: 0}
   m_InteractionLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -895,8 +895,6 @@ GameObject:
   - component: {fileID: 1543709498833922347}
   - component: {fileID: 4555870131212219664}
   - component: {fileID: 8822691863711739093}
-  - component: {fileID: 1230203192587548558}
-  - component: {fileID: 6831547835191424327}
   - component: {fileID: 2000100833357388525}
   - component: {fileID: 5555942709646196444}
   - component: {fileID: 2737441958147461909}
@@ -1040,34 +1038,6 @@ MonoBehaviour:
   m_AimAssistRequiredSpeed: 0.25
   m_AimAssistPercent: 0.8
   m_AimAssistMaxSpeedPercent: 10
---- !u!114 &1230203192587548558
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 616965502489606987}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017c5e3933235514c9520e1dace2a4b2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ActionAssets:
-  - {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
---- !u!114 &6831547835191424327
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 616965502489606987}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83e4e6cca11330d4088d729ab4fc9d9f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_StartingHoverFilters: []
-  m_StartingSelectFilters: []
 --- !u!114 &2000100833357388525
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4835,7 +4805,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6803edce0201f574f923fd9d10e5b30a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_InteractionManager: {fileID: 6831547835191424327}
+  m_InteractionManager: {fileID: 0}
   m_InteractionLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
