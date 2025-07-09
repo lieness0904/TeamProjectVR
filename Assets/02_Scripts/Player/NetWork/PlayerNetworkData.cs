@@ -57,6 +57,20 @@ public class PlayerNetworkData : NetworkBehaviour
             }
         }
 
+        else
+        {
+            // 권한이 없는 객체는 조작 관련 컴포넌트 비활성화
+            if (desktopController != null) desktopController.enabled = false;
+            if (characterControllerDriver != null) characterControllerDriver.enabled = false;
+            if (vrCastingController != null) vrCastingController.enabled = false;
+            //if (inputModalityManager != null) inputModalityManager.enabled = false;
+
+            if (voiceRecorder != null)
+            {
+                voiceRecorder.enabled = false;
+            }
+        }
+
         UpdateNameUI();
     }
 
