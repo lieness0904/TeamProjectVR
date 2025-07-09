@@ -20,10 +20,11 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     public NetworkObject playerPrefab;
     public NetworkObject xrOriginPrefab;
 
-    // --- [1] 이 줄을 추가합니다 ---
     [Header("스폰 위치")]
+
     public Transform[] spawnPoint;
     // -------------------------
+
 
     [Header("UI Elements")]
     public TextMeshProUGUI playerCountText;
@@ -170,17 +171,23 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             Destroy(child.gameObject);
         }
 
-        foreach (var player in FindObjectsOfType<PlayerNetworkData>())
+        foreach (PlayerRef playerRef in _runner.ActivePlayers)
         {
-            GameObject item = Instantiate(playerListItemPrefab, playerListContent.transform);
-            string playerName = player.PlayerName.Value;
-
-            if (string.IsNullOrEmpty(playerName))
+            if (_runner.TryGetPlayerObject(playerRef, out NetworkObject playerObject) && playerObject != null)
             {
-                playerName = "연결 중...";
-            }
+                PlayerNetworkData networkData = playerObject.GetComponent<PlayerNetworkData>();
+                if (networkData != null)
+                {
+                    GameObject item = Instantiate(playerListItemPrefab, playerListContent.transform);
+                    string playerName = networkData.PlayerName.Value;
 
-            item.GetComponent<TextMeshProUGUI>().text = playerName;
+                    if (string.IsNullOrEmpty(playerName))
+                    {
+                        playerName = "연결 중...";
+                    }
+                    item.GetComponent<TextMeshProUGUI>().text = playerName;
+                }
+            }
         }
     }
 
@@ -195,14 +202,10 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             if (playerPrefab != null)
             {
-                // --- [2] 이 부분을 수정합니다 ---
-                // spawnPoint가 할당되었다면 그 위치를 사용하고, 아니면 기본 위치(0,0,0)를 사용합니다.
                 Vector3 position = spawnPoint ? spawnPoint.position : Vector3.zero;
                 Quaternion rotation = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
 
                 NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, position, rotation, player);
-                // ---------------------------
-
                 _spawnedCharacters.Add(player, networkPlayerObject);
             }
             else
@@ -232,6 +235,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         _spawnedCharacters.Clear();
     }
 
+
     public void OnConnectedToServer(NetworkRunner runner)
     {
         if (runner.IsRunning && runner.LocalPlayer != null)
@@ -252,6 +256,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
+
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
     public void OnInput(NetworkRunner runner, NetworkInput input) { }
