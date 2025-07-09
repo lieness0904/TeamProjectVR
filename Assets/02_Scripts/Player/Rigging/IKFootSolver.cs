@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Fusion;
 using UnityEngine;
 
-public class IKFootSolver : MonoBehaviour
+public class IKFootSolver : NetworkBehaviour
 {
     [SerializeField] LayerMask terrainLayer = default;
     [SerializeField] Transform body = default;
@@ -13,10 +14,14 @@ public class IKFootSolver : MonoBehaviour
     [SerializeField] float stepHeight = 0.2f; // 무릎이 올라오는 높이 
     [SerializeField] Vector3 footOffset = default; // 기본 발 포지션 오프셋
     [SerializeField] private Vector3 footRotOffset; // 발이 꺾이지않게 잡아주는 오프셋 
+
     float footSpacing;
     Vector3 oldPosition, currentPosition, newPosition;
     Vector3 oldNormal, currentNormal, newNormal;
     private float lerp = 1;
+
+    [Networked] private Vector3 NetworkPosition { get; set; }
+    [Networked] private Quaternion NetworkRotation { get; set; }
 
     private void Start()
     {
@@ -27,11 +32,27 @@ public class IKFootSolver : MonoBehaviour
 
     private void Update()
     {
-        this.transform.position = currentPosition + footOffset;
+        if (Object.HasInputAuthority)
+        {
+            AnimateFoot();
+            // 네트워크 값 설정
+            NetworkPosition = transform.position;
+            NetworkRotation = transform.rotation;
+        }
+        else
+        {
+            // 네트워크 값 반영 (상대 캐릭터)
+            transform.position = NetworkPosition;
+            transform.rotation = NetworkRotation;
+        }
+    }
+    private void AnimateFoot()
+    {
+        transform.position = currentPosition + footOffset;
         var newRot = footRotOffset + (body.forward * 90f);
-        this.transform.rotation = Quaternion.Lerp(this.transform.rotation, Quaternion.Euler(newRot), 0.1f);
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(newRot), 0.1f);
 
-        Ray ray = new Ray(body.position + (body.right * footSpacing) + (Vector3.up * 2), Vector3.down);
+        Ray ray = new Ray(body.position + (body.right * footSpacing) + Vector3.up * 2, Vector3.down);
 
         if (Physics.Raycast(ray, out RaycastHit info, 10, terrainLayer.value))
         {
@@ -41,7 +62,6 @@ public class IKFootSolver : MonoBehaviour
                 int direction = body.InverseTransformPoint(info.point).z > body.InverseTransformPoint(newPosition).z ? 1 : -1;
                 newPosition = info.point + (body.forward * stepLength * direction);
                 newNormal = info.normal;
-                Debug.Log(newPosition);
             }
         }
 
@@ -49,22 +69,17 @@ public class IKFootSolver : MonoBehaviour
         {
             Vector3 tempPosition = Vector3.Lerp(oldPosition, newPosition, lerp);
             tempPosition.y += Mathf.Sin(lerp * Mathf.PI) * stepHeight;
-
-            currentPosition = tempPosition; 
+            currentPosition = tempPosition;
             currentNormal = Vector3.Lerp(oldNormal, newNormal, lerp);
             lerp += Time.deltaTime * speed;
         }
         else
         {
             oldPosition = newPosition;
-            oldNormal = newNormal;  
+            oldNormal = newNormal;
         }
     }
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(newPosition, 0.5f);
-    }
+
     public bool IsMoving()
     {
         return lerp < 1;

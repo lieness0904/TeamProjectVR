@@ -2611,7 +2611,7 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
   smoothValue: 0.1
-  modelHeight: 1.67
+  modelHeight: 1.5
 --- !u!1 &6974521556434623925
 GameObject:
   m_ObjectHideFlags: 0
