@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2821755325455757998}
   m_Layer: 0
-  m_Name: CC_BaseIndex1.R
+  m_Name: Finger2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -907,7 +907,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4921383506525019342}
   m_Layer: 0
-  m_Name: CC_BaseThumb1.R
+  m_Name: Finger1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1566,7 +1566,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5570424283894695693}
   m_Layer: 0
-  m_Name: CC_BasePinky1.R
+  m_Name: Finger5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3587,7 +3587,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7434459951773318014}
   m_Layer: 0
-  m_Name: CC_BaseMid1.R
+  m_Name: Finger3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4725,7 +4725,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1905630940639308917}
   m_Layer: 0
-  m_Name: CC_BaseRing1.R
+  m_Name: Finger4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
