@@ -49,8 +49,10 @@ public class IKFootSolver : NetworkBehaviour
     private void AnimateFoot()
     {
         transform.position = currentPosition + footOffset;
-        var newRot = footRotOffset + (body.forward * 90f);
-        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(newRot), 0.1f);
+
+        Vector3 forwardProjected = Vector3.ProjectOnPlane(body.forward, currentNormal).normalized;
+        Quaternion targetRot = Quaternion.LookRotation(forwardProjected, currentNormal);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot * Quaternion.Euler(footRotOffset), 0.1f);
 
         Ray ray = new Ray(body.position + (body.right * footSpacing) + Vector3.up * 2, Vector3.down);
 
