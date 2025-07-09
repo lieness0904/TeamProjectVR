@@ -900,6 +900,7 @@ GameObject:
   - component: {fileID: 2000100833357388525}
   - component: {fileID: 5555942709646196444}
   - component: {fileID: 2737441958147461909}
+  - component: {fileID: 5181972051709621761}
   m_Layer: 2
   m_Name: XR Origin (Action-based) 1 1
   m_TagString: Untagged
@@ -1088,6 +1089,7 @@ MonoBehaviour:
   - {fileID: 6075095801357725014}
   NetworkedBehaviours:
   - {fileID: 2737441958147461909}
+  - {fileID: 5181972051709621761}
   - {fileID: 8129652102384101102}
   - {fileID: 6923626503671503781}
   ForceRemoteRenderTimeframe: 0
@@ -1124,6 +1126,30 @@ MonoBehaviour:
   SyncParent: 0
   _autoAOIOverride: 1
   DisableSharedModeInterpolation: 0
+--- !u!114 &5181972051709621761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 616965502489606987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 821d7b92050d6c44a82d600db43d29b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _PlayerName:
+    _length: 0
+    _data:
+      Data: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  nameText: {fileID: 0}
+  desktopController: {fileID: 0}
+  characterControllerDriver: {fileID: 0}
+  riggingManager: {fileID: 0}
+  vrCastingController: {fileID: 0}
+  playerCamera: {fileID: 0}
+  leftHandController: {fileID: 6256807708239287683}
+  rightHandController: {fileID: 7595698775114715432}
 --- !u!1 &820132954775781932
 GameObject:
   m_ObjectHideFlags: 0
