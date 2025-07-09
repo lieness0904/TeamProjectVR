@@ -22,7 +22,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     [Header("스폰 위치")]
 
-    public Transform[] spawnPoint;
+    public Transform[] spawnPoints;
     // -------------------------
 
 
@@ -202,10 +202,23 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             if (playerPrefab != null)
             {
-                Vector3 position = spawnPoint ? spawnPoint.position : Vector3.zero;
-                Quaternion rotation = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
+                // 플레이어 ID 기반으로 스폰 위치 선택 (Index가 범위 내에 있을 경우만)
+                int spawnIndex = player.PlayerId % spawnPoints.Length;
 
-                NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, position, rotation, player);
+                Vector3 spawnPosition = Vector3.zero;
+                Quaternion spawnRotation = Quaternion.identity;
+
+                if (spawnPoints != null && spawnPoints.Length > 0 && spawnIndex < spawnPoints.Length && spawnPoints[spawnIndex] != null)
+                {
+                    spawnPosition = spawnPoints[spawnIndex].position;
+                    spawnRotation = spawnPoints[spawnIndex].rotation;
+                }
+                else
+                {
+                    Debug.LogWarning("스폰 포인트가 설정되지 않았거나 유효하지 않습니다. 기본 위치 (0,0,0)에 스폰합니다.");
+                }
+
+                NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, spawnRotation, player);
                 _spawnedCharacters.Add(player, networkPlayerObject);
             }
             else
