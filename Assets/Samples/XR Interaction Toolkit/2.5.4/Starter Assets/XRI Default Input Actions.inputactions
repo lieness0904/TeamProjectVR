@@ -1239,6 +1239,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "TogglePhone",
+                    "type": "Button",
+                    "id": "0cd0c882-57bb-4429-bcbc-d441859d1706",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -1472,6 +1481,17 @@
                     "action": "Grip Rotation",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "48fea2bc-568a-4177-8ad4-dd4910dfba0d",
+                    "path": "<XRController>{RightHand}/primaryButton",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TogglePhone",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -1598,6 +1618,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Generic XR Controller",
+                    "action": "Select",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0bbd588f-b913-4006-a32d-7597559ef8d0",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
                     "action": "Select",
                     "isComposite": false,
                     "isPartOfComposite": false
