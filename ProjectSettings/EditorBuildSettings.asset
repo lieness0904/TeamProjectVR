@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/01_Scenes/FishingScene.unity
     guid: 0d16ccd11f13e8040b2a70b40987faf5
+  - enabled: 1
+    path: Assets/01_Scenes/HouseScene.unity
+    guid: c9adc2e89cb38ad4e90e56634f7a925a
   - enabled: 0
     path: Assets/TempAssets/TestScene.unity
     guid: 5eecc7e13112e184da104d3c6321710b
