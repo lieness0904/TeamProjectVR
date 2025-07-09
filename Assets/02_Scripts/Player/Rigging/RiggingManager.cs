@@ -31,8 +31,21 @@ public class RiggingManager : NetworkBehaviour
     public float smoothValue = 0.1f;
     public float modelHeight = 1.67f;
 
+    private void Start()
+    {
+        if (!Object.HasInputAuthority)
+        {
+            // 상대 플레이어면 로컬 컨트롤러는 비활성화
+            leftHandController.gameObject.SetActive(false);
+            rightHandController.gameObject.SetActive(false);
+            hmd.gameObject.SetActive(false);
+        }
+    }
+
     private void LateUpdate()
     {
+        if (!Object.HasInputAuthority) return;
+
         MappingHandTransform(leftHandIK, leftHandController, true);
         MappingHandTransform(rightHandIK, rightHandController, false);
         MappingBodyTransform(headIK, hmd);

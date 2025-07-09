@@ -17,11 +17,12 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     private NetworkRunner _runner;
 
     [Header("Network Prefabs")]
+    public NetworkObject xrOriginPrefab;
     public NetworkObject playerPrefab;
 
     // --- [1] 이 줄을 추가합니다 ---
     [Header("스폰 위치")]
-    public Transform spawnPoint;
+    public Transform[] spawnPoints;
     // -------------------------
 
     [Header("UI Elements")]
@@ -194,14 +195,23 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             if (playerPrefab != null)
             {
-                // --- [2] 이 부분을 수정합니다 ---
-                // spawnPoint가 할당되었다면 그 위치를 사용하고, 아니면 기본 위치(0,0,0)를 사용합니다.
-                Vector3 position = spawnPoint ? spawnPoint.position : Vector3.zero;
-                Quaternion rotation = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
+                // 플레이어 ID 기반으로 스폰 위치 선택 (Index가 범위 내에 있을 경우만)
+                int spawnIndex = player.PlayerId % spawnPoints.Length;
 
-                NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, position, rotation, player);
-                // ---------------------------
+                Vector3 spawnPosition = Vector3.zero;
+                Quaternion spawnRotation = Quaternion.identity;
 
+                if (spawnPoints != null && spawnPoints.Length > 0 && spawnIndex < spawnPoints.Length && spawnPoints[spawnIndex] != null)
+                {
+                    spawnPosition = spawnPoints[spawnIndex].position;
+                    spawnRotation = spawnPoints[spawnIndex].rotation;
+                }
+                else
+                {
+                    Debug.LogWarning("스폰 포인트가 설정되지 않았거나 유효하지 않습니다. 기본 위치 (0,0,0)에 스폰합니다.");
+                }
+
+                NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, spawnRotation, player);
                 _spawnedCharacters.Add(player, networkPlayerObject);
             }
             else
@@ -231,7 +241,27 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         _spawnedCharacters.Clear();
     }
 
-    public void OnConnectedToServer(NetworkRunner runner) { }
+    public void OnConnectedToServer(NetworkRunner runner)
+    {
+        if (runner.IsRunning && runner.LocalPlayer != null)
+        {
+            // 내 PlayerRef가 캐릭터 프리팹으로 생성된 이후에 XR Origin 생성
+            runner.TryGetPlayerObject(runner.LocalPlayer, out NetworkObject playerObj);
+
+            if (playerObj != null && playerObj.HasInputAuthority)
+            {
+                NetworkObject player = Instantiate(playerPrefab);
+
+                // XR Origin의 RiggingManager에 캐릭터 연결
+                var rigManager = playerPrefab.GetComponentInChildren<RiggingManager>();
+                rigManager.headIK = playerObj.transform.Find("HeadIK");
+                rigManager.leftHandIK = playerObj.transform.Find("LeftHandIK");
+                rigManager.rightHandIK = playerObj.transform.Find("RightHandIK");
+
+                rigManager.transform.SetParent(playerObj.transform); // 필요시
+            }
+        }
+    }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
