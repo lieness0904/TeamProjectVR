@@ -7,11 +7,11 @@ using UnityEngine.SceneManagement;
 
 public class LoginManager : MonoBehaviour
 {
-
     private string scriptURL = "https://script.google.com/macros/s/AKfycbxsVIFFP0aRSLTljhqnSI0KAso8jv3Hx3UPdIiWsl1UynSyyk1EVABCf2Fpz6WwzcNn/exec";
 
-    [Header("파괴할 오브젝트")]
-    public GameObject xrOriginInTitle;
+    [Header("XR Origin 프리팹 설정")]
+    // --- [수정 1] XR Origin 프리팹을 할당받을 변수 ---
+    public GameObject xrOriginPrefab;
 
     [Header("UI Elements")]
     public TMP_InputField idInputField;
@@ -21,6 +21,13 @@ public class LoginManager : MonoBehaviour
 
     void Start()
     {
+        // --- [수정 2] 씬 시작 시 XR Origin 프리팹이 할당되어 있으면 생성 ---
+        if (xrOriginPrefab != null)
+        {
+            Instantiate(xrOriginPrefab);
+        }
+        // ---------------------------------------------------------
+
         if (loginButton != null)
         {
             loginButton.onClick.AddListener(OnLoginButtonClick);
@@ -33,7 +40,6 @@ public class LoginManager : MonoBehaviour
         string userId = idInputField.text;
         string password = passwordInputField.text;
 
-        // 아이디나 비밀번호가 비어있는지 확인합니다.
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
         {
             statusText.text = "아이디와 비밀번호를 모두 입력하세요.";
@@ -41,69 +47,51 @@ public class LoginManager : MonoBehaviour
         }
 
         statusText.text = "로그인 중...";
-
-        // 코루틴을 사용하여 비동기 웹 요청을 시작합니다.
         StartCoroutine(LoginRequest(userId, password));
     }
 
-
-    /// <param name="userId">사용자 아이디</param>
-    /// <param name="password">사용자 비밀번호</param>
     IEnumerator LoginRequest(string userId, string password)
     {
-        // 웹에 보낼 데이터 양식을 만듭니다.
         WWWForm form = new WWWForm();
-        form.AddField("action", "login"); // Apps Script의 어떤 기능을 호출할지 지정
+        form.AddField("action", "login");
         form.AddField("userId", userId);
         form.AddField("password", password);
 
-        // POST 방식으로 웹 요청을 생성하고 보냅니다.
         using (UnityWebRequest www = UnityWebRequest.Post(scriptURL, form))
         {
-            yield return www.SendWebRequest(); // 요청이 끝날 때까지 여기서 대기합니다.
+            yield return www.SendWebRequest();
 
-            // 웹 요청에 성공했을 경우
             if (www.result == UnityWebRequest.Result.Success)
             {
-                // 서버로부터 받은 JSON 형식의 응답 텍스트를 파싱(해석)합니다.
                 string jsonResponse = www.downloadHandler.text;
                 LoginResponse response = JsonUtility.FromJson<LoginResponse>(jsonResponse);
 
-                // 서버에서 "성공" 응답을 보냈을 경우
                 if (response.status == "success")
                 {
                     statusText.text = response.message;
                     Debug.Log("로그인 성공! 데이터 로드 완료.");
 
-                   
                     Debug.Log($"[LoginManager] 저장할 UserID: '{response.data.userId}'");
                     PlayerDataManager.Instance.UserID = response.data.userId;
                     Debug.Log($"[LoginManager] 저장된 UserID: '{PlayerDataManager.Instance.UserID}'");
-                    
 
-                    if (xrOriginInTitle != null)
-                    {
-                        Destroy(xrOriginInTitle);
-                    }
+                    // --- [수정 3] 불필요해진 파괴 로직 삭제 ---
 
-                    // 1초 후 로비 씬으로 이동합니다.
                     yield return new WaitForSeconds(1);
                     SceneManager.LoadScene("Lobby");
-                    
                 }
-                else // 서버에서 "실패" 응답을 보냈을 경우 (예: 비밀번호 오류)
+                else
                 {
                     statusText.text = "로그인 실패: " + response.message;
                 }
             }
-            else // 네트워크 연결 자체에 실패했을 경우
+            else
             {
                 statusText.text = "네트워크 오류: " + www.error;
                 Debug.LogError("Web Request Error: " + www.error);
             }
         }
     }
-
 
     private void OnDestroy()
     {
@@ -114,9 +102,6 @@ public class LoginManager : MonoBehaviour
     }
 }
 
-
-// 아래 두 클래스는 LoginManager.cs 파일의 일부입니다.
-// 이 부분까지 모두 포함되어야 합니다.
 [System.Serializable]
 public class LoginResponse
 {
@@ -125,12 +110,11 @@ public class LoginResponse
     public PlayerDataFields data;
 }
 
-
 [System.Serializable]
 public class PlayerDataFields
 {
     public string userId;
-    public float maxFishSize; // 수정 필요
-    public string fishCaughtList; // 수정 필요
+    public float maxFishSize;
+    public string fishCaughtList;
     public int points;
 }

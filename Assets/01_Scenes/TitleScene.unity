@@ -152,7 +152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a75c0948c86119442aeb7f32a3bf8009, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xrOriginInTitle: {fileID: 0}
+  xrOriginPrefab: {fileID: 616965502489606987, guid: a810e6c4b2e567640aa7ce3d496dafcb,
+    type: 3}
   idInputField: {fileID: 1106472318}
   passwordInputField: {fileID: 282282483}
   loginButton: {fileID: 897270928}
@@ -347,94 +348,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 282282481}
   m_CullTransparentMesh: 1
---- !u!1001 &565048047
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 616965502489606987, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: m_Name
-      value: XR Origin (Action-based) 1 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2000100833357388525, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: SortKey
-      value: 2336262707
-      objectReference: {fileID: 0}
-    - target: {fileID: 3237525749107578604, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: SortKey
-      value: 3711888316
-      objectReference: {fileID: 0}
-    - target: {fileID: 5934358756629123565, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: SortKey
-      value: 3343155815
-      objectReference: {fileID: 0}
-    - target: {fileID: 6075095801357725014, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: SortKey
-      value: 690792476
-      objectReference: {fileID: 0}
-    - target: {fileID: 7247636969907605289, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7247636969907605289, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.6
-      objectReference: {fileID: 0}
-    - target: {fileID: 7247636969907605289, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7247636969907605289, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7247636969907605289, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7247636969907605289, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7247636969907605289, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7247636969907605289, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7247636969907605289, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7247636969907605289, guid: a810e6c4b2e567640aa7ce3d496dafcb,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: a810e6c4b2e567640aa7ce3d496dafcb, type: 3}
 --- !u!1 &576725104
 GameObject:
   m_ObjectHideFlags: 0
@@ -2661,7 +2574,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2076022335}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
   m_Name: 
@@ -2827,4 +2740,3 @@ SceneRoots:
   - {fileID: 2067531597}
   - {fileID: 1261740543}
   - {fileID: 1559471407}
-  - {fileID: 565048047}

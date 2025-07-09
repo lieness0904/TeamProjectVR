@@ -20,10 +20,7 @@ public class PlayerNetworkData : NetworkBehaviour
     [Header("모드 전환 컴포넌트")]
     [SerializeField] private DesktopPlayerController desktopController;
     [SerializeField] private CharacterControllerDriver characterControllerDriver;
-
-    // --- [1] 이 줄을 주석 처리하여 컴파일 오류를 우회합니다 ---
-    //[SerializeField] private XRInputModalityManager inputModalityManager; 
-
+    [SerializeField] private RiggingManager riggingManager;
     [SerializeField] private CastingController vrCastingController;
     [SerializeField] private Camera playerCamera;
 
@@ -48,26 +45,13 @@ public class PlayerNetworkData : NetworkBehaviour
             else
             {
                 Debug.LogError("[PlayerNetworkData] GameModeManager.Instance를 찾을 수 없습니다! 컨트롤러 설정에 실패했습니다.");
+                // 기본 모드(VR)로 설정
                 SetupControllerForMode(GameModeManager.ControlMode.VR);
             }
 
             if (voiceRecorder != null)
             {
                 voiceRecorder.enabled = true;
-            }
-        }
-
-        else
-        {
-            // 권한이 없는 객체는 조작 관련 컴포넌트 비활성화
-            if (desktopController != null) desktopController.enabled = false;
-            if (characterControllerDriver != null) characterControllerDriver.enabled = false;
-            if (vrCastingController != null) vrCastingController.enabled = false;
-            //if (inputModalityManager != null) inputModalityManager.enabled = false;
-
-            if (voiceRecorder != null)
-            {
-                voiceRecorder.enabled = false;
             }
         }
 
@@ -88,8 +72,7 @@ public class PlayerNetworkData : NetworkBehaviour
 
             if (characterControllerDriver != null) characterControllerDriver.enabled = false;
 
-            // --- [2] 이 줄을 주석 처리합니다 ---
-            //if (inputModalityManager != null) inputModalityManager.enabled = false;
+            if (riggingManager != null) riggingManager.enabled = false;
 
             if (vrCastingController != null) vrCastingController.enabled = false;
         }
@@ -98,11 +81,9 @@ public class PlayerNetworkData : NetworkBehaviour
             Debug.Log("VR 모드로 컨트롤러를 설정합니다.");
 
             if (desktopController != null) desktopController.enabled = false;
-
             if (characterControllerDriver != null) characterControllerDriver.enabled = true;
 
-            // --- [3] 이 줄을 주석 처리합니다 ---
-            //if (inputModalityManager != null) inputModalityManager.enabled = true;
+            if (riggingManager != null) riggingManager.enabled = true;
 
             if (vrCastingController != null) vrCastingController.enabled = true;
         }

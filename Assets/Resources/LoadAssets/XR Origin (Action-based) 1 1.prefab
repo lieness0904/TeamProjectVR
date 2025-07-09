@@ -1349,7 +1349,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1073957359146085865}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!114 &3950854270472780923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7092,6 +7092,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: FemaleCharacter
+      objectReference: {fileID: 0}
+    - target: {fileID: 5570546635062656723, guid: 4d5df3d214dfc404dba68f0bb8855551,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5823910963181871196, guid: 4d5df3d214dfc404dba68f0bb8855551,
         type: 3}
