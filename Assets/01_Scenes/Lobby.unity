@@ -1301,6 +1301,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -4680212362017781875, guid: 4d92dc7fa4f2bb34294094f418942da2,
+        type: 3}
+      propertyPath: riggingManager
+      value: 
+      objectReference: {fileID: 770368123}
+    - target: {fileID: -4680212362017781875, guid: 4d92dc7fa4f2bb34294094f418942da2,
+        type: 3}
+      propertyPath: leftHandController
+      value: 
+      objectReference: {fileID: 1330532801}
+    - target: {fileID: -4680212362017781875, guid: 4d92dc7fa4f2bb34294094f418942da2,
+        type: 3}
+      propertyPath: rightHandController
+      value: 
+      objectReference: {fileID: 1330532800}
+    - target: {fileID: -4680212362017781875, guid: 4d92dc7fa4f2bb34294094f418942da2,
+        type: 3}
+      propertyPath: characterControllerDriver
+      value: 
+      objectReference: {fileID: 1330532804}
     - target: {fileID: 2844263502472752173, guid: 4d92dc7fa4f2bb34294094f418942da2,
         type: 3}
       propertyPath: m_Name
@@ -1419,6 +1439,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1330532799}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1330532804 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5096773232377592595, guid: 4d92dc7fa4f2bb34294094f418942da2,
+    type: 3}
+  m_PrefabInstance: {fileID: 1330532799}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af6bf904e410ee8479f9093d8830d1f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1345471599
 GameObject:
   m_ObjectHideFlags: 0
