@@ -17,18 +17,16 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     private NetworkRunner _runner;
 
     [Header("Network Prefabs")]
+    // --- [수정] --- 아래 playerPrefab에 NetworkTransform 컴포넌트를 꼭 추가해주세요!
     public NetworkObject playerPrefab;
-    
+
     [Header("스폰 위치")]
-
     public Transform[] spawnPoints;
-    // -------------------------
-
 
     [Header("UI Elements")]
     public TextMeshProUGUI playerCountText;
     public GameObject playerListContent;
-    public GameObject playerListItemPrefab;
+    public GameObject playerListItemPrefab; // 플레이어 목록에 표시될 UI 프리팹
 
     private readonly Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
 
@@ -50,18 +48,28 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     void Start()
     {
-        ConnectToLobby();
+        // --- [수정] --- 로비 씬에서만 ConnectToLobby를 호출하도록 변경
+        if (SceneManager.GetActiveScene().name == "Lobby")
+        {
+            ConnectToLobby();
+        }
     }
 
-    void Update()
-    {
-        UpdatePlayerListUI();
-    }
+    // --- [수정] --- Update에서 매번 UI를 갱신하는 로직 삭제 (성능 저하의 원인)
+    // void Update()
+    // {
+    //     UpdatePlayerListUI();
+    // }
 
     async void ConnectToLobby()
     {
         if (_hasConnectedOnce)
         {
+            // 이미 연결된 Runner가 있다면 UI만 업데이트
+            if (_runner != null && _runner.IsRunning)
+            {
+                UpdatePlayerListUI();
+            }
             return;
         }
         _hasConnectedOnce = true;
@@ -75,6 +83,8 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             GameMode = GameMode.AutoHostOrClient,
             SessionName = "게스트 하우스",
+            // --- [수정] --- 호스트 마이그레이션 기능 활성화
+            EnableClientSessionCreation = true
         });
     }
 
@@ -125,7 +135,9 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
                 GameMode = GameMode.AutoHostOrClient,
                 SessionName = sessionName,
                 PlayerCount = MAX_PLAYERS_PER_ROOM,
-                Scene = SceneRef.FromIndex(sceneIndex)
+                Scene = SceneRef.FromIndex(sceneIndex),
+                // --- [수정] --- 콘텐츠 씬에서도 호스트 마이그레이션 기능 활성화
+                EnableClientSessionCreation = true
             });
 
             if (result.Ok)
@@ -146,6 +158,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
+    // --- [수정] --- UI 업데이트 로직 수정 및 최적화
     private void UpdatePlayerListUI()
     {
         if (_runner == null || !_runner.IsRunning)
@@ -165,9 +178,27 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         if (playerListContent == null || playerListItemPrefab == null) return;
 
+        // 기존 목록 모두 삭제
         foreach (Transform child in playerListContent.transform)
         {
             Destroy(child.gameObject);
+        }
+
+        // --- [추가] --- 현재 접속한 플레이어 목록을 기반으로 UI 아이템 생성
+        foreach (PlayerRef player in _runner.ActivePlayers)
+        {
+            GameObject item = Instantiate(playerListItemPrefab, playerListContent.transform);
+
+            // playerListItemPrefab에 TextMeshProUGUI 컴포넌트가 있다고 가정
+            TextMeshProUGUI playerNameText = item.GetComponentInChildren<TextMeshProUGUI>();
+            if (playerNameText != null)
+            {
+                string id = $"Player {player.PlayerId}";
+                if (player == _runner.LocalPlayer) id += " (나)";
+                
+
+                playerNameText.text = id;
+            }
         }
     }
 
@@ -182,9 +213,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             if (playerPrefab != null)
             {
-                // 플레이어 ID 기반으로 스폰 위치 선택 (Index가 범위 내에 있을 경우만)
                 int spawnIndex = player.PlayerId % spawnPoints.Length;
-
                 Vector3 spawnPosition = Vector3.zero;
                 Quaternion spawnRotation = Quaternion.identity;
 
@@ -206,6 +235,9 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
                 Debug.LogError("Player Prefab이 할당되지 않았습니다!");
             }
         }
+
+        // --- [수정] --- 플레이어 입장 시 UI 업데이트
+        UpdatePlayerListUI();
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
@@ -220,27 +252,38 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             }
             _spawnedCharacters.Remove(player);
         }
+
+        // --- [수정] --- 플레이어 퇴장 시 UI 업데이트
+        UpdatePlayerListUI();
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
         Debug.Log($"OnShutdown: NetworkRunner가 종료되었습니다. 이유: {shutdownReason}");
         _spawnedCharacters.Clear();
-    }
 
+        // --- [수정] --- 로비로 돌아가도록 씬 전환 로직 추가 (호스트가 나가서 종료됐을 경우 등)
+        SceneManager.LoadScene("Lobby");
+    }
 
     public void OnConnectedToServer(NetworkRunner runner)
     {
-        
+        Debug.Log("OnConnectedToServer: 서버에 연결되었습니다.");
     }
-    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
 
+    // --- [수정] --- 호스트 마이그레이션 콜백 추가
+    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
+    {
+        Debug.Log("OnHostMigration: 호스트 마이그레이션이 시작되었습니다.");
+        // 필요 시 여기에 호스트 마이그레이션 관련 로직 추가 (예: UI 표시)
+    }
+
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
     public void OnInput(NetworkRunner runner, NetworkInput input) { }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
-    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
     public void OnSceneLoadDone(NetworkRunner runner) { }
     public void OnSceneLoadStart(NetworkRunner runner) { }
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }

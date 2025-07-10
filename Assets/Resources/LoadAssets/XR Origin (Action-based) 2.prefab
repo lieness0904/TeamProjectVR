@@ -2484,8 +2484,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe415e88825b79488f96843e41d1445, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xrOrigin: {fileID: 0}
-  fullBodyVisual: {fileID: 0}
+  xrOrigin: {fileID: 2844263502472752173}
+  fullBodyVisual: {fileID: 5029180451000584027, guid: d210c7e399234b74397eef4d890ea2ce,
+    type: 3}
 --- !u!1 &3548182066130798304
 GameObject:
   m_ObjectHideFlags: 0
