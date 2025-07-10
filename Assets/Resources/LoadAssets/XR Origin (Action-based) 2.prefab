@@ -2530,6 +2530,7 @@ MonoBehaviour:
   vrCastingController: {fileID: 0}
   leftHandController: {fileID: 1514185288520741825}
   rightHandController: {fileID: 3381337482437580617}
+  inputActionAsset: {fileID: 0}
 --- !u!114 &9062790499181634592
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2542,9 +2543,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe415e88825b79488f96843e41d1445, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xrOrigin: {fileID: 0}
+  xrOrigin: {fileID: 2844263502472752173}
   fullBodyVisuals: {fileID: 0}
-  handsOnlyVisuals: {fileID: 0}
+  handsOnlyVisuals: {fileID: 2844263502472752173}
 --- !u!1 &3548182066130798304
 GameObject:
   m_ObjectHideFlags: 0
