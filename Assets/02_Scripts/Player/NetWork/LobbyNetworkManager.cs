@@ -18,8 +18,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     [Header("Network Prefabs")]
     public NetworkObject playerPrefab;
-    public NetworkObject xrOriginPrefab;
-
+    
     [Header("스폰 위치")]
 
     public Transform[] spawnPoints;
