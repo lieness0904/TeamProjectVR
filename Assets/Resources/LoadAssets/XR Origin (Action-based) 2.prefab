@@ -2296,8 +2296,6 @@ GameObject:
   - component: {fileID: 8752484761493386202}
   - component: {fileID: 7746992488569452343}
   - component: {fileID: 1828468711737261583}
-  - component: {fileID: -4680212362017781875}
-  - component: {fileID: 9062790499181634592}
   m_Layer: 2
   m_Name: XR Origin (Action-based) 2
   m_TagString: Untagged
@@ -2454,8 +2452,6 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 1828468711737261583}
-  - {fileID: -4680212362017781875}
-  - {fileID: 9062790499181634592}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &1828468711737261583
 MonoBehaviour:
@@ -2474,45 +2470,6 @@ MonoBehaviour:
   SyncParent: 0
   _autoAOIOverride: 1
   DisableSharedModeInterpolation: 0
---- !u!114 &-4680212362017781875
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2844263502472752173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 821d7b92050d6c44a82d600db43d29b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _PlayerName:
-    _length: 0
-    _data:
-      Data: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-  nameText: {fileID: 0}
-  characterControllerDriver: {fileID: 5096773232377592595}
-  riggingManager: {fileID: 0}
-  vrCastingController: {fileID: 0}
-  leftHandController: {fileID: 1514185288520741825}
-  rightHandController: {fileID: 3381337482437580617}
-  inputActionAsset: {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f,
-    type: 3}
---- !u!114 &9062790499181634592
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2844263502472752173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbe415e88825b79488f96843e41d1445, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  xrOrigin: {fileID: 2844263502472752173}
-  fullBodyVisuals: {fileID: 2844263502472752173}
-  handsOnlyVisuals: {fileID: 0}
 --- !u!1 &3548182066130798304
 GameObject:
   m_ObjectHideFlags: 0
