@@ -12,14 +12,13 @@ public class PlayerNetworkData : NetworkBehaviour
     [Header("UI")]
     public TextMeshProUGUI nameText;
 
-    [Header("모드 전환 컴포넌트")]
-    [SerializeField] private DesktopPlayerController desktopController;
+    [Header("VR 전용 컴포넌트")]
     [SerializeField] private CharacterControllerDriver characterControllerDriver;
     [SerializeField] private RiggingManager riggingManager;
     [SerializeField] private CastingController vrCastingController;
-    [SerializeField] private Camera playerCamera;
+    // [SerializeField] private Camera playerCamera; // 데스크톱 모드에서만 사용했으므로 주석 처리하거나 삭제해도 됩니다.
 
-    // --- [추가 1] 손 컨트롤러 동기화를 위한 변수 ---
+    // --- 손 컨트롤러 동기화를 위한 변수 ---
     [Header("VR 컨트롤러 Tramsform")]
     public Transform leftHandController;
     public Transform rightHandController;
@@ -41,21 +40,20 @@ public class PlayerNetworkData : NetworkBehaviour
     {
         if (Object.HasInputAuthority)
         {
-            Debug.Log("[PlayerNetworkData] 내 캐릭터가 스폰되었습니다. ID 및 컨트롤 모드를 설정합니다.");
+            Debug.Log("[PlayerNetworkData] 내 캐릭터가 스폰되었습니다. ID 및 VR 컨트롤러를 설정합니다.");
 
+            // 유저 ID 설정
             string id = PlayerDataManager.Instance.UserID;
             PlayerName = id;
 
-            if (GameModeManager.Instance != null)
-            {
-                SetupControllerForMode(GameModeManager.Instance.CurrentMode);
-            }
-            else
-            {
-                Debug.LogError("[PlayerNetworkData] GameModeManager.Instance를 찾을 수 없습니다! 컨트롤러 설정에 실패했습니다.");
-                SetupControllerForMode(GameModeManager.ControlMode.VR);
-            }
+            // --- 컨트롤러 설정 (VR 모드 고정) ---
+            Debug.Log("VR 모드로 컨트롤러를 설정합니다.");
+            if (characterControllerDriver != null) characterControllerDriver.enabled = true;
+            if (riggingManager != null) riggingManager.enabled = true;
+            if (vrCastingController != null) vrCastingController.enabled = true;
+            // ------------------------------------
 
+            // 보이스 레코더 활성화
             if (voiceRecorder != null)
             {
                 voiceRecorder.enabled = true;
@@ -65,13 +63,11 @@ public class PlayerNetworkData : NetworkBehaviour
         UpdateNameUI();
     }
 
-    // --- [추가 2] 네트워크 동기화를 위한 FixedUpdateNetwork 함수 ---
     public override void FixedUpdateNetwork()
     {
         if (Object.HasInputAuthority)
         {
             // 내가 조종하는 캐릭터라면, 내 로컬 컨트롤러의 위치/회전 값을 네트워크 변수에 기록합니다.
-            // 이 데이터가 서버(호스트)로 전송됩니다.
             if (leftHandController != null)
             {
                 LeftHandPos = leftHandController.position;
@@ -97,38 +93,6 @@ public class PlayerNetworkData : NetworkBehaviour
                 rightHandController.position = RightHandPos;
                 rightHandController.rotation = RightHandRot;
             }
-        }
-    }
-    // ----------------------------------------------------
-
-    private void SetupControllerForMode(GameModeManager.ControlMode mode)
-    {
-        if (mode == GameModeManager.ControlMode.Desktop)
-        {
-            Debug.Log("데스크톱 모드로 컨트롤러를 설정합니다.");
-            if (leftHandController != null) leftHandController.gameObject.SetActive(false);
-            if (rightHandController != null) rightHandController.gameObject.SetActive(false);
-
-            if (desktopController != null)
-            {
-                desktopController.enabled = true;
-                desktopController.cameraTransform = playerCamera.transform;
-            }
-
-            if (characterControllerDriver != null) characterControllerDriver.enabled = false;
-            if (riggingManager != null) riggingManager.enabled = false;
-            if (vrCastingController != null) vrCastingController.enabled = false;
-        }
-        else // VR 모드일 경우
-        {
-            Debug.Log("VR 모드로 컨트롤러를 설정합니다.");
-            if (leftHandController != null) leftHandController.gameObject.SetActive(true);
-            if (rightHandController != null) rightHandController.gameObject.SetActive(true);
-
-            if (desktopController != null) desktopController.enabled = false;
-            if (characterControllerDriver != null) characterControllerDriver.enabled = true;
-            if (riggingManager != null) riggingManager.enabled = true;
-            if (vrCastingController != null) vrCastingController.enabled = true;
         }
     }
 
