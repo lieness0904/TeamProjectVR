@@ -1,52 +1,33 @@
-using System.Collections;
-using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 
 public class PlayerVisual : NetworkBehaviour
 {
-    [Header("VR용 XR리그")]
-    public GameObject xrOrigin; // 내 화면에서만 켜짐
+    [Header("필수 연결 요소")]
+    public GameObject xrOrigin; // 내 화면에서만 켜질 XR Origin
 
-    [Header("공통 시각 요소")]
-    public GameObject characterModel; // 손 포함 몸 전체
-
-    [Header("내 손만 보이게 제어할 대상 (CharacterModel 내부의 손들")]
-    public GameObject[] handsOnly; // 내 화면에서 보여야 하는 손 오브젝트
+    [Header("시각적 모델")]
+    public GameObject fullBodyVisuals; // 몸 전체 모델 (상대방에게 보일 부분)
+    public GameObject handsOnlyVisuals; // 1인칭 손 모델 (나에게만 보일 부분)
 
     public override void Spawned()
     {
         if (Object.HasInputAuthority)
         {
-            // 내 플레이어일 때
-            xrOrigin.SetActive(true);            // 내 XR 리그 활성화
-            characterModel.SetActive(true);      // 모델 활성화
-            SetBodyPartsVisibleExceptHands(false);
+            // --- 내가 조종하는 캐릭터일 때 ---
+            // 내 VR 화면을 켜고, 나에게 보일 몸통도 켠다.
+            // 1인칭 전용 손은 이제 사용하지 않으므로 끈다.
+            if (xrOrigin != null) xrOrigin.SetActive(true);
+            if (fullBodyVisuals != null) fullBodyVisuals.SetActive(true);
+            if (handsOnlyVisuals != null) handsOnlyVisuals.SetActive(false);
         }
         else
         {
-            // 상대방 플레이어일 때
-            xrOrigin.SetActive(false);           // 상대 XR 리그 끔
-            characterModel.SetActive(true);      // 전체 모델 보여줌
-            SetBodyPartsVisibleExceptHands(true);
-        }
-    }
-    private void SetBodyPartsVisibleExceptHands(bool bodyVisible)
-    {
-        // 상대방이면 전체 보여주고, 내 화면이면 손만 보여줌
-        foreach (Transform child in characterModel.transform)
-        {
-            bool isHand = false;
-            foreach (var hand in handsOnly)
-            {
-                if (child.gameObject == hand)
-                {
-                    isHand = true;
-                    break;
-                }
-            }
-
-            child.gameObject.SetActive(isHand || bodyVisible);
+            // --- 상대방이 조종하는 캐릭터일 때 (이전과 동일) ---
+            // 상대방의 VR 화면은 끄고, 나에게 보여야 할 몸통은 켠다.
+            if (xrOrigin != null) xrOrigin.SetActive(false);
+            if (fullBodyVisuals != null) fullBodyVisuals.SetActive(true);
+            if (handsOnlyVisuals != null) handsOnlyVisuals.SetActive(false);
         }
     }
 }
