@@ -250,22 +250,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnConnectedToServer(NetworkRunner runner)
     {
-        if (runner.IsRunning && runner.LocalPlayer != null)
-        {
-            runner.TryGetPlayerObject(runner.LocalPlayer, out NetworkObject playerObj);
-
-            if (playerObj != null && playerObj.HasInputAuthority)
-            {
-                NetworkObject player = Instantiate(playerPrefab);
-
-                var rigManager = playerPrefab.GetComponent<RiggingManager>();
-                rigManager.headIK = playerObj.transform.Find("HeadIK");
-                rigManager.leftHandIK = playerObj.transform.Find("LeftHandIK");
-                rigManager.rightHandIK = playerObj.transform.Find("RightHandIK");
-
-                rigManager.transform.SetParent(playerObj.transform);
-            }
-        }
+        
     }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
 
