@@ -16,9 +16,7 @@ public class PlayerNetworkData : NetworkBehaviour
     [SerializeField] private CharacterControllerDriver characterControllerDriver;
     [SerializeField] private RiggingManager riggingManager;
     [SerializeField] private CastingController vrCastingController;
-    // [SerializeField] private Camera playerCamera; // 데스크톱 모드에서만 사용했으므로 주석 처리하거나 삭제해도 됩니다.
 
-    // --- 손 컨트롤러 동기화를 위한 변수 ---
     [Header("VR 컨트롤러 Tramsform")]
     public Transform leftHandController;
     public Transform rightHandController;
@@ -27,7 +25,6 @@ public class PlayerNetworkData : NetworkBehaviour
     [Networked] private Quaternion LeftHandRot { get; set; }
     [Networked] private Vector3 RightHandPos { get; set; }
     [Networked] private Quaternion RightHandRot { get; set; }
-    // -----------------------------------------
 
     private Recorder voiceRecorder;
 
@@ -42,9 +39,25 @@ public class PlayerNetworkData : NetworkBehaviour
         {
             Debug.Log("[PlayerNetworkData] 내 캐릭터가 스폰되었습니다. ID 및 VR 컨트롤러를 설정합니다.");
 
-            // 유저 ID 설정
-            string id = PlayerDataManager.Instance.UserID;
+            // --- [수정된 부분] PlayerDataManager가 없을 때를 대비한 ID 설정 ---
+            string id;
+            if (PlayerDataManager.Instance != null)
+            {
+                id = PlayerDataManager.Instance.UserID;
+                // 만약의 경우를 대비해 ID가 비어있으면 임시 ID 부여
+                if (string.IsNullOrEmpty(id))
+                {
+                    id = "Guest";
+                }
+            }
+            else
+            {
+                // PlayerDataManager가 없을 경우 (Lobby 씬에서 바로 시작한 경우) 임시 ID를 부여합니다.
+                id = "TestGuest";
+                Debug.LogWarning("[PlayerNetworkData] PlayerDataManager.Instance를 찾을 수 없어 임시 ID를 사용합니다.");
+            }
             PlayerName = id;
+            // ----------------------------------------------------------------
 
             // --- 컨트롤러 설정 (VR 모드 고정) ---
             Debug.Log("VR 모드로 컨트롤러를 설정합니다.");
@@ -67,7 +80,6 @@ public class PlayerNetworkData : NetworkBehaviour
     {
         if (Object.HasInputAuthority)
         {
-            // 내가 조종하는 캐릭터라면, 내 로컬 컨트롤러의 위치/회전 값을 네트워크 변수에 기록합니다.
             if (leftHandController != null)
             {
                 LeftHandPos = leftHandController.position;
@@ -81,8 +93,6 @@ public class PlayerNetworkData : NetworkBehaviour
         }
         else
         {
-            // 내가 조종하는 캐릭터가 아니라면 (다른 사람 캐릭터),
-            // 네트워크를 통해 받은 위치/회전 값을 실제 컨트롤러 오브젝트에 적용합니다.
             if (leftHandController != null)
             {
                 leftHandController.position = LeftHandPos;
