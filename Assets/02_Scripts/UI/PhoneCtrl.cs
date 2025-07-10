@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PhoneUIController : MonoBehaviour
+public class PhoneCtrl : MonoBehaviour
 {
     public GameObject phoneUI;
-
+    public GameObject menuPanel;
     public GameObject chatPanel;
     public GameObject settingPanel;
     public GameObject inventoryPanel;
+
 
     private void Update()
     {
@@ -22,15 +23,17 @@ public class PhoneUIController : MonoBehaviour
             {
                 // 켤 때 모든 하위 패널 비활성화
                 ResetPanels();
+                menuPanel.SetActive(true);
             }
         }
     }
 
     private void ResetPanels()
     {
-        if (chatPanel != null) chatPanel.SetActive(false);
-        if (settingPanel != null) settingPanel.SetActive(false);
-        if (inventoryPanel != null) inventoryPanel.SetActive(false);
+        menuPanel.SetActive(false);
+        chatPanel.SetActive(false);
+        settingPanel.SetActive(false);
+        inventoryPanel.SetActive(false);
     }
 }
 
