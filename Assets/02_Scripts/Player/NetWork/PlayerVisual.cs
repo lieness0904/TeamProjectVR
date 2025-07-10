@@ -10,7 +10,7 @@ public class PlayerVisual : NetworkBehaviour
     public GameObject fullBodyVisuals;
     public GameObject handsOnlyVisuals;
 
-    public override void Spawned()
+    public override void Render()
     {
         if (Object.HasInputAuthority)
         {

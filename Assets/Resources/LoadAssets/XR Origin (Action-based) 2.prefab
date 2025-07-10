@@ -2511,7 +2511,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   xrOrigin: {fileID: 2844263502472752173}
-  fullBodyVisuals: {fileID: 0}
+  fullBodyVisuals: {fileID: 2844263502472752173}
   handsOnlyVisuals: {fileID: 0}
 --- !u!1 &3548182066130798304
 GameObject:
