@@ -7,12 +7,13 @@ public class XRRootFollower : NetworkBehaviour
 {
     public Transform xrOrigin;
 
-    public override void FixedUpdateNetwork()
+    void LateUpdate()
     {
         if (HasInputAuthority && xrOrigin != null)
         {
             transform.position = xrOrigin.position;
-            transform.rotation = Quaternion.Euler(0, xrOrigin.eulerAngles.y, 0); // 필요 시 Y축만 반영
+            transform.rotation = Quaternion.Euler(0, xrOrigin.eulerAngles.y, 0);
+            Debug.Log($"[XRRootFollower] Cube 위치 갱신됨: {transform.position}");
         }
     }
 }

@@ -123,8 +123,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   xrOrigin: {fileID: 1457083863177972418}
-  fullBodyVisual: {fileID: 5029180451000584027, guid: d210c7e399234b74397eef4d890ea2ce,
-    type: 3}
+  fullBodyVisual: {fileID: 1411396863594812391}
 --- !u!114 &3468467640243037364
 MonoBehaviour:
   m_ObjectHideFlags: 0
