@@ -2296,6 +2296,7 @@ GameObject:
   - component: {fileID: 8752484761493386202}
   - component: {fileID: 7746992488569452343}
   - component: {fileID: 1828468711737261583}
+  - component: {fileID: -4187103427748991924}
   m_Layer: 2
   m_Name: XR Origin (Action-based) 2
   m_TagString: Untagged
@@ -2452,6 +2453,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 1828468711737261583}
+  - {fileID: -4187103427748991924}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &1828468711737261583
 MonoBehaviour:
@@ -2470,6 +2472,20 @@ MonoBehaviour:
   SyncParent: 0
   _autoAOIOverride: 1
   DisableSharedModeInterpolation: 0
+--- !u!114 &-4187103427748991924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2844263502472752173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbe415e88825b79488f96843e41d1445, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xrOrigin: {fileID: 0}
+  fullBodyVisual: {fileID: 0}
 --- !u!1 &3548182066130798304
 GameObject:
   m_ObjectHideFlags: 0

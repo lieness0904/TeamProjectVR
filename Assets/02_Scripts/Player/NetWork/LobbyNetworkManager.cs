@@ -169,25 +169,6 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             Destroy(child.gameObject);
         }
-
-        foreach (PlayerRef playerRef in _runner.ActivePlayers)
-        {
-            if (_runner.TryGetPlayerObject(playerRef, out NetworkObject playerObject) && playerObject != null)
-            {
-                PlayerNetworkData networkData = playerObject.GetComponent<PlayerNetworkData>();
-                if (networkData != null)
-                {
-                    GameObject item = Instantiate(playerListItemPrefab, playerListContent.transform);
-                    string playerName = networkData.PlayerName.Value;
-
-                    if (string.IsNullOrEmpty(playerName))
-                    {
-                        playerName = "연결 중...";
-                    }
-                    item.GetComponent<TextMeshProUGUI>().text = playerName;
-                }
-            }
-        }
     }
 
 
