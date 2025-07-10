@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a75c0948c86119442aeb7f32a3bf8009, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xrOriginPrefab: {fileID: 2844263502472752173, guid: 4d92dc7fa4f2bb34294094f418942da2,
+  xrOriginPrefab: {fileID: 2844263502472752173, guid: a3412bf7f035ac344a90781923f80d6e,
     type: 3}
   idInputField: {fileID: 1106472318}
   passwordInputField: {fileID: 282282483}

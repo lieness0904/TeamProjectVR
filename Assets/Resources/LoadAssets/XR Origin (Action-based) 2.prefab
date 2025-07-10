@@ -2301,7 +2301,7 @@ GameObject:
   - component: {fileID: -4680212362017781875}
   - component: {fileID: 9062790499181634592}
   m_Layer: 2
-  m_Name: XR Origin (Action-based) 1
+  m_Name: XR Origin (Action-based) 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2479,7 +2479,7 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SortKey: 4114191093
+  SortKey: 9333239
   ObjectInterest: 1
   Flags: 1
   NestedObjects:
@@ -3720,7 +3720,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &905280341129736188
 Transform:
   m_ObjectHideFlags: 0
@@ -5816,7 +5816,7 @@ PrefabInstance:
     - target: {fileID: 3550073916620600672, guid: 4d5df3d214dfc404dba68f0bb8855551,
         type: 3}
       propertyPath: SortKey
-      value: 351300150
+      value: 541409592
       objectReference: {fileID: 0}
     - target: {fileID: 3834566061282998849, guid: 4d5df3d214dfc404dba68f0bb8855551,
         type: 3}
@@ -5890,11 +5890,6 @@ PrefabInstance:
       objectReference: {fileID: 5575339627827889303}
     - target: {fileID: 4443999911218156603, guid: 4d5df3d214dfc404dba68f0bb8855551,
         type: 3}
-      propertyPath: modelHeight
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 4443999911218156603, guid: 4d5df3d214dfc404dba68f0bb8855551,
-        type: 3}
       propertyPath: leftHandController
       value: 
       objectReference: {fileID: 1514185288520741825}
@@ -5906,7 +5901,7 @@ PrefabInstance:
     - target: {fileID: 5324792558437846746, guid: 4d5df3d214dfc404dba68f0bb8855551,
         type: 3}
       propertyPath: SortKey
-      value: 2361369808
+      value: 2551479250
       objectReference: {fileID: 0}
     - target: {fileID: 5570546635062656723, guid: 4d5df3d214dfc404dba68f0bb8855551,
         type: 3}
