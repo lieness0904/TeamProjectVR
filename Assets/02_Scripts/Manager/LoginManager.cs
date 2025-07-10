@@ -10,6 +10,7 @@ public class LoginManager : MonoBehaviour
     private string scriptURL = "https://script.google.com/macros/s/AKfycbxsVIFFP0aRSLTljhqnSI0KAso8jv3Hx3UPdIiWsl1UynSyyk1EVABCf2Fpz6WwzcNn/exec";
 
     [Header("XR Origin 프리팹 설정")]
+    // --- [수정 1] XR Origin 프리팹을 할당받을 변수 ---
     public GameObject xrOriginPrefab;
 
     [Header("UI Elements")]
@@ -20,17 +21,15 @@ public class LoginManager : MonoBehaviour
 
     void Start()
     {
+        // --- [수정 2] 씬 시작 시 XR Origin 프리팹이 할당되어 있으면 생성 ---
         if (xrOriginPrefab != null)
         {
-            // TitleScene에서는 기본적인 XR Origin만 사용하므로,
-            // 이 부분은 이제 필요 없습니다. 주석 처리하거나 삭제합니다.
-            // Instantiate(xrOriginPrefab);
+            Instantiate(xrOriginPrefab);
         }
+        // ---------------------------------------------------------
 
         if (loginButton != null)
         {
-            // [수정 1] 리스너 중복 추가를 막기 위해 먼저 모든 리스너를 제거합니다.
-            loginButton.onClick.RemoveAllListeners();
             loginButton.onClick.AddListener(OnLoginButtonClick);
         }
     }
@@ -47,8 +46,6 @@ public class LoginManager : MonoBehaviour
             return;
         }
 
-        // [수정 2] 연속 클릭을 막기 위해 버튼을 비활성화합니다.
-        loginButton.interactable = false;
         statusText.text = "로그인 중...";
         StartCoroutine(LoginRequest(userId, password));
     }
@@ -78,32 +75,29 @@ public class LoginManager : MonoBehaviour
                     PlayerDataManager.Instance.UserID = response.data.userId;
                     Debug.Log($"[LoginManager] 저장된 UserID: '{PlayerDataManager.Instance.UserID}'");
 
+                    // --- [수정 3] 불필요해진 파괴 로직 삭제 ---
+
                     yield return new WaitForSeconds(1);
                     SceneManager.LoadScene("Lobby");
                 }
                 else
                 {
                     statusText.text = "로그인 실패: " + response.message;
-                    // [수정 3] 로그인 실패 시 버튼을 다시 활성화합니다.
-                    loginButton.interactable = true;
                 }
             }
             else
             {
                 statusText.text = "네트워크 오류: " + www.error;
                 Debug.LogError("Web Request Error: " + www.error);
-                // [수정 3] 네트워크 오류 시 버튼을 다시 활성화합니다.
-                loginButton.interactable = true;
             }
         }
     }
 
     private void OnDestroy()
     {
-        // OnDestroy에서도 리스너를 제거해주는 것이 좋습니다.
         if (loginButton != null)
         {
-            loginButton.onClick.RemoveAllListeners();
+            loginButton.onClick.RemoveListener(OnLoginButtonClick);
         }
     }
 }
