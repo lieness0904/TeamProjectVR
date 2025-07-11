@@ -174,7 +174,7 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log($"OnPlayerJoined: 플레이어 {player.PlayerId}가 입장. 현재 세션: {runner.SessionInfo.Name}");
+        Debug.Log($"[OnPlayerJoined] IsServer: {runner.IsServer}, player: {player}, playerPrefab: {playerPrefab}");
 
         // 접속 UI
         UpdatePlayerListUI();
@@ -187,9 +187,8 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
                 spawnPosition.y = spawnY;
 
                 NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player);
+                Debug.Log($"[Spawned] player: {player}, object: {networkPlayerObject}, InputAuthority: {networkPlayerObject.InputAuthority}, HasInputAuthority: {networkPlayerObject.HasInputAuthority}");
                 _spawnedCharacters.Add(player, networkPlayerObject);
-
-                Debug.Log($"[{runner.LocalPlayer}] 내 오브젝트의 InputAuthority: {networkPlayerObject.InputAuthority}, HasInputAuthority: {networkPlayerObject.HasInputAuthority}");
             }
             else
             {

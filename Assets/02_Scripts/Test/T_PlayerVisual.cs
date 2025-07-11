@@ -25,6 +25,8 @@ public class T_PlayerVisual : NetworkBehaviour
             StartCoroutine(WaitForRigHMD(rig));
         }
         character.SetActive(true);
+
+        Debug.Log($"[Player.Spawned] Object: {this.name}, HasInputAuthority: {Object.HasInputAuthority}, InputAuthority: {Object.InputAuthority}, IsProxy: {Object.IsProxy}");
     }
 
     private IEnumerator WaitForRigHMD(RiggingManager rig)

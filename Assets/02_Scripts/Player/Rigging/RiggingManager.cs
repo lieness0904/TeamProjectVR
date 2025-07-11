@@ -145,5 +145,13 @@ public class RiggingManager : NetworkBehaviour
             rightHandIK.position = RightHandPos;
             rightHandIK.rotation = RightHandRot;
         }
+        if (HasInputAuthority)
+        {
+            Debug.Log($"[IK Send] {Runner.LocalPlayer}: Head:{headIK.position}, Left:{leftHandIK.position}, Right:{rightHandIK.position}");
+        }
+        else
+        {
+            Debug.Log($"[IK Recv] {Runner.LocalPlayer}: Head:{HeadPos}, Left:{LeftHandPos}, Right:{RightHandPos}");
+        }
     }
 }
