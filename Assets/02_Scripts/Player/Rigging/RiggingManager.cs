@@ -40,6 +40,21 @@ public class RiggingManager : NetworkBehaviour
         MappingBodyTransform(headIK, hmd);
         MappingHeadTransform(headIK, hmd);
     }
+    public override void Spawned()
+    {
+        if (HasInputAuthority)
+        {
+            // XR Origin 기준으로 로컬 컨트롤러 찾기
+            hmd = GameObject.FindWithTag("MainCamera")?.transform;
+            leftHandController = GameObject.Find("LeftHand Controller")?.transform;
+            rightHandController = GameObject.Find("RightHand Controller")?.transform;
+
+            // IK 타겟도 필요하면 자동으로 찾기 (또는 에디터에서 미리 연결)
+            if (headIK == null) headIK = transform.Find("HeadIK");
+            if (leftHandIK == null) leftHandIK = transform.Find("LeftHandIK");
+            if (rightHandIK == null) rightHandIK = transform.Find("RightHandIK");
+        }
+    }
 
     private void MappingHandTransform(Transform ik, Transform controller, bool isLeft)
     {

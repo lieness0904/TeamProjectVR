@@ -194,21 +194,6 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
                 Debug.LogError("Player Prefab이 할당되지 않았습니다!");
             }
         }
-        if (runner.IsRunning && runner.LocalPlayer != null)
-        {
-            runner.TryGetPlayerObject(runner.LocalPlayer, out NetworkObject playerObj);
-        
-            if (playerObj != null && playerObj.HasInputAuthority)
-            {
-                var rigManager = playerObj.GetComponent<RiggingManager>();
-        
-                rigManager.headIK = playerObj.transform.Find("HeadIK");
-                rigManager.leftHandIK = playerObj.transform.Find("LeftHandIK");
-                rigManager.rightHandIK = playerObj.transform.Find("RightHandIK");
-        
-                rigManager.transform.SetParent(playerObj.transform);
-            }
-        }
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
