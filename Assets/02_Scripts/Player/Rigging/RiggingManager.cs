@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class RiggingManager : NetworkBehaviour
 {
+    public GameObject xrOrigin;
+
     [Header("IK Targets")]
     public Transform leftHandIK;
     public Transform rightHandIK;
@@ -34,46 +36,37 @@ public class RiggingManager : NetworkBehaviour
 
     public override void Spawned()
     {
-        if (HasInputAuthority)
+        // XR Origin 직접 참조(Inspector에서 할당/프리팹 하위에 반드시 있어야 함)
+        if (xrOrigin == null)
         {
-            // XR Origin/컨트롤러/IK 등 플레이어 프리팹 하위에 이미 있음 → Find로 할당
-            if (HasInputAuthority)
+            xrOrigin = transform.Find("XR Origin (Action-based)")?.gameObject;
+            if (xrOrigin == null)
             {
-                // 하위 구조 경로 반드시 맞추기!
-                var xrOrigin = transform.Find("XR Origin (Action-based)");
-                if (xrOrigin == null)
-                {
-                    Debug.LogError("플레이어 프리팹에 XR Origin (Action-based) 오브젝트가 없습니다!");
-                    return;
-                }
-
-                hmd = xrOrigin.Find("Camera Offset/Main Camera");
-                leftHandController = xrOrigin.Find("Camera Offset/Left Controller");
-                rightHandController = xrOrigin.Find("Camera Offset/Right Controller");
-
-                if (hmd == null || leftHandController == null || rightHandController == null)
-                    Debug.LogError("XR Origin 내부에 HMD/Hand Controller 경로를 다시 확인하세요!");
-
-                // IK Target도 프리팹 내부에 이미 존재한다고 가정
-                headIK = transform.Find("HeadIK");
-                leftHandIK = transform.Find("LeftArmIK");
-                rightHandIK = transform.Find("RightArmIK");
-                if (headIK == null || leftHandIK == null || rightHandIK == null)
-                    Debug.LogError("외형 프리팹에 IK Target 오브젝트가 빠졌거나 경로가 다름!");
-            }
-            else
-            {
-                // 프록시(남)일 땐 XR Origin 비활성화해도 무방
-                var xrOrigin = transform.Find("XR Origin (Action-based)");
-                if (xrOrigin != null) xrOrigin.gameObject.SetActive(false);
-
-                // IK Target은 자기 위치에 있어야 하니 그대로 놔둠
-                headIK = transform.Find("HeadIK");
-                leftHandIK = transform.Find("LeftArmIK");
-                rightHandIK = transform.Find("RightArmIK");
+                Debug.LogError("XR Origin (Action-based) 참조가 없습니다!");
+                return;
             }
         }
+
+        // XR Origin 하위에서 컨트롤러/HMD 참조
+        hmd = xrOrigin.transform.Find("Camera Offset/Main Camera");
+        leftHandController = xrOrigin.transform.Find("Camera Offset/Left Controller");
+        rightHandController = xrOrigin.transform.Find("Camera Offset/Right Controller");
+
+        if (hmd == null || leftHandController == null || rightHandController == null)
+            Debug.LogError("XR Origin 내부에 HMD/Hand Controller 경로를 확인하세요!");
+
+        // IK Target은 기존대로 프리팹 하위에 있다고 가정
+        headIK = transform.Find("HeadIK");
+        leftHandIK = transform.Find("LeftArmIK");
+        rightHandIK = transform.Find("RightArmIK");
+        if (headIK == null || leftHandIK == null || rightHandIK == null)
+            Debug.LogError("IK Target 오브젝트 경로를 확인하세요!");
+
+        // 프록시(타인)일 땐 XR Origin 비활성화
+        if (!HasInputAuthority && xrOrigin != null)
+            xrOrigin.SetActive(false);
     }
+
     private void LateUpdate()
     {
         if (!HasInputAuthority || hmd == null) return;
