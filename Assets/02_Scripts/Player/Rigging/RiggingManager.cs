@@ -40,20 +40,41 @@ public class RiggingManager : NetworkBehaviour
             if (xrOriginPrefab != null)
             {
                 GameObject xrOriginInstance = Instantiate(xrOriginPrefab);
+                xrOriginInstance.transform.position = this.transform.position; // 인스턴스 위치/회전
+                xrOriginInstance.transform.rotation = this.transform.rotation;
+
                 XROrigin xr = xrOriginInstance.GetComponent<XROrigin>();
+                if (xr != null)
+                {
+                    hmd = xr.Camera?.transform;
+                    var leftHandObj = xr.transform.Find("Camera Offset/Left Controller");
+                    var rightHandObj = xr.transform.Find("Camera Offset/Right Controller");
+                    if (leftHandObj == null || rightHandObj == null)
+                        Debug.LogWarning("XR Origin에서 핸드 컨트롤러를 못 찾음! 경로/이름 체크");
 
-                hmd = xr.Camera.transform;
-                leftHandController = xr.transform.Find("LeftHand Controller");
-                rightHandController = xr.transform.Find("RightHand Controller");
-
-                xrOriginPrefab.transform.position = this.transform.position;
-                xrOriginPrefab.transform.rotation = this.transform.rotation;
+                    leftHandController = leftHandObj;
+                    rightHandController = rightHandObj;
+                }
+                else
+                {
+                    Debug.LogError("XROrigin 컴포넌트 못 찾음! 프리팹에 있는지 확인");
+                }
             }
+            else
+            {
+                Debug.LogError("XR Origin 프리팹을 Resources에서 못 찾음! 경로/이름 확인");
+            }
+            
 
-            // Find IK Targets if not assigned
+            // IK Target 찾기
             if (headIK == null) headIK = transform.Find("HeadIK");
-            if (leftHandIK == null) leftHandIK = transform.Find("LeftHandIK");
-            if (rightHandIK == null) rightHandIK = transform.Find("RightHandIK");
+            if (leftHandIK == null) leftHandIK = transform.Find("LeftArmIK");
+            if (rightHandIK == null) rightHandIK = transform.Find("RightArmIK");
+
+            if (headIK == null || leftHandIK == null || rightHandIK == null)
+                Debug.LogWarning("IK Target(HeadIK/LeftHandIK/RightHandIK) 중 못 찾은 게 있음! 외형 프리팹 구조 체크");
+            Debug.Log($"hmd: {hmd}, leftHandController: {leftHandController}, rightHandController: {rightHandController}");
+            Debug.Log($"headIK: {headIK}, leftHandIK: {leftHandIK}, rightHandIK: {rightHandIK}");
         }
     }
     private void LateUpdate()

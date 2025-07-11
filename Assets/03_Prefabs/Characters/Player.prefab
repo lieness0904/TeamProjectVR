@@ -366,9 +366,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09254a00da8e006438e25ec8277a0406, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xrOrigin: {fileID: 7398623622262977940}
   character: {fileID: 1179239562757778870}
   animator: {fileID: 2377174442835911294}
+  _syncedPosition: {x: 0, y: 0, z: 0}
+  _syncedRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &1079702006409334275
 GameObject:
   m_ObjectHideFlags: 0

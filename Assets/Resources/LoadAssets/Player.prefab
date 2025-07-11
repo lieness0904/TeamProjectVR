@@ -2305,7 +2305,7 @@ GameObject:
   - component: {fileID: 7756159299015669217}
   - component: {fileID: 4307358457798537882}
   m_Layer: 0
-  m_Name: RIghtArmIK
+  m_Name: RightArmIK
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4193,9 +4193,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09254a00da8e006438e25ec8277a0406, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xrOrigin: {fileID: 0}
   character: {fileID: 4749185244128090951}
   animator: {fileID: 5272301325667844702}
+  _syncedPosition: {x: 0, y: 0, z: 0}
+  _syncedRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &5673812313962815478
 GameObject:
   m_ObjectHideFlags: 0

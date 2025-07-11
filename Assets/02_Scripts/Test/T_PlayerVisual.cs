@@ -15,11 +15,13 @@ public class T_PlayerVisual : NetworkBehaviour
 
     private Transform head; // XR Origin HMD
 
+    private Vector3 lastHeadPosition;
+
     public override void Spawned()
     {
         if (Object.HasInputAuthority)
         {
-            var rig = GetComponent<RiggingManager>();
+            var rig = GetComponentInChildren<RiggingManager>();
             StartCoroutine(WaitForRigHMD(rig));
         }
         character.SetActive(true);
@@ -27,8 +29,18 @@ public class T_PlayerVisual : NetworkBehaviour
 
     private IEnumerator WaitForRigHMD(RiggingManager rig)
     {
-        while (rig.hmd == null) yield return null;
+        if (rig == null)
+        {
+            Debug.LogError("RiggingManager is null!");
+            yield break;
+        }
+        while (rig.hmd == null)
+        {
+            yield return null;
+        }
         head = rig.hmd;
+
+        lastHeadPosition = head.position;
     }
 
     private void Update()
@@ -44,9 +56,11 @@ public class T_PlayerVisual : NetworkBehaviour
             character.transform.rotation = syncedRotation;
 
             // 애니메이션 계산도 여기서
-            Vector3 velocity = (head.position - transform.position) / Time.deltaTime;
+            Vector3 velocity = (head.position - lastHeadPosition) / Time.deltaTime;
             Vector3 localVel = character.transform.InverseTransformDirection(velocity);
             blendParam = new Vector2(localVel.x, localVel.z);
+
+            lastHeadPosition = head.position;
         }
         else
         {
