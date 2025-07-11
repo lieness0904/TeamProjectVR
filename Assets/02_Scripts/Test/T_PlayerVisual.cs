@@ -22,22 +22,42 @@ public class T_PlayerVisual : NetworkBehaviour
 
     public override void Spawned()
     {
+        // 필수: 인스펙터에 꼭 할당돼있어야 함!
+        if (xrOrigin == null)
+        {
+            xrOrigin = transform.Find("XR Origin (Action-based)")?.gameObject;
+            if (xrOrigin == null)
+                Debug.LogError("XR Origin (Action-based) 오브젝트가 Player 하위에 없습니다!");
+        }
+        if (character == null)
+        {
+            character = transform.Find("MaleCharacter")?.gameObject;
+            if (character == null)
+                Debug.LogError("MaleCharacter 오브젝트가 Player 하위에 없습니다!");
+        }
+        if (animator == null)
+        {
+            animator = character.GetComponentInChildren<Animator>();
+            if (animator == null)
+                Debug.LogError("Animator가 MaleCharacter(자식)에 없습니다!");
+        }
+
+        // HMD(Main Camera) 참조
+        head = xrOrigin.transform.Find("Camera Offset/Main Camera");
+        if (head == null)
+            Debug.LogError("Camera Offset/Main Camera(HMD)를 XR Origin 하위에서 못 찾음!");
+
         if (Object.HasInputAuthority)
         {
-            // XR Origin이 하위 오브젝트에 이미 존재한다고 가정
-            head = xrOrigin.transform.Find("Camera Offset/Main Camera");
-            if (head == null)
-            {
-                Debug.LogError("Main Camera(HMD) not found in XR Origin!");
-            }
+            xrOrigin.SetActive(true); // 내 XR Origin만 켜기
             lastHeadPosition = head.position;
         }
         else
         {
-            // 프록시에서는 XR Origin을 사용하지 않음
-            xrOrigin.SetActive(false); // 남의 XR Origin은 꺼버림 (필수!)
+            xrOrigin.SetActive(false); // 남의 XR Origin은 반드시 꺼버려야 함
         }
         character.SetActive(true);
+
         Debug.Log($"[Player.Spawned] Object: {this.name}, HasInputAuthority: {Object.HasInputAuthority}, InputAuthority: {Object.InputAuthority}, IsProxy: {Object.IsProxy}");
     }
 

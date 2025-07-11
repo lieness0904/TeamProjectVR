@@ -3463,9 +3463,9 @@ MonoBehaviour:
   leftHandIK: {fileID: 2434993277591323061}
   rightHandIK: {fileID: 5833417334287454542}
   headIK: {fileID: 5496811944456517874}
-  leftHandController: {fileID: 0}
-  rightHandController: {fileID: 0}
-  hmd: {fileID: 0}
+  leftHandController: {fileID: 5033780255512081905}
+  rightHandController: {fileID: 9093910597567598969}
+  hmd: {fileID: 2127800042992272039}
   leftOffset:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 90, z: 90}
@@ -3475,6 +3475,12 @@ MonoBehaviour:
   headOffset:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
+  _HeadPos: {x: 0, y: 0, z: 0}
+  _HeadRot: {x: 0, y: 0, z: 0, w: 0}
+  _LeftHandPos: {x: 0, y: 0, z: 0}
+  _LeftHandRot: {x: 0, y: 0, z: 0, w: 0}
+  _RightHandPos: {x: 0, y: 0, z: 0}
+  _RightHandRot: {x: 0, y: 0, z: 0, w: 0}
   smoothValue: 0.1
   modelHeight: 1.5
 --- !u!1 &4928642078876567356
@@ -4196,6 +4202,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   character: {fileID: 4749185244128090951}
   animator: {fileID: 5272301325667844702}
+  xrOrigin: {fileID: 8619952984693254685}
   _syncedPosition: {x: 0, y: 0, z: 0}
   _syncedRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &5673812313962815478
@@ -5670,6 +5677,30 @@ PrefabInstance:
 --- !u!4 &1066109167377405347 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6778893410718438291, guid: 4d92dc7fa4f2bb34294094f418942da2,
+    type: 3}
+  m_PrefabInstance: {fileID: 5825655740182464048}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2127800042992272039 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5575339627827889303, guid: 4d92dc7fa4f2bb34294094f418942da2,
+    type: 3}
+  m_PrefabInstance: {fileID: 5825655740182464048}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5033780255512081905 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1514185288520741825, guid: 4d92dc7fa4f2bb34294094f418942da2,
+    type: 3}
+  m_PrefabInstance: {fileID: 5825655740182464048}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8619952984693254685 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2844263502472752173, guid: 4d92dc7fa4f2bb34294094f418942da2,
+    type: 3}
+  m_PrefabInstance: {fileID: 5825655740182464048}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &9093910597567598969 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3381337482437580617, guid: 4d92dc7fa4f2bb34294094f418942da2,
     type: 3}
   m_PrefabInstance: {fileID: 5825655740182464048}
   m_PrefabAsset: {fileID: 0}
