@@ -817,7 +817,7 @@ ModelImporter:
     - name: CC_BasePinky3.L
       parentName: CC_BasePinky2.L
       position: {x: 0.000000052303076, y: 0.013010114, z: 0.0000000047683715}
-      rotation: {x: 0.0018778996, y: -0.00011965182, z: 0.026909087, w: 0.9996361}
+      rotation: {x: 0.0018778997, y: -0.00011965182, z: 0.026909089, w: 0.9996361}
       scale: {x: 1.0000004, y: 1.0000001, z: 1}
     - name: CC_BasePinky3.L_end
       parentName: CC_BasePinky3.L
@@ -917,7 +917,7 @@ ModelImporter:
     - name: CC_BaseIndex1.R
       parentName: CC_BaseHand.R
       position: {x: 0.0014952646, y: 0.0687984, z: 0.029692011}
-      rotation: {x: 0.022422833, y: -0.0034713584, z: -0.016163826, w: 0.99961185}
+      rotation: {x: 0.022422835, y: -0.0034713584, z: -0.016163828, w: 0.99961185}
       scale: {x: 1.0000005, y: 0.9999999, z: 0.99999994}
     - name: CC_BaseIndex2.R
       parentName: CC_BaseIndex1.R
@@ -947,7 +947,7 @@ ModelImporter:
     - name: CC_BaseMid3.R
       parentName: CC_BaseMid2.R
       position: {x: 0.0000004247576, y: 0.018898258, z: 0}
-      rotation: {x: 0.00021685372, y: 0.00005658155, z: -0.041081313, w: 0.99915576}
+      rotation: {x: 0.00021685373, y: 0.00005658155, z: -0.041081317, w: 0.99915576}
       scale: {x: 1, y: 1.0000002, z: 0.9999999}
     - name: CC_BaseMid3.R_end
       parentName: CC_BaseMid3.R
@@ -1097,7 +1097,7 @@ ModelImporter:
     hasExtraRoot: 1
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  autoGenerateAvatarMappingIfUnspecified: 1
+  autoGenerateAvatarMappingIfUnspecified: 0
   animationType: 3
   humanoidOversampling: 1
   avatarSetup: 1

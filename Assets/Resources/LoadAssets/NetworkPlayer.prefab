@@ -177,7 +177,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Avatar
       value: 
-      objectReference: {fileID: 9000000, guid: b18c6692e57fd7a4784f8c8c77d4310c, type: 3}
+      objectReference: {fileID: 9000000, guid: e3f26e14f277c6d4c97ab6487552b69b, type: 3}
     - target: {fileID: 4037996108215822180, guid: 4d5df3d214dfc404dba68f0bb8855551,
         type: 3}
       propertyPath: m_Controller
