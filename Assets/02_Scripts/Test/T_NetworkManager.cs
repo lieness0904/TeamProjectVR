@@ -197,15 +197,15 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         if (runner.IsRunning && runner.LocalPlayer != null)
         {
             runner.TryGetPlayerObject(runner.LocalPlayer, out NetworkObject playerObj);
-
+        
             if (playerObj != null && playerObj.HasInputAuthority)
             {
-                var rigManager = playerPrefab.GetComponent<RiggingManager>();
-
+                var rigManager = playerObj.GetComponent<RiggingManager>();
+        
                 rigManager.headIK = playerObj.transform.Find("HeadIK");
                 rigManager.leftHandIK = playerObj.transform.Find("LeftHandIK");
                 rigManager.rightHandIK = playerObj.transform.Find("RightHandIK");
-
+        
                 rigManager.transform.SetParent(playerObj.transform);
             }
         }
