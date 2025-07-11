@@ -19,17 +19,17 @@ public class T_PlayerVisual : NetworkBehaviour
 
 
     
-    public override void Spawned()
-    {
-        if (Object.HasInputAuthority)
-        {
-            var rig = GetComponentInChildren<RiggingManager>();
-            StartCoroutine(WaitForRigHMD(rig));
-        }
-        character.SetActive(true);
-
-        Debug.Log($"[Player.Spawned] Object: {this.name}, HasInputAuthority: {Object.HasInputAuthority}, InputAuthority: {Object.InputAuthority}, IsProxy: {Object.IsProxy}");
-    }
+    // public override void Spawned()
+    // {
+    //     if (Object.HasInputAuthority)
+    //     {
+    //         var rig = GetComponentInChildren<RiggingManager>();
+    //         StartCoroutine(WaitForRigHMD(rig));
+    //     }
+    //     character.SetActive(true);
+    // 
+    //     Debug.Log($"[Player.Spawned] Object: {this.name}, HasInputAuthority: {Object.HasInputAuthority}, InputAuthority: {Object.InputAuthority}, IsProxy: {Object.IsProxy}");
+    // }
 
     private IEnumerator WaitForRigHMD(RiggingManager rig)
     {
