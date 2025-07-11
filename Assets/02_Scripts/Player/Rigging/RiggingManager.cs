@@ -22,12 +22,12 @@ public class RiggingManager : NetworkBehaviour
     public Vector3[] headOffset;
 
     // 네트워크로 보낼거
-    [Networked] private Vector3 HeadPos { get; set; }
-    [Networked] private Quaternion HeadRot { get; set; }
-    [Networked] private Vector3 LeftHandPos { get; set; }
-    [Networked] private Quaternion LeftHandRot { get; set; }
-    [Networked] private Vector3 RightHandPos { get; set; }
-    [Networked] private Quaternion RightHandRot { get; set; }
+    [Networked] public Vector3 HeadPos { get; set; }
+    [Networked] public Quaternion HeadRot { get; set; }
+    [Networked] public Vector3 LeftHandPos { get; set; }
+    [Networked] public Quaternion LeftHandRot { get; set; }
+    [Networked] public Vector3 RightHandPos { get; set; }
+    [Networked] public Quaternion RightHandRot { get; set; }
 
     public float smoothValue = 0.1f;
     public float modelHeight = 1.67f;
