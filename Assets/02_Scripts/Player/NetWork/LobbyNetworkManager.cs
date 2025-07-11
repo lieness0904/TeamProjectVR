@@ -184,6 +184,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             Destroy(child.gameObject);
         }
 
+
         // --- [추가] --- 현재 접속한 플레이어 목록을 기반으로 UI 아이템 생성
         foreach (PlayerRef player in _runner.ActivePlayers)
         {
@@ -200,6 +201,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
                 playerNameText.text = id;
             }
         }
+
     }
 
 

@@ -86,6 +86,8 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 1
     motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -108,10 +110,11 @@ ModelImporter:
     addColliders: 0
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
-    importVisibility: 1
+    importPhysicalCameras: 1
+    importVisibility: 0
     importBlendShapes: 1
-    importCameras: 1
-    importLights: 1
+    importCameras: 0
+    importLights: 0
     nodeNameCollisionStrategy: 1
     fileIdsGeneration: 2
     swapUVChannels: 0
@@ -824,7 +827,7 @@ ModelImporter:
     - name: CC_BasePinky3.L
       parentName: CC_BasePinky2.L
       position: {x: -0.0000000070035457, y: 0.013010089, z: -0.0000000023841857}
-      rotation: {x: 0.0018779056, y: -0.00011964341, z: 0.026909018, w: 0.9996361}
+      rotation: {x: 0.0018779062, y: -0.00011964341, z: 0.026909027, w: 0.9996361}
       scale: {x: 1.0000002, y: 1.0000001, z: 0.9999998}
     - name: CC_BasePinky3.L_end
       parentName: CC_BasePinky3.L
@@ -1003,7 +1006,7 @@ ModelImporter:
       scale: {x: 1, y: 1, z: 1}
     - name: CC_BaseThumb1.R
       parentName: CC_BaseHand.R
-      position: {x: 0.013402601, y: 0.018508647, z: 0.024007613}
+      position: {x: 0.0133, y: 0.02654652, z: 0.02553807}
       rotation: {x: 0.40543267, y: -0.120422386, z: -0.06455607, w: 0.9038558}
       scale: {x: 1.0000004, y: 1.0000001, z: 1}
     - name: CC_BaseThumb2.R
@@ -1013,7 +1016,7 @@ ModelImporter:
       scale: {x: 1.0000005, y: 1.0000004, z: 1.0000006}
     - name: CC_BaseThumb3.R
       parentName: CC_BaseThumb2.R
-      position: {x: -0.0000001901388, y: 0.025085215, z: 0.000000095367426}
+      position: {x: 0.0007, y: 0.02316941, z: -0.0000000500679}
       rotation: {x: -0.0120681, y: 0.00097442843, z: 0.013228587, w: 0.99983925}
       scale: {x: 1, y: 1, z: 0.99999964}
     - name: CC_BaseThumb3.R_end
@@ -1061,6 +1064,11 @@ ModelImporter:
       position: {x: -0, y: -0.0006303016, z: -0.0016106805}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
+    - name: F_body_legs_knee
+      parentName: F_body(Clone)
+      position: {x: -0, y: -0.0006303016, z: -0.0016106805}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
     - name: F_body_legs_lower
       parentName: F_body(Clone)
       position: {x: -0, y: -0.0006303016, z: -0.0016106805}
@@ -1077,6 +1085,11 @@ ModelImporter:
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: F_body_torso
+      parentName: F_body(Clone)
+      position: {x: -0, y: -0.0006303016, z: -0.0016106805}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: F_body_torso.001
       parentName: F_body(Clone)
       position: {x: -0, y: -0.0006303016, z: -0.0016106805}
       rotation: {x: 0, y: -0, z: -0, w: 1}
