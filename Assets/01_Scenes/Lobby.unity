@@ -123,6 +123,79 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &513338061
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4215206941505838382, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
+        type: 3}
+      propertyPath: SortKey
+      value: 917806375
+      objectReference: {fileID: 0}
+    - target: {fileID: 6353435013460634273, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6353435013460634273, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6353435013460634273, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6353435013460634273, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6353435013460634273, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6353435013460634273, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6353435013460634273, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6353435013460634273, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6353435013460634273, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6353435013460634273, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7099926504839954311, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
+        type: 3}
+      propertyPath: m_Name
+      value: Player
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 80f27cbfd20ebfe4bb20981141d94e1f, type: 3}
 --- !u!1 &664426598
 GameObject:
   m_ObjectHideFlags: 0
@@ -509,7 +582,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1345471600}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: LobbyNetworkManager, Assembly-CSharp
         m_MethodName: JoinFishingContent
         m_Mode: 1
@@ -1224,7 +1297,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1345471601}
-  - component: {fileID: 1345471600}
   - component: {fileID: 1345471602}
   m_Layer: 0
   m_Name: NetworkManager
@@ -1233,26 +1305,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1345471600
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1345471599}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34fa16d1808854e4a8611b23ca07e210, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 4215206941505838382, guid: 80f27cbfd20ebfe4bb20981141d94e1f,
-    type: 3}
-  xrOriginPrefab: {fileID: 0}
-  spawnPoints: []
-  playerCountText: {fileID: 1260317243}
-  playerListContent: {fileID: 2021241935}
-  playerListItemPrefab: {fileID: 4199274315002902618, guid: e165ef07866328a4ab7a2b648f628d89,
-    type: 3}
 --- !u!4 &1345471601
 Transform:
   m_ObjectHideFlags: 0
@@ -2105,7 +2157,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1345471600}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: LobbyNetworkManager, Assembly-CSharp
         m_MethodName: QuitGame
         m_Mode: 1
@@ -2288,67 +2340,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1872681302}
   m_CullTransparentMesh: 1
---- !u!1 &1915278150
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1915278153}
-  - component: {fileID: 1915278152}
-  - component: {fileID: 1915278151}
-  m_Layer: 0
-  m_Name: '@XR_Managers'
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1915278151
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1915278150}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017c5e3933235514c9520e1dace2a4b2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ActionAssets:
-  - {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
---- !u!114 &1915278152
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1915278150}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83e4e6cca11330d4088d729ab4fc9d9f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_StartingHoverFilters: []
-  m_StartingSelectFilters: []
---- !u!4 &1915278153
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1915278150}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.6108928, y: 1.6761628, z: 0.337826}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2021241935
 GameObject:
   m_ObjectHideFlags: 0
@@ -2597,4 +2588,4 @@ SceneRoots:
   - {fileID: 1605040010}
   - {fileID: 1267798536}
   - {fileID: 1089742137}
-  - {fileID: 1915278153}
+  - {fileID: 513338061}

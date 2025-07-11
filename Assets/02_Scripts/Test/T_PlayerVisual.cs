@@ -28,7 +28,6 @@ public class T_PlayerVisual : NetworkBehaviour
         // --- 이 NetworkObject가 스폰되었을 때 호출됩니다. ---
 
         // 씬에 있는 XR Origin을 찾습니다.
-        // ※ 주의: 이 방식은 씬에 XR Origin이 하나만 있고, 항상 활성화 상태일 때만 안정적으로 동작합니다.
         localXROrigin = FindAnyObjectByType<XROrigin>();
         if (localXROrigin == null)
         {
@@ -39,27 +38,21 @@ public class T_PlayerVisual : NetworkBehaviour
         if (Object.HasInputAuthority)
         {
             // "이것은 내 캐릭터입니다."
-
-            // 1. XR Origin을 활성화하여 1인칭 시점으로 세상을 봅니다.
             if (localXROrigin != null)
             {
                 localXROrigin.gameObject.SetActive(true);
             }
 
-            // 2. 내 아바타는 내 시야를 가리므로 비활성화합니다.
             if (characterVisual != null)
             {
                 characterVisual.SetActive(false);
             }
 
-            // 3. 속도 계산을 위한 초기 위치를 기록합니다.
             _lastPosition = (localXROrigin != null && localXROrigin.Camera != null) ? localXROrigin.Camera.transform.position : transform.position;
         }
         else
         {
             // "이것은 다른 사람의 캐릭터입니다."
-
-            // 1. 다른 사람의 아바타를 봐야 하므로 활성화합니다.
             if (characterVisual != null)
             {
                 characterVisual.SetActive(true);
@@ -70,24 +63,23 @@ public class T_PlayerVisual : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
         // --- 물리 업데이트 주기마다 호출되는 Fusion의 핵심 업데이트 함수입니다. ---
-        // 입력 처리, 상태 동기화 등 중요한 로직이 여기서 처리됩니다.
 
-        // 이 오브젝트의 제어 권한을 가진 클라이언트에서만 아래 로직을 실행합니다.
-        // 즉, 내 캐릭터만 내 XR 장비의 움직임을 따라가도록 합니다.
         if (Object.HasInputAuthority)
         {
             if (localXROrigin != null && localXROrigin.Camera != null)
             {
-                // NetworkObject(Player 프리팹의 루트)의 위치를 내 머리(HMD) 위치의 X, Z값에 맞춰줍니다.
-                // Y값은 그대로 두어, 공중에 뜨거나 땅에 파고드는 것을 방지합니다.
+                // 1. 부모(Player) 오브젝트를 HMD의 월드 위치와 Y축 회전에 맞춰 이동시킵니다.
                 transform.position = new Vector3(
                     localXROrigin.Camera.transform.position.x,
                     transform.position.y,
                     localXROrigin.Camera.transform.position.z
                 );
 
-                // NetworkObject의 Y축 회전 값을 내 머리(HMD)의 Y축 회전에 맞춰줍니다.
                 transform.rotation = Quaternion.Euler(0, localXROrigin.Camera.transform.rotation.eulerAngles.y, 0);
+
+                // 2. (핵심 수정!) 자식(XR Origin)의 로컬 위치를 0으로 리셋합니다.
+                // 이 코드가 부모의 움직임이 자식에게 누적되는 것을 막아 피드백 루프를 끊어줍니다.
+                localXROrigin.transform.localPosition = Vector3.zero;
             }
         }
     }
@@ -101,24 +93,15 @@ public class T_PlayerVisual : NetworkBehaviour
         {
             if (localXROrigin != null && localXROrigin.Camera != null)
             {
-                // 현재 머리 위치를 기준으로 속도를 계산합니다.
                 Vector3 currentPosition = localXROrigin.Camera.transform.position;
                 Vector3 velocity = (currentPosition - _lastPosition) / Time.deltaTime;
-
-                // 월드 좌표계 기준 속도를 캐릭터의 로컬 좌표계 기준으로 변환합니다. (앞/뒤/좌/우 움직임)
                 Vector3 localVelocity = transform.InverseTransformDirection(velocity);
-
-                // 계산된 값을 [Networked] 속성인 _blendParam에 저장합니다.
-                // 이 값은 자동으로 다른 클라이언트들에게 동기화됩니다.
                 _blendParam = new Vector2(localVelocity.x, localVelocity.z);
-
-                // 다음 계산을 위해 현재 위치를 저장합니다.
                 _lastPosition = currentPosition;
             }
         }
 
         // 모든 클라이언트(나 자신 포함)에서 동기화된 _blendParam 값을 애니메이터에 적용합니다.
-        // 이를 통해 다른 사람의 아바타가 움직이는 것처럼 보입니다.
         if (animator != null)
         {
             animator.SetFloat("MoveX", _blendParam.x);
