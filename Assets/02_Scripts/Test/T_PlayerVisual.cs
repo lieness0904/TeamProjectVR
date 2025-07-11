@@ -8,6 +8,7 @@ public class T_PlayerVisual : NetworkBehaviour
 {
     public GameObject character;
     public Animator animator;
+    public GameObject xrOrigin;
 
     [Networked] public Vector3 syncedPosition { get; set; }
     [Networked] public Quaternion syncedRotation { get; set; }
@@ -18,33 +19,26 @@ public class T_PlayerVisual : NetworkBehaviour
     private Vector3 lastHeadPosition;
 
 
-    
-    // public override void Spawned()
-    // {
-    //     if (Object.HasInputAuthority)
-    //     {
-    //         var rig = GetComponentInChildren<RiggingManager>();
-    //         StartCoroutine(WaitForRigHMD(rig));
-    //     }
-    //     character.SetActive(true);
-    // 
-    //     Debug.Log($"[Player.Spawned] Object: {this.name}, HasInputAuthority: {Object.HasInputAuthority}, InputAuthority: {Object.InputAuthority}, IsProxy: {Object.IsProxy}");
-    // }
 
-    private IEnumerator WaitForRigHMD(RiggingManager rig)
+    public override void Spawned()
     {
-        if (rig == null)
+        if (Object.HasInputAuthority)
         {
-            Debug.LogError("RiggingManager is null!");
-            yield break;
+            // XR Origin이 하위 오브젝트에 이미 존재한다고 가정
+            head = xrOrigin.transform.Find("Camera Offset/Main Camera");
+            if (head == null)
+            {
+                Debug.LogError("Main Camera(HMD) not found in XR Origin!");
+            }
+            lastHeadPosition = head.position;
         }
-        while (rig.hmd == null)
+        else
         {
-            yield return null;
+            // 프록시에서는 XR Origin을 사용하지 않음
+            xrOrigin.SetActive(false); // 남의 XR Origin은 꺼버림 (필수!)
         }
-        head = rig.hmd;
-
-        lastHeadPosition = head.position;
+        character.SetActive(true);
+        Debug.Log($"[Player.Spawned] Object: {this.name}, HasInputAuthority: {Object.HasInputAuthority}, InputAuthority: {Object.InputAuthority}, IsProxy: {Object.IsProxy}");
     }
 
     public override void FixedUpdateNetwork()
