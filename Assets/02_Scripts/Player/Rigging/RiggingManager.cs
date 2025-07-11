@@ -1,157 +1,75 @@
 using Fusion;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.XR.CoreUtils;
 using UnityEngine;
 
 public class RiggingManager : NetworkBehaviour
 {
-    [Header("IK Targets")]
-    public Transform leftHandIK;
-    public Transform rightHandIK;
-    public Transform headIK;
+    // --- [변경 1] 인스펙터에서 직접 할당할 변수들 ---
+    [Header("VR 장비 (입력 소스)")]
+    public Transform hmd; // XR Origin > Camera Offset > Main Camera
+    public Transform leftHandController; // XR Origin > Camera Offset > LeftHand Controller
+    public Transform rightHandController; // XR Origin > Camera Offset > RightHand Controller
 
-    [Header("Local Controllers")]
-    public Transform leftHandController;
-    public Transform rightHandController;
-    public Transform hmd;
+    [Header("아바타 IK 타겟 (동기화 대상)")]
+    public Transform headIK; // 아바타의 머리 Bone
+    public Transform leftHandIK; // 아바타의 왼손 Bone
+    public Transform rightHandIK; // 아바타의 오른손 Bone
 
-    [Header("Offsets")]
-    public Vector3[] leftOffset; // 0:Position, 1:Rotation
-    public Vector3[] rightOffset;
-    public Vector3[] headOffset;
+    [Header("오프셋 설정")]
+    public Vector3 headPositionOffset;
+    public Vector3 headRotationOffset;
+    public Vector3 handPositionOffset;
+    public Vector3 handRotationOffset;
+    // ---------------------------------------------------
 
-    // 네트워크로 보낼거
-    [Networked] public Vector3 HeadPos { get; set; }
-    [Networked] public Quaternion HeadRot { get; set; }
-    [Networked] public Vector3 LeftHandPos { get; set; }
-    [Networked] public Quaternion LeftHandRot { get; set; }
-    [Networked] public Vector3 RightHandPos { get; set; }
-    [Networked] public Quaternion RightHandRot { get; set; }
+    // --- 네트워크 동기화 변수들 (이전과 동일) ---
+    [Networked] private Vector3 NetworkHeadPos { get; set; }
+    [Networked] private Quaternion NetworkHeadRot { get; set; }
+    [Networked] private Vector3 NetworkLeftHandPos { get; set; }
+    [Networked] private Quaternion NetworkLeftHandRot { get; set; }
+    [Networked] private Vector3 NetworkRightHandPos { get; set; }
+    [Networked] private Quaternion NetworkRightHandRot { get; set; }
+    // ---------------------------------------------------
 
-    public float smoothValue = 0.1f;
-    public float modelHeight = 1.67f;
-
-    public override void Spawned()
-    {
-        if (HasInputAuthority)
-        {
-            GameObject xrOriginPrefab = Resources.Load<GameObject>("LoadAssets/XR Origin (Action-based)");
-            if (xrOriginPrefab != null)
-            {
-                GameObject xrOriginInstance = Instantiate(xrOriginPrefab);
-                xrOriginInstance.transform.position = this.transform.position; // 인스턴스 위치/회전
-                xrOriginInstance.transform.rotation = this.transform.rotation;
-
-                XROrigin xr = xrOriginInstance.GetComponent<XROrigin>();
-                if (xr != null)
-                {
-                    hmd = xr.Camera?.transform;
-                    var leftHandObj = xr.transform.Find("Camera Offset/Left Controller");
-                    var rightHandObj = xr.transform.Find("Camera Offset/Right Controller");
-                    if (leftHandObj == null || rightHandObj == null)
-                        Debug.LogWarning("XR Origin에서 핸드 컨트롤러를 못 찾음! 경로/이름 체크");
-
-                    leftHandController = leftHandObj;
-                    rightHandController = rightHandObj;
-                }
-                else
-                {
-                    Debug.LogError("XROrigin 컴포넌트 못 찾음! 프리팹에 있는지 확인");
-                }
-            }
-            else
-            {
-                Debug.LogError("XR Origin 프리팹을 Resources에서 못 찾음! 경로/이름 확인");
-            }
-            
-
-            // IK Target 찾기
-            if (headIK == null) headIK = transform.Find("HeadIK");
-            if (leftHandIK == null) leftHandIK = transform.Find("LeftArmIK");
-            if (rightHandIK == null) rightHandIK = transform.Find("RightArmIK");
-
-            if (headIK == null || leftHandIK == null || rightHandIK == null)
-                Debug.LogWarning("IK Target(HeadIK/LeftHandIK/RightHandIK) 중 못 찾은 게 있음! 외형 프리팹 구조 체크");
-            Debug.Log($"hmd: {hmd}, leftHandController: {leftHandController}, rightHandController: {rightHandController}");
-            Debug.Log($"headIK: {headIK}, leftHandIK: {leftHandIK}, rightHandIK: {rightHandIK}");
-        }
-    }
-    private void LateUpdate()
-    {
-        if (!Object.HasInputAuthority) return;
-
-        MappingHandTransform(leftHandIK, leftHandController, true);
-        MappingHandTransform(rightHandIK, rightHandController, false);
-        MappingBodyTransform(headIK, hmd);
-        MappingHeadTransform(headIK, hmd);
-    }
-
-    private void MappingHandTransform(Transform ik, Transform controller, bool isLeft)
-    {
-        // ik의 Transform = controller의 Transform
-
-        var offset = isLeft ? leftOffset : rightOffset;
-
-        ik.position = controller.TransformPoint(offset[0]);
-        ik.rotation = controller.rotation * Quaternion.Euler(offset[1]);
-        
-    }
-    private void MappingBodyTransform(Transform ik, Transform hmd)
-    {
-        this.transform.position = new Vector3(hmd.position.x, hmd.position.y - modelHeight, hmd.position.z);
-        float yaw = hmd.eulerAngles.y;
-        var targetRotation = new Vector3(this.transform.eulerAngles.x, yaw, this.transform.eulerAngles.z);
-        this.transform.rotation = Quaternion.Lerp(this.transform.rotation, Quaternion.Euler(targetRotation), smoothValue);
-    }
-    private void MappingHeadTransform(Transform ik, Transform hmd)
-    {
-        ik.position = hmd.TransformPoint(headOffset[0]); 
-        ik.rotation = hmd.rotation * Quaternion.Euler(headOffset[1]);
-    }
-
+    // --- [변경 2] Spawned()와 LateUpdate()를 삭제하고 FixedUpdateNetwork()로 로직 통합 ---
     public override void FixedUpdateNetwork()
     {
-        if (HasInputAuthority)
+        if (Object.HasInputAuthority)
         {
-            headIK.position = hmd.TransformPoint(headOffset[0]);
-            headIK.rotation = hmd.rotation * Quaternion.Euler(headOffset[1]);
+            // --- 이 오브젝트가 '나 자신'일 경우 ---
+            // 1. 실제 VR 장비의 위치와 회전 값을 읽어옵니다.
+            // 2. 오프셋을 적용합니다.
+            // 3. 계산된 최종 값을 [Networked] 변수에 기록하여 다른 사람에게 전송합니다.
 
-            leftHandIK.position = leftHandController.TransformPoint(leftOffset[0]);
-            leftHandIK.rotation = leftHandController.rotation * Quaternion.Euler(leftOffset[1]);
+            // 머리 동기화
+            Vector3 headPos = hmd.TransformPoint(headPositionOffset);
+            Quaternion headRot = hmd.rotation * Quaternion.Euler(headRotationOffset);
+            NetworkHeadPos = headPos;
+            NetworkHeadRot = headRot;
 
-            rightHandIK.position = rightHandController.TransformPoint(rightOffset[0]);
-            rightHandIK.rotation = rightHandController.rotation * Quaternion.Euler(rightOffset[1]);
+            // 왼손 동기화
+            Vector3 leftHandPos = leftHandController.TransformPoint(handPositionOffset);
+            Quaternion leftHandRot = leftHandController.rotation * Quaternion.Euler(handRotationOffset);
+            NetworkLeftHandPos = leftHandPos;
+            NetworkLeftHandRot = leftHandRot;
 
-            // 네트워크 전송
-            HeadPos = headIK.position;
-            HeadRot = headIK.rotation;
-
-            LeftHandPos = leftHandIK.position;
-            LeftHandRot = leftHandIK.rotation;
-
-            RightHandPos = rightHandIK.position;
-            RightHandRot = rightHandIK.rotation;
+            // 오른손 동기화
+            Vector3 rightHandPos = rightHandController.TransformPoint(handPositionOffset);
+            Quaternion rightHandRot = rightHandController.rotation * Quaternion.Euler(handRotationOffset);
+            NetworkRightHandPos = rightHandPos;
+            NetworkRightHandRot = rightHandRot;
         }
         else
         {
-            // 타인 캐릭터 → 네트워크에서 받은 값으로 IK 반영
-            headIK.position = HeadPos;
-            headIK.rotation = HeadRot;
+            // --- 이 오브젝트가 '다른 사람'일 경우 ---
+            // 네트워크를 통해 수신한 [Networked] 변수의 값으로 아바타의 IK 타겟을 부드럽게 움직여줍니다.
+            headIK.position = Vector3.Lerp(headIK.position, NetworkHeadPos, Time.deltaTime * 20f);
+            headIK.rotation = Quaternion.Slerp(headIK.rotation, NetworkHeadRot, Time.deltaTime * 20f);
 
-            leftHandIK.position = LeftHandPos;
-            leftHandIK.rotation = LeftHandRot;
+            leftHandIK.position = Vector3.Lerp(leftHandIK.position, NetworkLeftHandPos, Time.deltaTime * 20f);
+            leftHandIK.rotation = Quaternion.Slerp(leftHandIK.rotation, NetworkLeftHandRot, Time.deltaTime * 20f);
 
-            rightHandIK.position = RightHandPos;
-            rightHandIK.rotation = RightHandRot;
-        }
-        if (HasInputAuthority)
-        {
-            Debug.Log($"[IK Send] LocalPlayer:{Runner.LocalPlayer} | Authority:{Object.InputAuthority} | Head:{headIK.position} Left:{leftHandIK.position} Right:{rightHandIK.position}");
-        }
-        else
-        {
-            Debug.Log($"[IK Recv] LocalPlayer:{Runner.LocalPlayer} | Authority:{Object.InputAuthority} | Head:{HeadPos} Left:{LeftHandPos} Right:{RightHandPos}");
+            rightHandIK.position = Vector3.Lerp(rightHandIK.position, NetworkRightHandPos, Time.deltaTime * 20f);
+            rightHandIK.rotation = Quaternion.Slerp(rightHandIK.rotation, NetworkRightHandRot, Time.deltaTime * 20f);
         }
     }
 }

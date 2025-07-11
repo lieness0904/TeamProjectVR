@@ -170,6 +170,16 @@ PrefabInstance:
       propertyPath: SortKey
       value: 2074961018
       objectReference: {fileID: 0}
+    - target: {fileID: 3985797555403590107, guid: 4d5df3d214dfc404dba68f0bb8855551,
+        type: 3}
+      propertyPath: NetworkedBehaviours.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3985797555403590107, guid: 4d5df3d214dfc404dba68f0bb8855551,
+        type: 3}
+      propertyPath: NetworkedBehaviours.Array.data[0]
+      value: 
+      objectReference: {fileID: 1986105396379990461}
     - target: {fileID: 5324792558437846746, guid: 4d5df3d214dfc404dba68f0bb8855551,
         type: 3}
       propertyPath: SortKey
@@ -180,7 +190,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: FemaleCharacter
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4443999911218156603, guid: 4d5df3d214dfc404dba68f0bb8855551, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -191,6 +202,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 613216214043083800}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1986105396379990461 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1374306728240971173, guid: 4d5df3d214dfc404dba68f0bb8855551,
+    type: 3}
+  m_PrefabInstance: {fileID: 613216214043083800}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5029423760460249803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &2305831545048036764 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1692616199142519172, guid: 4d5df3d214dfc404dba68f0bb8855551,
