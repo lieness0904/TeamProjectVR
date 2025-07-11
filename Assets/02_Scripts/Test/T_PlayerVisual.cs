@@ -17,6 +17,8 @@ public class T_PlayerVisual : NetworkBehaviour
 
     private Vector3 lastHeadPosition;
 
+
+    
     public override void Spawned()
     {
         if (Object.HasInputAuthority)
@@ -45,7 +47,7 @@ public class T_PlayerVisual : NetworkBehaviour
         lastHeadPosition = head.position;
     }
 
-    private void Update()
+    public override void FixedUpdateNetwork()
     {
         if (Object.HasInputAuthority && head != null)
         {
