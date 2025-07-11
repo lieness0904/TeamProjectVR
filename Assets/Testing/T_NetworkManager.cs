@@ -8,9 +8,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
 
-public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
+public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
-    public static LobbyNetworkManager Instance { get; private set; }
+    public static T_NetworkManager Instance { get; private set; }
 
     private static bool _hasConnectedOnce = false;
 
@@ -18,13 +18,10 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     [Header("Network Prefabs")]
     public NetworkObject playerPrefab;
-    public NetworkObject xrOriginPrefab;
 
-    [Header("스폰 위치")]
-
-    public Transform[] spawnPoints;
+    [Header("스폰 높이")]
+    public float spawnY;
     // -------------------------
-
 
     [Header("UI Elements")]
     public TextMeshProUGUI playerCountText;
@@ -56,7 +53,6 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     void Update()
     {
-        UpdatePlayerListUI();
     }
 
     async void ConnectToLobby()
@@ -170,6 +166,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             Destroy(child.gameObject);
         }
+
     }
 
 
@@ -179,27 +176,17 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         Debug.Log($"OnPlayerJoined: 플레이어 {player.PlayerId}가 입장. 현재 세션: {runner.SessionInfo.Name}");
 
+        // 접속 UI
+        UpdatePlayerListUI();
+
         if (runner.IsServer)
         {
             if (playerPrefab != null)
             {
-                // 플레이어 ID 기반으로 스폰 위치 선택 (Index가 범위 내에 있을 경우만)
-                int spawnIndex = player.PlayerId % spawnPoints.Length;
+                Vector3 spawnPosition = UnityEngine.Random.insideUnitSphere * 3;
+                spawnPosition.y = spawnY;
 
-                Vector3 spawnPosition = Vector3.zero;
-                Quaternion spawnRotation = Quaternion.identity;
-
-                if (spawnPoints != null && spawnPoints.Length > 0 && spawnIndex < spawnPoints.Length && spawnPoints[spawnIndex] != null)
-                {
-                    spawnPosition = spawnPoints[spawnIndex].position;
-                    spawnRotation = spawnPoints[spawnIndex].rotation;
-                }
-                else
-                {
-                    Debug.LogWarning("스폰 포인트가 설정되지 않았거나 유효하지 않습니다. 기본 위치 (0,0,0)에 스폰합니다.");
-                }
-
-                NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, spawnRotation, player);
+                NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player);
                 _spawnedCharacters.Add(player, networkPlayerObject);
             }
             else
@@ -207,11 +194,29 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
                 Debug.LogError("Player Prefab이 할당되지 않았습니다!");
             }
         }
+        if (runner.IsRunning && runner.LocalPlayer != null)
+        {
+            runner.TryGetPlayerObject(runner.LocalPlayer, out NetworkObject playerObj);
+
+            if (playerObj != null && playerObj.HasInputAuthority)
+            {
+                var rigManager = playerPrefab.GetComponent<RiggingManager>();
+
+                rigManager.headIK = playerObj.transform.Find("HeadIK");
+                rigManager.leftHandIK = playerObj.transform.Find("LeftHandIK");
+                rigManager.rightHandIK = playerObj.transform.Find("RightHandIK");
+
+                rigManager.transform.SetParent(playerObj.transform);
+            }
+        }
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"OnPlayerLeft: 플레이어 {player.PlayerId}가 퇴장. 현재 세션: {runner.SessionInfo.Name}");
+
+        // 접속 UI
+        UpdatePlayerListUI();
 
         if (_spawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
         {
@@ -221,6 +226,7 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             }
             _spawnedCharacters.Remove(player);
         }
+        
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
@@ -230,27 +236,8 @@ public class LobbyNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     }
 
 
-    public void OnConnectedToServer(NetworkRunner runner)
-    {
-        if (runner.IsRunning && runner.LocalPlayer != null)
-        {
-            runner.TryGetPlayerObject(runner.LocalPlayer, out NetworkObject playerObj);
-
-            if (playerObj != null && playerObj.HasInputAuthority)
-            {
-                NetworkObject player = Instantiate(playerPrefab);
-
-                var rigManager = playerPrefab.GetComponent<RiggingManager>();
-                rigManager.headIK = playerObj.transform.Find("HeadIK");
-                rigManager.leftHandIK = playerObj.transform.Find("LeftHandIK");
-                rigManager.rightHandIK = playerObj.transform.Find("RightHandIK");
-
-                rigManager.transform.SetParent(playerObj.transform);
-            }
-        }
-    }
+    public void OnConnectedToServer(NetworkRunner runner) { }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
-
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
     public void OnInput(NetworkRunner runner, NetworkInput input) { }
