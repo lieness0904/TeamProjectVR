@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58b69951fc938f44a898cf41698ae026, type: 3}
   m_Name: MapData 2
   m_EditorClassIdentifier: 
-  mapName: Mandarin
+  mapName: Farm
   previewImage: {fileID: 21300000, guid: c42227184175b6641ba501be50f4be2f, type: 3}
-  sceneName: MandarinScene
+  sceneName: FarmScene
