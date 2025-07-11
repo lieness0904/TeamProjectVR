@@ -9,9 +9,8 @@ public class LoginManager : MonoBehaviour
 {
     private string scriptURL = "https://script.google.com/macros/s/AKfycbxsVIFFP0aRSLTljhqnSI0KAso8jv3Hx3UPdIiWsl1UynSyyk1EVABCf2Fpz6WwzcNn/exec";
 
-    [Header("XR Origin 프리팹 설정")]
-    // --- [수정 1] XR Origin 프리팹을 할당받을 변수 ---
-    public GameObject xrOriginPrefab;
+    // [Header("XR Origin 프리팹 설정")]
+    // public GameObject xrOriginPrefab; // 이 변수 제거
 
     [Header("UI Elements")]
     public TMP_InputField idInputField;
@@ -21,12 +20,11 @@ public class LoginManager : MonoBehaviour
 
     void Start()
     {
-        // --- [수정 2] 씬 시작 시 XR Origin 프리팹이 할당되어 있으면 생성 ---
-        if (xrOriginPrefab != null)
-        {
-            Instantiate(xrOriginPrefab);
-        }
-        // ---------------------------------------------------------
+        // 씬 시작 시 XR Origin 프리팹 생성 로직 제거
+        // if (xrOriginPrefab != null)
+        // {
+        //     Instantiate(xrOriginPrefab);
+        // }
 
         if (loginButton != null)
         {
@@ -74,8 +72,6 @@ public class LoginManager : MonoBehaviour
                     Debug.Log($"[LoginManager] 저장할 UserID: '{response.data.userId}'");
                     PlayerDataManager.Instance.UserID = response.data.userId;
                     Debug.Log($"[LoginManager] 저장된 UserID: '{PlayerDataManager.Instance.UserID}'");
-
-                    // --- [수정 3] 불필요해진 파괴 로직 삭제 ---
 
                     yield return new WaitForSeconds(1);
                     SceneManager.LoadScene("Lobby");

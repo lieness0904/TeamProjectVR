@@ -346,6 +346,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "TriggerValue",
+                    "type": "Value",
+                    "id": "02839e3f-2c9c-4f76-9b3d-279badf667d6",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -799,6 +808,17 @@
                     "action": "AimPose",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e72537d1-0a29-44a1-8e71-4667b55802b6",
+                    "path": "<XRController>{LeftHand}/trigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TriggerValue",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -1144,6 +1164,15 @@
                     "type": "Value",
                     "id": "ffc282a0-cd33-4ecd-aab6-075d869e9472",
                     "expectedControlType": "Pose",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "TriggerValue",
+                    "type": "Value",
+                    "id": "5c47e673-f35d-4b66-96bd-67f07f45084d",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -1598,6 +1627,17 @@
                     "processors": "",
                     "groups": "XR Usage",
                     "action": "AimPose",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "09302658-c5ea-4b34-9d79-c141609c82c1",
+                    "path": "<XRController>{LeftHand}/trigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TriggerValue",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

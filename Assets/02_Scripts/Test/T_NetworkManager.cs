@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
+using Unity.XR.CoreUtils; // XROrigin을 위한 네임스페이스
 
 public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -17,7 +18,7 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     private NetworkRunner _runner;
 
     [Header("Network Prefabs")]
-    public NetworkObject playerPrefab;
+    public NetworkObject playerPrefab; // T_PlayerVisual과 NetworkTransform이 붙은 플레이어 프리팹
 
     [Header("스폰 높이")]
     public float spawnY;
@@ -44,6 +45,11 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             Destroy(gameObject);
             return;
         }
+
+        if (FindAnyObjectByType<XROrigin>() == null)
+        {
+            Debug.LogWarning("T_NetworkManager: 씬에 XROrigin이 없습니다. VR 환경이 제대로 설정되지 않았을 수 있습니다.");
+        }
     }
 
     void Start()
@@ -53,6 +59,7 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     void Update()
     {
+        // UpdatePlayerListUI(); // FixedUpdateNetwork나 OnPlayerJoined/Left에서 호출하는 것이 더 효율적
     }
 
     async void ConnectToLobby()
@@ -68,6 +75,7 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         _runner = gameObject.AddComponent<NetworkRunner>();
         _runner.AddCallbacks(this);
 
+        Debug.Log("Connecting to Lobby...");
         await _runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
@@ -104,7 +112,7 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             return;
         }
 
-        if (_runner != null)
+        if (_runner != null && _runner.IsRunning)
         {
             await _runner.Shutdown();
         }
@@ -167,6 +175,15 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             Destroy(child.gameObject);
         }
 
+        foreach (var playerRef in _runner.ActivePlayers)
+        {
+            GameObject listItem = Instantiate(playerListItemPrefab, playerListContent.transform);
+            TextMeshProUGUI playerText = listItem.GetComponentInChildren<TextMeshProUGUI>();
+            if (playerText != null)
+            {
+                playerText.text = $"플레이어 {playerRef.PlayerId}";
+            }
+        }
     }
 
 
@@ -175,8 +192,6 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"OnPlayerJoined: 플레이어 {player.PlayerId}가 입장. 현재 세션: {runner.SessionInfo.Name}");
-
-        // 접속 UI
         UpdatePlayerListUI();
 
         if (runner.IsServer)
@@ -188,6 +203,8 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
                 NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player);
                 _spawnedCharacters.Add(player, networkPlayerObject);
+
+                Debug.Log($"플레이어 {player.PlayerId}를 위치 {spawnPosition}에 스폰했습니다.");
             }
             else
             {
@@ -199,8 +216,6 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"OnPlayerLeft: 플레이어 {player.PlayerId}가 퇴장. 현재 세션: {runner.SessionInfo.Name}");
-
-        // 접속 UI
         UpdatePlayerListUI();
 
         if (_spawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
@@ -211,26 +226,43 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             }
             _spawnedCharacters.Remove(player);
         }
-        
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
         Debug.Log($"OnShutdown: NetworkRunner가 종료되었습니다. 이유: {shutdownReason}");
         _spawnedCharacters.Clear();
+        UpdatePlayerListUI();
     }
 
 
-    public void OnConnectedToServer(NetworkRunner runner) { }
-    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
+    public void OnConnectedToServer(NetworkRunner runner) { Debug.Log("Connected to server."); }
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { Debug.Log($"Disconnected from server: {reason}"); }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
-    public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
-    public void OnInput(NetworkRunner runner, NetworkInput input) { }
+    public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { Debug.LogError($"Connect failed: {reason}"); }
+
+    // 이 함수가 핵심입니다!
+    public void OnInput(NetworkRunner runner, NetworkInput input)
+    {
+        // 로컬 플레이어(이 게임을 실행하고 있는 나 자신)의 캐릭터가 스폰되었는지 확인합니다.
+        if (_spawnedCharacters.TryGetValue(runner.LocalPlayer, out NetworkObject playerObject) && playerObject != null)
+        {
+            // 캐릭터에서 T_PlayerController 스크립트를 찾습니다.
+            T_PlayerController playerController = playerObject.GetComponent<T_PlayerController>();
+            if (playerController != null)
+            {
+                // T_PlayerController로부터 현재 컨트롤러 입력 값을 받아와서
+                // Fusion의 네트워크 입력(input)에 담아줍니다.
+                input.Set(playerController.GetNetworkInput());
+            }
+        }
+    }
+
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
-    public void OnSceneLoadDone(NetworkRunner runner) { }
-    public void OnSceneLoadStart(NetworkRunner runner) { }
+    public void OnSceneLoadDone(NetworkRunner runner) { Debug.Log("Scene Load Done."); UpdatePlayerListUI(); }
+    public void OnSceneLoadStart(NetworkRunner runner) { Debug.Log("Scene Load Start."); }
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
