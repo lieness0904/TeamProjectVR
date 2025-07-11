@@ -1280,7 +1280,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3411c457a4bc39a4f87f73822e6179da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 4288876055509505985, guid: d4a323eaac06f3a48b90a810122f0c21,
+  playerPrefab: {fileID: 3410343780843889728, guid: e22da8a004df44e4c9067c76b0c73cc3,
     type: 3}
   spawnY: 1.5
   playerCountText: {fileID: 1260317243}
