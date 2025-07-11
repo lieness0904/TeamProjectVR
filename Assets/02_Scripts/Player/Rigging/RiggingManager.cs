@@ -36,50 +36,47 @@ public class RiggingManager : NetworkBehaviour
     {
         if (HasInputAuthority)
         {
-            GameObject xrOriginPrefab = Resources.Load<GameObject>("LoadAssets/XR Origin (Action-based)");
-            if (xrOriginPrefab != null)
+            // XR Origin/컨트롤러/IK 등 플레이어 프리팹 하위에 이미 있음 → Find로 할당
+            if (HasInputAuthority)
             {
-                GameObject xrOriginInstance = Instantiate(xrOriginPrefab);
-                xrOriginInstance.transform.position = this.transform.position; // 인스턴스 위치/회전
-                xrOriginInstance.transform.rotation = this.transform.rotation;
-
-                XROrigin xr = xrOriginInstance.GetComponent<XROrigin>();
-                if (xr != null)
+                // 하위 구조 경로 반드시 맞추기!
+                var xrOrigin = transform.Find("XR Origin (Action-based)");
+                if (xrOrigin == null)
                 {
-                    hmd = xr.Camera?.transform;
-                    var leftHandObj = xr.transform.Find("Camera Offset/Left Controller");
-                    var rightHandObj = xr.transform.Find("Camera Offset/Right Controller");
-                    if (leftHandObj == null || rightHandObj == null)
-                        Debug.LogWarning("XR Origin에서 핸드 컨트롤러를 못 찾음! 경로/이름 체크");
+                    Debug.LogError("플레이어 프리팹에 XR Origin (Action-based) 오브젝트가 없습니다!");
+                    return;
+                }
 
-                    leftHandController = leftHandObj;
-                    rightHandController = rightHandObj;
-                }
-                else
-                {
-                    Debug.LogError("XROrigin 컴포넌트 못 찾음! 프리팹에 있는지 확인");
-                }
+                hmd = xrOrigin.Find("Camera Offset/Main Camera");
+                leftHandController = xrOrigin.Find("Camera Offset/Left Controller");
+                rightHandController = xrOrigin.Find("Camera Offset/Right Controller");
+
+                if (hmd == null || leftHandController == null || rightHandController == null)
+                    Debug.LogError("XR Origin 내부에 HMD/Hand Controller 경로를 다시 확인하세요!");
+
+                // IK Target도 프리팹 내부에 이미 존재한다고 가정
+                headIK = transform.Find("HeadIK");
+                leftHandIK = transform.Find("LeftArmIK");
+                rightHandIK = transform.Find("RightArmIK");
+                if (headIK == null || leftHandIK == null || rightHandIK == null)
+                    Debug.LogError("외형 프리팹에 IK Target 오브젝트가 빠졌거나 경로가 다름!");
             }
             else
             {
-                Debug.LogError("XR Origin 프리팹을 Resources에서 못 찾음! 경로/이름 확인");
+                // 프록시(남)일 땐 XR Origin 비활성화해도 무방
+                var xrOrigin = transform.Find("XR Origin (Action-based)");
+                if (xrOrigin != null) xrOrigin.gameObject.SetActive(false);
+
+                // IK Target은 자기 위치에 있어야 하니 그대로 놔둠
+                headIK = transform.Find("HeadIK");
+                leftHandIK = transform.Find("LeftArmIK");
+                rightHandIK = transform.Find("RightArmIK");
             }
-            
-
-            // IK Target 찾기
-            if (headIK == null) headIK = transform.Find("HeadIK");
-            if (leftHandIK == null) leftHandIK = transform.Find("LeftArmIK");
-            if (rightHandIK == null) rightHandIK = transform.Find("RightArmIK");
-
-            if (headIK == null || leftHandIK == null || rightHandIK == null)
-                Debug.LogWarning("IK Target(HeadIK/LeftHandIK/RightHandIK) 중 못 찾은 게 있음! 외형 프리팹 구조 체크");
-            Debug.Log($"hmd: {hmd}, leftHandController: {leftHandController}, rightHandController: {rightHandController}");
-            Debug.Log($"headIK: {headIK}, leftHandIK: {leftHandIK}, rightHandIK: {rightHandIK}");
         }
     }
     private void LateUpdate()
     {
-        if (!Object.HasInputAuthority) return;
+        if (!HasInputAuthority || hmd == null) return;
 
         MappingHandTransform(leftHandIK, leftHandController, true);
         MappingHandTransform(rightHandIK, rightHandController, false);
@@ -90,7 +87,7 @@ public class RiggingManager : NetworkBehaviour
     private void MappingHandTransform(Transform ik, Transform controller, bool isLeft)
     {
         // ik의 Transform = controller의 Transform
-
+        if (ik == null || controller == null) return;
         var offset = isLeft ? leftOffset : rightOffset;
 
         ik.position = controller.TransformPoint(offset[0]);
@@ -106,6 +103,7 @@ public class RiggingManager : NetworkBehaviour
     }
     private void MappingHeadTransform(Transform ik, Transform hmd)
     {
+        if (ik == null || hmd == null) return;
         ik.position = hmd.TransformPoint(headOffset[0]); 
         ik.rotation = hmd.rotation * Quaternion.Euler(headOffset[1]);
     }
@@ -135,15 +133,10 @@ public class RiggingManager : NetworkBehaviour
         }
         else
         {
-            // 타인 캐릭터 → 네트워크에서 받은 값으로 IK 반영
-            headIK.position = HeadPos;
-            headIK.rotation = HeadRot;
-
-            leftHandIK.position = LeftHandPos;
-            leftHandIK.rotation = LeftHandRot;
-
-            rightHandIK.position = RightHandPos;
-            rightHandIK.rotation = RightHandRot;
+            // 타인 프록시는 네트워크 값만 IK에 반영
+            if (headIK != null) { headIK.position = HeadPos; headIK.rotation = HeadRot; }
+            if (leftHandIK != null) { leftHandIK.position = LeftHandPos; leftHandIK.rotation = LeftHandRot; }
+            if (rightHandIK != null) { rightHandIK.position = RightHandPos; rightHandIK.rotation = RightHandRot; }
         }
         if (HasInputAuthority)
         {
