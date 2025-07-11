@@ -33,6 +33,8 @@ public class RiggingManager : NetworkBehaviour
 
     private void LateUpdate()
     {
+        if (!Object.HasInputAuthority) return;
+
         MappingHandTransform(leftHandIK, leftHandController, true);
         MappingHandTransform(rightHandIK, rightHandController, false);
         MappingBodyTransform(headIK, hmd);
