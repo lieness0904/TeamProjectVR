@@ -136,6 +136,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1d971e5e0c108d47bd0b8bbc6e7fad3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraTransform: {fileID: 6396313080151331964}
   moveAction:
     m_UseReference: 1
     m_Action:
