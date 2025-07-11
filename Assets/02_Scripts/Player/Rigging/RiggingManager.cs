@@ -1,6 +1,7 @@
+using Fusion;
 using System.Collections;
 using System.Collections.Generic;
-using Fusion;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 
 public class RiggingManager : NetworkBehaviour
@@ -31,6 +32,27 @@ public class RiggingManager : NetworkBehaviour
     public float smoothValue = 0.1f;
     public float modelHeight = 1.67f;
 
+    public override void Spawned()
+    {
+        if (HasInputAuthority)
+        {
+            GameObject xrOriginPrefab = Resources.Load<GameObject>("LoadAssets/XR Origin (Action-based)");
+            if (xrOriginPrefab != null)
+            {
+                GameObject xrOriginInstance = Instantiate(xrOriginPrefab);
+                XROrigin xr = xrOriginInstance.GetComponent<XROrigin>();
+
+                hmd = xr.Camera.transform;
+                leftHandController = xr.transform.Find("LeftHand Controller");
+                rightHandController = xr.transform.Find("RightHand Controller");
+            }
+
+            // Find IK Targets if not assigned
+            if (headIK == null) headIK = transform.Find("HeadIK");
+            if (leftHandIK == null) leftHandIK = transform.Find("LeftHandIK");
+            if (rightHandIK == null) rightHandIK = transform.Find("RightHandIK");
+        }
+    }
     private void LateUpdate()
     {
         if (!Object.HasInputAuthority) return;
@@ -39,21 +61,6 @@ public class RiggingManager : NetworkBehaviour
         MappingHandTransform(rightHandIK, rightHandController, false);
         MappingBodyTransform(headIK, hmd);
         MappingHeadTransform(headIK, hmd);
-    }
-    public override void Spawned()
-    {
-        if (HasInputAuthority)
-        {
-            // XR Origin 기준으로 로컬 컨트롤러 찾기
-            hmd = GameObject.FindWithTag("MainCamera")?.transform;
-            leftHandController = GameObject.Find("LeftHand Controller")?.transform;
-            rightHandController = GameObject.Find("RightHand Controller")?.transform;
-
-            // IK 타겟도 필요하면 자동으로 찾기 (또는 에디터에서 미리 연결)
-            if (headIK == null) headIK = transform.Find("HeadIK");
-            if (leftHandIK == null) leftHandIK = transform.Find("LeftHandIK");
-            if (rightHandIK == null) rightHandIK = transform.Find("RightHandIK");
-        }
     }
 
     private void MappingHandTransform(Transform ik, Transform controller, bool isLeft)
@@ -81,7 +88,7 @@ public class RiggingManager : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        if (Object.HasInputAuthority)
+        if (HasInputAuthority)
         {
             headIK.position = hmd.TransformPoint(headOffset[0]);
             headIK.rotation = hmd.rotation * Quaternion.Euler(headOffset[1]);
