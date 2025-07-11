@@ -147,11 +147,11 @@ public class RiggingManager : NetworkBehaviour
         }
         if (HasInputAuthority)
         {
-            Debug.Log($"[IK Send] {Runner.LocalPlayer}: Head:{headIK.position}, Left:{leftHandIK.position}, Right:{rightHandIK.position}");
+            Debug.Log($"[IK Send] LocalPlayer:{Runner.LocalPlayer} | Authority:{Object.InputAuthority} | Head:{headIK.position} Left:{leftHandIK.position} Right:{rightHandIK.position}");
         }
         else
         {
-            Debug.Log($"[IK Recv] {Runner.LocalPlayer}: Head:{HeadPos}, Left:{LeftHandPos}, Right:{RightHandPos}");
+            Debug.Log($"[IK Recv] LocalPlayer:{Runner.LocalPlayer} | Authority:{Object.InputAuthority} | Head:{HeadPos} Left:{LeftHandPos} Right:{RightHandPos}");
         }
     }
 }
