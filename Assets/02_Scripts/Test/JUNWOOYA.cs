@@ -48,17 +48,7 @@ public class JUNWOOYA : NetworkBehaviour, INetworkRunnerCallbacks
         // NetworkInput에 전달될 데이터
         NetworkInputData data = new NetworkInputData();
 
-        // 왼쪽 컨트롤러 썸스틱 값 얻어오기
-        InputDevice leftHand = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-        if (leftHand.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 axis))
-        {
-            // 방향 벡터로 변환
-            data.direction = new Vector3(axis.x, 0, axis.y); // x = 좌우, y = 앞뒤
-        }
-        else
-        {
-            data.direction = Vector3.zero;  
-        }
+
 
         // 데이터 전달
         input.Set(data);
@@ -131,11 +121,7 @@ public class JUNWOOYA : NetworkBehaviour, INetworkRunnerCallbacks
     }
 }
 
-// 사용자의 입력을 받아 방향데이터를 담아주도록 처리 *INetworkInput은 값이 싸기떄문에 struct(값타입)으로 구현하도록 되어있음, 참조타입(class)는 힙에 할당되고 GC비용 발생
-public struct NetworkInputData : INetworkInput
-{
-    public Vector3 direction;
-}
+
 
 
 // 네트워크 위치 및 회전 동기화
