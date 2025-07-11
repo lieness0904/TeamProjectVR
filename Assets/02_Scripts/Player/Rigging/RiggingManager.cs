@@ -45,6 +45,9 @@ public class RiggingManager : NetworkBehaviour
                 hmd = xr.Camera.transform;
                 leftHandController = xr.transform.Find("LeftHand Controller");
                 rightHandController = xr.transform.Find("RightHand Controller");
+
+                xrOriginPrefab.transform.position = this.transform.position;
+                xrOriginPrefab.transform.rotation = this.transform.rotation;
             }
 
             // Find IK Targets if not assigned
