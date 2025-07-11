@@ -56,9 +56,9 @@ public class RiggingManager : NetworkBehaviour
             Debug.LogError("XR Origin 내부에 HMD/Hand Controller 경로를 확인하세요!");
 
         // IK Target은 기존대로 프리팹 하위에 있다고 가정
-        headIK = transform.Find("HeadIK");
-        leftHandIK = transform.Find("LeftArmIK");
-        rightHandIK = transform.Find("RightArmIK");
+        headIK = transform.Find("VR Rig/HeadIK");
+        leftHandIK = transform.Find("VR Rig/LeftArmIK");
+        rightHandIK = transform.Find("VR Rig/RightArmIK");
         if (headIK == null || leftHandIK == null || rightHandIK == null)
             Debug.LogError("IK Target 오브젝트 경로를 확인하세요!");
 
