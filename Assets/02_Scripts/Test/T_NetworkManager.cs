@@ -188,6 +188,8 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
                 NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player);
                 _spawnedCharacters.Add(player, networkPlayerObject);
+
+                Debug.Log($"[{runner.LocalPlayer}] 내 오브젝트의 InputAuthority: {networkPlayerObject.InputAuthority}, HasInputAuthority: {networkPlayerObject.HasInputAuthority}");
             }
             else
             {
@@ -217,7 +219,6 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
         Debug.Log($"OnShutdown: NetworkRunner가 종료되었습니다. 이유: {shutdownReason}");
-        _spawnedCharacters.Clear();
     }
 
 
