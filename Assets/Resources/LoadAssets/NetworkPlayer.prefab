@@ -236,10 +236,7 @@ PrefabInstance:
       propertyPath: m_Name
       value: FemaleCharacter
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 4443999911218156603, guid: 4d5df3d214dfc404dba68f0bb8855551, type: 3}
-    - {fileID: 1374306728240971173, guid: 4d5df3d214dfc404dba68f0bb8855551, type: 3}
-    - {fileID: 3985797555403590107, guid: 4d5df3d214dfc404dba68f0bb8855551, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
