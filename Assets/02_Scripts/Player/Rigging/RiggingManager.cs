@@ -67,7 +67,6 @@ public class RiggingManager : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        if (!Object.HasInputAuthority) return;
         if (hmd == null || leftHandController == null || rightHandController == null) return;
 
         // 오프셋 적용한 손 위치
@@ -78,22 +77,32 @@ public class RiggingManager : NetworkBehaviour
         Quaternion rightRot = rightHandController.rotation * Quaternion.Euler(rightHandRotationOffset);
 
         // IK 위치 직접 적용
-        leftHandIK.position = leftPos;
-        leftHandIK.rotation = leftRot;
+        if (Object.HasInputAuthority)
+        {
+            leftHandIK.position = leftPos;
+            leftHandIK.rotation = leftRot;
 
-        rightHandIK.position = rightPos;
-        rightHandIK.rotation = rightRot;
+            rightHandIK.position = rightPos;
+            rightHandIK.rotation = rightRot;
 
-        headIK.position = hmd.position;
-        headIK.rotation = hmd.rotation;
+            headIK.position = hmd.position;
+            headIK.rotation = hmd.rotation;
+        }
 
-        // 네트워크 전송용
-        NetworkHeadPos = hmd.position;
-        NetworkHeadRot = hmd.rotation;
-        NetworkLeftHandPos = leftPos;
-        NetworkLeftHandRot = leftRot;
-        NetworkRightHandPos = rightPos;
-        NetworkRightHandRot = rightRot;
+        // 호스트면 직접 할당, 아니면 RPC로 전달
+        if (Object.HasStateAuthority)
+        {
+            NetworkHeadPos = hmd.position;
+            NetworkHeadRot = hmd.rotation;
+            NetworkLeftHandPos = leftPos;
+            NetworkLeftHandRot = leftRot;
+            NetworkRightHandPos = rightPos;
+            NetworkRightHandRot = rightRot;
+        }
+        else
+        {
+            RPC_UpdateIK(hmd.position, hmd.rotation, leftPos, leftRot, rightPos, rightRot);
+        }
 
         // 애니메이션 블렌드 계산
         Vector3 velocity = (hmd.position - lastHmdPosition) / Runner.DeltaTime;
@@ -101,6 +110,16 @@ public class RiggingManager : NetworkBehaviour
         lastHmdPosition = hmd.position;
 
         NetworkMoveBlend = new Vector2(localVelocity.x, localVelocity.z);
+    }
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    private void RPC_UpdateIK(Vector3 headPos, Quaternion headRot, Vector3 leftPos, Quaternion leftRot, Vector3 rightPos, Quaternion rightRot)
+    {
+        NetworkHeadPos = headPos;
+        NetworkHeadRot = headRot;
+        NetworkLeftHandPos = leftPos;
+        NetworkLeftHandRot = leftRot;
+        NetworkRightHandPos = rightPos;
+        NetworkRightHandRot = rightRot;
     }
     public override void Render()
     {
