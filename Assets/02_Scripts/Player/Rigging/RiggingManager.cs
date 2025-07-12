@@ -38,7 +38,7 @@ public class RiggingManager : NetworkBehaviour
     [Networked] private Vector3 NetworkRightHandPos { get; set; }
     [Networked] private Quaternion NetworkRightHandRot { get; set; }
     [Networked] private Vector2 NetworkMoveBlend { get; set; }
- 
+
     private Vector3 lastHmdPosition;
 
     public override void Spawned()
@@ -67,75 +67,69 @@ public class RiggingManager : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        // VR 장비 참조가 하나라도 없으면 실행하지 않아 오류를 방지합니다. (안전장치)
+        if (!Object.HasInputAuthority) return;
         if (hmd == null || leftHandController == null || rightHandController == null) return;
 
-        if (Object.HasInputAuthority)
+        // 오프셋 적용한 손 위치
+        Vector3 leftPos = leftHandController.position + leftHandController.rotation * leftHandPositionOffset;
+        Quaternion leftRot = leftHandController.rotation * Quaternion.Euler(leftHandRotationOffset);
+
+        Vector3 rightPos = rightHandController.position + rightHandController.rotation * rightHandPositionOffset;
+        Quaternion rightRot = rightHandController.rotation * Quaternion.Euler(rightHandRotationOffset);
+
+        // IK 위치 직접 적용
+        leftHandIK.position = leftPos;
+        leftHandIK.rotation = leftRot;
+
+        rightHandIK.position = rightPos;
+        rightHandIK.rotation = rightRot;
+
+        headIK.position = hmd.position;
+        headIK.rotation = hmd.rotation;
+
+        // 네트워크 전송용
+        NetworkHeadPos = hmd.position;
+        NetworkHeadRot = hmd.rotation;
+        NetworkLeftHandPos = leftPos;
+        NetworkLeftHandRot = leftRot;
+        NetworkRightHandPos = rightPos;
+        NetworkRightHandRot = rightRot;
+
+        // 애니메이션 블렌드 계산
+        Vector3 velocity = (hmd.position - lastHmdPosition) / Runner.DeltaTime;
+        Vector3 localVelocity = xrOrigin.transform.InverseTransformDirection(velocity);
+        lastHmdPosition = hmd.position;
+
+        NetworkMoveBlend = new Vector2(localVelocity.x, localVelocity.z);
+    }
+    public override void Render()
+    {
+        // IK 및 애니메이션은 로컬/리모트 모두 적용해야 함
+        if (!Object.HasInputAuthority)
         {
-            // --- 오프셋 포함한 위치/회전 계산 ---
-            Vector3 leftPos = leftHandController.position + leftHandController.rotation * leftHandPositionOffset;
-            Quaternion leftRot = leftHandController.rotation * Quaternion.Euler(leftHandRotationOffset);
+            // 리모트 플레이어 IK 보간
+            headIK.position = Vector3.Lerp(headIK.position, NetworkHeadPos, Runner.DeltaTime * 20f);
+            headIK.rotation = Quaternion.Slerp(headIK.rotation, NetworkHeadRot, Runner.DeltaTime * 20f);
 
-            Vector3 rightPos = rightHandController.position + rightHandController.rotation * rightHandPositionOffset;
-            Quaternion rightRot = rightHandController.rotation * Quaternion.Euler(rightHandRotationOffset);
+            Vector3 leftPos = NetworkLeftHandPos + NetworkLeftHandRot * leftHandPositionOffset;
+            Quaternion leftRot = NetworkLeftHandRot * Quaternion.Euler(leftHandRotationOffset);
+            leftHandIK.position = Vector3.Lerp(leftHandIK.position, leftPos, Runner.DeltaTime * 20f);
+            leftHandIK.rotation = Quaternion.Slerp(leftHandIK.rotation, leftRot, Runner.DeltaTime * 20f);
 
-            // --- IK 타겟 위치 업데이트 ---
-            leftHandIK.position = leftPos;
-            leftHandIK.rotation = leftRot;
-
-            rightHandIK.position = rightPos;
-            rightHandIK.rotation = rightRot;
-
-            headIK.position = hmd.position;
-            headIK.rotation = hmd.rotation;
-
-            // --- '나 자신'일 경우: VR 장비 값을 읽어 네트워크로 전송 ---
-            NetworkHeadPos = hmd.position;
-            NetworkHeadRot = hmd.rotation;
-            NetworkLeftHandPos = leftHandController.position;
-            NetworkLeftHandRot = leftHandController.rotation;
-            NetworkRightHandPos = rightHandController.position;
-            NetworkRightHandRot = rightHandController.rotation;
-        }
-        else
-        {
-            // --- '다른 사람'일 경우: 네트워크 값을 아바타 IK에 부드럽게 적용 ---
-            headIK.position = Vector3.Lerp(headIK.position, NetworkHeadPos, Time.deltaTime * 20f);
-            headIK.rotation = Quaternion.Slerp(headIK.rotation, NetworkHeadRot, Time.deltaTime * 20f);
-
-            leftHandIK.position = Vector3.Lerp(leftHandIK.position, NetworkLeftHandPos, Time.deltaTime * 20f);
-            leftHandIK.rotation = Quaternion.Slerp(leftHandIK.rotation, NetworkLeftHandRot, Time.deltaTime * 20f);
-
-            rightHandIK.position = Vector3.Lerp(rightHandIK.position, NetworkRightHandPos, Time.deltaTime * 20f);
-            rightHandIK.rotation = Quaternion.Slerp(rightHandIK.rotation, NetworkRightHandRot, Time.deltaTime * 20f);
+            Vector3 rightPos = NetworkRightHandPos + NetworkRightHandRot * rightHandPositionOffset;
+            Quaternion rightRot = NetworkRightHandRot * Quaternion.Euler(rightHandRotationOffset);
+            rightHandIK.position = Vector3.Lerp(rightHandIK.position, rightPos, Runner.DeltaTime * 20f);
+            rightHandIK.rotation = Quaternion.Slerp(rightHandIK.rotation, rightRot, Runner.DeltaTime * 20f);
         }
 
-        // --- 애니메이션 파라미터 반영 ---
+        // 애니메이션 블렌딩 (로컬 & 리모트 모두 적용)
         if (animator != null)
         {
-            Vector2 target;
-
-            if (Object.HasInputAuthority)
-            {
-                // 로컬 플레이어: 직접 계산
-                Vector3 velocity = (hmd.position - lastHmdPosition) / Time.fixedDeltaTime;
-                Vector3 localVelocity = xrOrigin.transform.InverseTransformDirection(velocity);
-                target = new Vector2(localVelocity.x, localVelocity.z);
-                lastHmdPosition = hmd.position;
-
-                NetworkMoveBlend = target;
-            }
-            else
-            {
-                // 원격 플레이어: 네트워크로 받은 값
-                target = NetworkMoveBlend;
-            }
-
             Vector2 current = new Vector2(animator.GetFloat("MoveX"), animator.GetFloat("MoveY"));
-            Vector2 smoothed = Vector2.Lerp(current, target, Time.deltaTime * blendSmoothSpeed);
-
+            Vector2 smoothed = Vector2.Lerp(current, NetworkMoveBlend, Runner.DeltaTime * blendSmoothSpeed);
             animator.SetFloat("MoveX", smoothed.x);
             animator.SetFloat("MoveY", smoothed.y);
         }
     }
 }
+
