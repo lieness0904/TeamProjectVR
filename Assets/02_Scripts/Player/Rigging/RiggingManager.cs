@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class RiggingManager : NetworkBehaviour
 {
@@ -30,6 +32,18 @@ public class RiggingManager : NetworkBehaviour
     public Vector3 rightHandPositionOffset = Vector3.zero;
     public Vector3 rightHandRotationOffset = Vector3.zero;
 
+    [Header("왼손가락 IK")]
+    public List<Transform> leftFingerTargets;       // 손가락 tip IK 타겟
+    public List<Vector3> fingerOpenPositions;       // 펼쳤을 때 localPosition
+    public List<Vector3> fingerClosedOffsets;       // 쥐었을 때 offset (예: -0.03f 등)
+    public InputActionProperty leftGripAction;      // 오른손 Grip 액션
+
+    [Header("오른손가락 IK")]
+    public List<Transform> rightFingerTargets;       // 오른손 손가락 tip IK 타겟
+    public List<Vector3> rightFingerOpenPositions;   // 오른손 펼쳤을 때 localPosition
+    public List<Vector3> rightFingerClosedOffsets;   // 오른손 쥐었을 때 offset
+    public InputActionProperty rightGripAction;      // 오른손 Grip 액션
+
     // --- 네트워크 동기화 변수들 ---
     [Networked] private Vector3 NetworkHeadPos { get; set; }
     [Networked] private Quaternion NetworkHeadRot { get; set; }
@@ -38,6 +52,8 @@ public class RiggingManager : NetworkBehaviour
     [Networked] private Vector3 NetworkRightHandPos { get; set; }
     [Networked] private Quaternion NetworkRightHandRot { get; set; }
     [Networked] private Vector2 NetworkMoveBlend { get; set; }
+    [Networked] private float NetworkLeftGrip { get; set; }
+    [Networked] private float NetworkRightGrip { get; set; }
 
     private Vector3 lastHmdPosition;
 
@@ -51,8 +67,6 @@ public class RiggingManager : NetworkBehaviour
             // VR 장비를 활성화하고, 시각적 아바타는 비활성화합니다.
             xrOrigin.SetActive(true);
             characterAvatar.SetActive(true);
-
-            Debug.Log("Local Player Spawned: XR Origin Activated, Avatar Deactivated.");
         }
         else
         {
@@ -61,7 +75,14 @@ public class RiggingManager : NetworkBehaviour
             xrOrigin.SetActive(false);
             characterAvatar.SetActive(true);
             lastHmdPosition = hmd.position;
-            Debug.Log("Remote Player Spawned: XR Origin Deactivated, Avatar Activated.");
+        }
+        if (leftGripAction != null && leftGripAction.action != null)
+        {
+            leftGripAction.action.Enable(); // <<<<< 강제로 활성화
+        }
+        if (rightGripAction != null && rightGripAction.action != null)
+        {
+            rightGripAction.action.Enable();
         }
     }
 
@@ -87,6 +108,11 @@ public class RiggingManager : NetworkBehaviour
 
             headIK.position = hmd.position;
             headIK.rotation = hmd.rotation;
+
+            if (leftGripAction != null && leftGripAction.action != null)
+                NetworkLeftGrip = leftGripAction.action.ReadValue<float>();
+            if (rightGripAction != null && rightGripAction.action != null)
+                NetworkRightGrip = rightGripAction.action.ReadValue<float>();
         }
 
         // 호스트면 직접 할당, 아니면 RPC로 전달
@@ -108,7 +134,6 @@ public class RiggingManager : NetworkBehaviour
         Vector3 velocity = (hmd.position - lastHmdPosition) / Runner.DeltaTime;
         Vector3 localVelocity = xrOrigin.transform.InverseTransformDirection(velocity);
         lastHmdPosition = hmd.position;
-
         NetworkMoveBlend = new Vector2(localVelocity.x, localVelocity.z);
     }
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
@@ -121,6 +146,7 @@ public class RiggingManager : NetworkBehaviour
         NetworkRightHandPos = rightPos;
         NetworkRightHandRot = rightRot;
     }
+    
     public override void Render()
     {
         // IK 및 애니메이션은 로컬/리모트 모두 적용해야 함
@@ -141,6 +167,19 @@ public class RiggingManager : NetworkBehaviour
             rightHandIK.rotation = Quaternion.Slerp(rightHandIK.rotation, rightRot, Runner.DeltaTime * 20f);
         }
 
+        // --- 손가락 IK ---
+        for (int i = 0; i < leftFingerTargets.Count; i++)
+        {
+            Vector3 open = fingerOpenPositions[i];
+            Vector3 closed = open + fingerClosedOffsets[i];
+            leftFingerTargets[i].localPosition = Vector3.Lerp(open, closed, NetworkLeftGrip);
+        }
+        for (int i = 0; i < rightFingerTargets.Count; i++)
+        {
+            Vector3 open = rightFingerOpenPositions[i];
+            Vector3 closed = open + rightFingerClosedOffsets[i];
+            rightFingerTargets[i].localPosition = Vector3.Lerp(open, closed, NetworkRightGrip);
+        }
         // 애니메이션 블렌딩 (로컬 & 리모트 모두 적용)
         if (animator != null)
         {
@@ -150,5 +189,6 @@ public class RiggingManager : NetworkBehaviour
             animator.SetFloat("MoveY", smoothed.y);
         }
     }
+    
 }
 
