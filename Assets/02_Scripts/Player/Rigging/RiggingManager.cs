@@ -88,44 +88,23 @@ public class RiggingManager : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        if (!Object.HasInputAuthority) return;
+        if (!Object.HasInputAuthority || hmd == null || leftHandController == null || rightHandController == null)
+            return;
 
+        // 오프셋 적용한 손 위치
         Vector3 leftPos = leftHandController.position + leftHandController.rotation * leftHandPositionOffset;
         Quaternion leftRot = leftHandController.rotation * Quaternion.Euler(leftHandRotationOffset);
-        Vector3 rightPos = rightHandController.position + rightHandController.rotation * rightHandRotationOffset;
+
+        Vector3 rightPos = rightHandController.position + rightHandController.rotation * rightHandPositionOffset;
         Quaternion rightRot = rightHandController.rotation * Quaternion.Euler(rightHandRotationOffset);
 
-        NetworkHeadPos = hmd.position;
-        NetworkHeadRot = hmd.rotation;
-        NetworkLeftHandPos = leftPos;
-        NetworkLeftHandRot = leftRot;
-        NetworkRightHandPos = rightPos;
-        NetworkRightHandRot = rightRot;
+        float leftGrip = leftGripAction.action?.ReadValue<float>() ?? 0f;
+        float rightGrip = rightGripAction.action?.ReadValue<float>() ?? 0f;
 
-        if (leftGripAction.action != null)
-            NetworkLeftGrip = leftGripAction.action.ReadValue<float>();
-        if (rightGripAction.action != null)
-            NetworkRightGrip = rightGripAction.action.ReadValue<float>();
-
-        //// 호스트면 직접 할당, 아니면 RPC로 전달
-        //if (Object.HasStateAuthority)
-        //{
-        //    NetworkHeadPos = hmd.position;
-        //    NetworkHeadRot = hmd.rotation;
-        //    NetworkLeftHandPos = leftPos;
-        //    NetworkLeftHandRot = leftRot;
-        //    NetworkRightHandPos = rightPos;
-        //    NetworkRightHandRot = rightRot;
-        //
-        //    if (leftGripAction != null && leftGripAction.action != null)
-        //        NetworkLeftGrip = leftGripAction.action.ReadValue<float>();
-        //    if (rightGripAction != null && rightGripAction.action != null)
-        //        NetworkRightGrip = rightGripAction.action.ReadValue<float>();
-        //}
-        //else
-        //{
-        //    RPC_UpdateIK(hmd.position, hmd.rotation, leftPos, leftRot, rightPos, rightRot);
-        //}
+        if (Runner.IsForward)
+        {
+            RPC_UpdateIK(hmd.position, hmd.rotation, leftPos, leftRot, rightPos, rightRot, leftGrip, rightGrip);
+        }
 
         // 애니메이션 블렌드 계산
         Vector3 velocity = (hmd.position - lastHmdPosition) / Runner.DeltaTime;
@@ -134,7 +113,8 @@ public class RiggingManager : NetworkBehaviour
         NetworkMoveBlend = new Vector2(localVelocity.x, localVelocity.z);
     }
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    private void RPC_UpdateIK(Vector3 headPos, Quaternion headRot, Vector3 leftPos, Quaternion leftRot, Vector3 rightPos, Quaternion rightRot)
+    private void RPC_UpdateIK(Vector3 headPos, Quaternion headRot, Vector3 leftPos, Quaternion leftRot,
+                               Vector3 rightPos, Quaternion rightRot, float leftGrip, float rightGrip)
     {
         NetworkHeadPos = headPos;
         NetworkHeadRot = headRot;
@@ -142,14 +122,20 @@ public class RiggingManager : NetworkBehaviour
         NetworkLeftHandRot = leftRot;
         NetworkRightHandPos = rightPos;
         NetworkRightHandRot = rightRot;
+        NetworkLeftGrip = leftGrip;
+        NetworkRightGrip = rightGrip;
     }
-    
+
     public override void Render()
     {
-        // IK 및 애니메이션은 로컬/리모트 모두 적용해야 함
+        TransformLocalIK();
+        ApplyFingerIK();
+        ApplyAnimatorBlend();
+    }
+    private void TransformLocalIK()
+    {
         if (!Object.HasInputAuthority)
         {
-            // 리모트 플레이어 IK 보간
             headIK.position = Vector3.Lerp(headIK.position, NetworkHeadPos, Runner.DeltaTime * 20f);
             headIK.rotation = Quaternion.Slerp(headIK.rotation, NetworkHeadRot, Runner.DeltaTime * 20f);
 
@@ -162,48 +148,46 @@ public class RiggingManager : NetworkBehaviour
             Quaternion rightRot = NetworkRightHandRot * Quaternion.Euler(rightHandRotationOffset);
             rightHandIK.position = Vector3.Lerp(rightHandIK.position, rightPos, Runner.DeltaTime * 20f);
             rightHandIK.rotation = Quaternion.Slerp(rightHandIK.rotation, rightRot, Runner.DeltaTime * 20f);
-
         }
         else
         {
-            // 로컬 플레이어는 직접 위치 넣어줘야 함
             headIK.position = hmd.position;
             headIK.rotation = hmd.rotation;
 
-            Vector3 leftPos = leftHandController.position + leftHandController.rotation * leftHandPositionOffset;
-            Quaternion leftRot = leftHandController.rotation * Quaternion.Euler(leftHandRotationOffset);
-            leftHandIK.position = leftPos;
-            leftHandIK.rotation = leftRot;
+            leftHandIK.position = leftHandController.position + leftHandController.rotation * leftHandPositionOffset;
+            leftHandIK.rotation = leftHandController.rotation * Quaternion.Euler(leftHandRotationOffset);
 
-            Vector3 rightPos = rightHandController.position + rightHandController.rotation * rightHandRotationOffset;
-            Quaternion rightRot = rightHandController.rotation * Quaternion.Euler(rightHandRotationOffset);
-            rightHandIK.position = rightPos;
-            rightHandIK.rotation = rightRot;
+            rightHandIK.position = rightHandController.position + rightHandController.rotation * rightHandPositionOffset;
+            rightHandIK.rotation = rightHandController.rotation * Quaternion.Euler(rightHandRotationOffset);
         }
+    }
 
-        // --- 손가락 IK ---
+    private void ApplyFingerIK()
+    {
         for (int i = 0; i < leftFingerTargets.Count; i++)
         {
             Vector3 open = fingerOpenPositions[i];
             Vector3 closed = open + fingerClosedOffsets[i];
             leftFingerTargets[i].localPosition = Vector3.Lerp(open, closed, NetworkLeftGrip);
         }
+
         for (int i = 0; i < rightFingerTargets.Count; i++)
         {
             Vector3 open = rightFingerOpenPositions[i];
             Vector3 closed = open + rightFingerClosedOffsets[i];
             rightFingerTargets[i].localPosition = Vector3.Lerp(open, closed, NetworkRightGrip);
         }
-
-        // 애니메이션 블렌딩 (로컬 & 리모트 모두 적용)
-        if (animator != null)
-        {
-            Vector2 current = new Vector2(animator.GetFloat("MoveX"), animator.GetFloat("MoveY"));
-            Vector2 smoothed = Vector2.Lerp(current, NetworkMoveBlend, Runner.DeltaTime * blendSmoothSpeed);
-            animator.SetFloat("MoveX", smoothed.x);
-            animator.SetFloat("MoveY", smoothed.y);
-        }
     }
-    
+
+    private void ApplyAnimatorBlend()
+    {
+        if (animator == null) return;
+
+        Vector2 current = new Vector2(animator.GetFloat("MoveX"), animator.GetFloat("MoveY"));
+        Vector2 smoothed = Vector2.Lerp(current, NetworkMoveBlend, Runner.DeltaTime * blendSmoothSpeed);
+        animator.SetFloat("MoveX", smoothed.x);
+        animator.SetFloat("MoveY", smoothed.y);
+    }
+
 }
 
