@@ -7,11 +7,12 @@ using System;
 public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 {
     [Header("Player Prefab")]
-    // 스폰할 플레이어 프리팹을 여기에 할당합니다.
     [SerializeField] private NetworkObject playerPrefab;
 
-    [Header("Spawn Points")]
+    [Header("Spawn Settings")]
     [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
+    // 새로 추가된 부분: 스폰 시 적용할 회전 값 (오일러 각도)
+    [SerializeField] private Vector3 spawnRotation = Vector3.zero;
     private int nextSpawnPointIndex = 0;
 
     // 현재 세션에 있는 플레이어들의 정보를 저장하는 딕셔너리
@@ -51,11 +52,15 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
             Transform spawnPoint = spawnPoints[nextSpawnPointIndex];
 
             // 다음 플레이어를 위해 인덱스를 1 증가시킵니다.
-            // 만약 인덱스가 리스트 크기를 넘어서면 다시 0으로 돌아가 순환합니다.
             nextSpawnPointIndex = (nextSpawnPointIndex + 1) % spawnPoints.Count;
 
-            // 플레이어 프리팹을 스폰하고, 해당 플레이어에게 입력 권한을 부여합니다.
-            NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPoint.position, spawnPoint.rotation, player);
+            // --- [수정된 부분] ---
+            // 인스펙터에서 설정한 Vector3 회전 값을 Quaternion으로 변환합니다.
+            Quaternion rotation = Quaternion.Euler(spawnRotation);
+
+            // 플레이어 프리팹을 스폰할 때, 스폰 포인트의 위치와 우리가 지정한 회전 값을 사용합니다.
+            NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPoint.position, rotation, player);
+            // --------------------
 
             // 스폰된 플레이어 정보를 딕셔너리에 추가하여 관리합니다.
             spawnedCharacters.Add(player, networkPlayerObject);
@@ -65,7 +70,6 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         // 플레이어가 세션을 떠났을 때 호출됩니다.
-        // 딕셔너리에서 해당 플레이어의 오브젝트를 찾아 디스폰(제거)합니다.
         if (spawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
         {
             if (runner.IsServer)
