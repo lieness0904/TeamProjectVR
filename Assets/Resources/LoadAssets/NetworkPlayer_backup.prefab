@@ -54,8 +54,6 @@ MonoBehaviour:
   ObjectInterest: 1
   Flags: 262145
   NestedObjects:
-  - {fileID: 602520411172612552}
-  - {fileID: 8141812043469918834}
   - {fileID: 4712984554667281090}
   - {fileID: 4163280501328621944}
   NetworkedBehaviours:
@@ -99,42 +97,6 @@ MonoBehaviour:
   headIK: {fileID: 2305831545048036764}
   leftHandIK: {fileID: 3244488200243580738}
   rightHandIK: {fileID: 1461982803002067121}
-  animator: {fileID: 0}
-  blendSmoothSpeed: 10
-  leftHandPositionOffset: {x: 0, y: 0, z: 0}
-  leftHandRotationOffset: {x: 0, y: 0, z: 0}
-  rightHandPositionOffset: {x: 0, y: 0, z: 0}
-  rightHandRotationOffset: {x: 0, y: 0, z: 0}
-  leftFingerTargets: []
-  fingerOpenPositions: []
-  fingerClosedOffsets: []
-  leftGripAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Left Grip
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 49ce11c6-782e-4fd3-90d3-354904fa7c3b
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  rightFingerTargets: []
-  rightFingerOpenPositions: []
-  rightFingerClosedOffsets: []
-  rightGripAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Right Grip
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 29731a22-1788-460c-b8f5-c0f6a5625f9a
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
 --- !u!143 &4283278791442278746
 CharacterController:
   m_ObjectHideFlags: 0
@@ -341,11 +303,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2219043814805023655}
     m_Modifications:
-    - target: {fileID: 221302354272361609, guid: 4d92dc7fa4f2bb34294094f418942da2,
-        type: 3}
-      propertyPath: SortKey
-      value: 3663923341
-      objectReference: {fileID: 0}
     - target: {fileID: 1647827511948894374, guid: 4d92dc7fa4f2bb34294094f418942da2,
         type: 3}
       propertyPath: m_InteractionManager
@@ -411,28 +368,11 @@ PrefabInstance:
       propertyPath: m_InteractionManager
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 8913514971972020019, guid: 4d92dc7fa4f2bb34294094f418942da2,
-        type: 3}
-      propertyPath: SortKey
-      value: 3952409929
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4d92dc7fa4f2bb34294094f418942da2, type: 3}
---- !u!114 &602520411172612552 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8913514971972020019, guid: 4d92dc7fa4f2bb34294094f418942da2,
-    type: 3}
-  m_PrefabInstance: {fileID: 8354106643697962747}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &3313743461664087400 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6778893410718438291, guid: 4d92dc7fa4f2bb34294094f418942da2,
@@ -463,18 +403,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 8354106643697962747}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &8141812043469918834 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 221302354272361609, guid: 4d92dc7fa4f2bb34294094f418942da2,
-    type: 3}
-  m_PrefabInstance: {fileID: 8354106643697962747}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &8356772896441621320 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6340983823979955, guid: 4d92dc7fa4f2bb34294094f418942da2,

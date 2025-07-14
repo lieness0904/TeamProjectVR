@@ -3207,8 +3207,6 @@ GameObject:
   - component: {fileID: 4037996108215822180}
   - component: {fileID: 1743298257025008829}
   - component: {fileID: 3834566061282998849}
-
-
   m_Layer: 0
   m_Name: FemaleCharacter
   m_TagString: Untagged
@@ -3255,7 +3253,7 @@ Animator:
   m_GameObject: {fileID: 5570546635062656723}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 766162ee069fcb94c88cefac2fbc5f0d, type: 2}
+  m_Controller: {fileID: 0}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -3378,8 +3376,6 @@ MonoBehaviour:
   - m_Rig: {fileID: 5823910963181871196}
     m_Active: 1
   m_Effectors: []
-
-
 --- !u!1 &5678532811780615772
 GameObject:
   m_ObjectHideFlags: 0
