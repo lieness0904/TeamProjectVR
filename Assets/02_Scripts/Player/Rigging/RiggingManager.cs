@@ -162,21 +162,22 @@ public class RiggingManager : NetworkBehaviour
             Quaternion rightRot = NetworkRightHandRot * Quaternion.Euler(rightHandRotationOffset);
             rightHandIK.position = Vector3.Lerp(rightHandIK.position, rightPos, Runner.DeltaTime * 20f);
             rightHandIK.rotation = Quaternion.Slerp(rightHandIK.rotation, rightRot, Runner.DeltaTime * 20f);
+
+            // --- 손가락 IK ---
+            for (int i = 0; i < leftFingerTargets.Count; i++)
+            {
+                Vector3 open = fingerOpenPositions[i];
+                Vector3 closed = open + fingerClosedOffsets[i];
+                leftFingerTargets[i].localPosition = Vector3.Lerp(open, closed, NetworkLeftGrip);
+            }
+            for (int i = 0; i < rightFingerTargets.Count; i++)
+            {
+                Vector3 open = rightFingerOpenPositions[i];
+                Vector3 closed = open + rightFingerClosedOffsets[i];
+                rightFingerTargets[i].localPosition = Vector3.Lerp(open, closed, NetworkRightGrip);
+            }
         }
 
-        // --- 손가락 IK ---
-        for (int i = 0; i < leftFingerTargets.Count; i++)
-        {
-            Vector3 open = fingerOpenPositions[i];
-            Vector3 closed = open + fingerClosedOffsets[i];
-            leftFingerTargets[i].localPosition = Vector3.Lerp(open, closed, NetworkLeftGrip);
-        }
-        for (int i = 0; i < rightFingerTargets.Count; i++)
-        {
-            Vector3 open = rightFingerOpenPositions[i];
-            Vector3 closed = open + rightFingerClosedOffsets[i];
-            rightFingerTargets[i].localPosition = Vector3.Lerp(open, closed, NetworkRightGrip);
-        }
         // 애니메이션 블렌딩 (로컬 & 리모트 모두 적용)
         if (animator != null)
         {
