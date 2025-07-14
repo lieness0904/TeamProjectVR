@@ -3207,7 +3207,8 @@ GameObject:
   - component: {fileID: 4037996108215822180}
   - component: {fileID: 1743298257025008829}
   - component: {fileID: 3834566061282998849}
-  - component: {fileID: 4443999911218156603}
+
+
   m_Layer: 0
   m_Name: FemaleCharacter
   m_TagString: Untagged
@@ -3377,35 +3378,8 @@ MonoBehaviour:
   - m_Rig: {fileID: 5823910963181871196}
     m_Active: 1
   m_Effectors: []
---- !u!114 &4443999911218156603
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5570546635062656723}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c8217190108cd624cb10f54698b25747, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  leftHandIK: {fileID: 6603652725956279407}
-  rightHandIK: {fileID: 3990144695352168608}
-  headIK: {fileID: 7966560078802083838}
-  leftHandController: {fileID: 0}
-  rightHandController: {fileID: 0}
-  hmd: {fileID: 0}
-  leftOffset:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 90, z: 90}
-  rightOffset:
-  - {x: 0, y: 0, z: 0}
-  - {x: -180, y: 90, z: 90}
-  headOffset:
-  - {x: 0, y: -0.1, z: 0}
-  - {x: 0, y: 0, z: 0}
-  smoothValue: 0.1
-  modelHeight: 1.5
+
+
 --- !u!1 &5678532811780615772
 GameObject:
   m_ObjectHideFlags: 0

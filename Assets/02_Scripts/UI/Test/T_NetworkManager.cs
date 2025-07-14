@@ -174,7 +174,7 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log($"OnPlayerJoined: 플레이어 {player.PlayerId}가 입장. 현재 세션: {runner.SessionInfo.Name}");
+        Debug.Log($"[OnPlayerJoined] IsServer: {runner.IsServer}, player: {player}, playerPrefab: {playerPrefab}");
 
         // 접속 UI
         UpdatePlayerListUI();
@@ -187,26 +187,12 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
                 spawnPosition.y = spawnY;
 
                 NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player);
+                Debug.Log($"[Spawned] player: {player}, object: {networkPlayerObject}, InputAuthority: {networkPlayerObject.InputAuthority}, HasInputAuthority: {networkPlayerObject.HasInputAuthority}");
                 _spawnedCharacters.Add(player, networkPlayerObject);
             }
             else
             {
                 Debug.LogError("Player Prefab이 할당되지 않았습니다!");
-            }
-        }
-        if (runner.IsRunning && runner.LocalPlayer != null)
-        {
-            runner.TryGetPlayerObject(runner.LocalPlayer, out NetworkObject playerObj);
-
-            if (playerObj != null && playerObj.HasInputAuthority)
-            {
-                var rigManager = playerPrefab.GetComponent<RiggingManager>();
-
-                rigManager.headIK = playerObj.transform.Find("HeadIK");
-                rigManager.leftHandIK = playerObj.transform.Find("LeftHandIK");
-                rigManager.rightHandIK = playerObj.transform.Find("RightHandIK");
-
-                rigManager.transform.SetParent(playerObj.transform);
             }
         }
     }
@@ -232,7 +218,6 @@ public class T_NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
         Debug.Log($"OnShutdown: NetworkRunner가 종료되었습니다. 이유: {shutdownReason}");
-        _spawnedCharacters.Clear();
     }
 
 
