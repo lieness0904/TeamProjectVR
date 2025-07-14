@@ -163,19 +163,36 @@ public class RiggingManager : NetworkBehaviour
             rightHandIK.position = Vector3.Lerp(rightHandIK.position, rightPos, Runner.DeltaTime * 20f);
             rightHandIK.rotation = Quaternion.Slerp(rightHandIK.rotation, rightRot, Runner.DeltaTime * 20f);
 
-            // --- 손가락 IK ---
-            for (int i = 0; i < leftFingerTargets.Count; i++)
-            {
-                Vector3 open = fingerOpenPositions[i];
-                Vector3 closed = open + fingerClosedOffsets[i];
-                leftFingerTargets[i].localPosition = Vector3.Lerp(open, closed, NetworkLeftGrip);
-            }
-            for (int i = 0; i < rightFingerTargets.Count; i++)
-            {
-                Vector3 open = rightFingerOpenPositions[i];
-                Vector3 closed = open + rightFingerClosedOffsets[i];
-                rightFingerTargets[i].localPosition = Vector3.Lerp(open, closed, NetworkRightGrip);
-            }
+        }
+        else
+        {
+            // 로컬 플레이어는 직접 위치 넣어줘야 함
+            headIK.position = hmd.position;
+            headIK.rotation = hmd.rotation;
+
+            Vector3 leftPos = leftHandController.position + leftHandController.rotation * leftHandPositionOffset;
+            Quaternion leftRot = leftHandController.rotation * Quaternion.Euler(leftHandRotationOffset);
+            leftHandIK.position = leftPos;
+            leftHandIK.rotation = leftRot;
+
+            Vector3 rightPos = rightHandController.position + rightHandController.rotation * rightHandRotationOffset;
+            Quaternion rightRot = rightHandController.rotation * Quaternion.Euler(rightHandRotationOffset);
+            rightHandIK.position = rightPos;
+            rightHandIK.rotation = rightRot;
+        }
+
+        // --- 손가락 IK ---
+        for (int i = 0; i < leftFingerTargets.Count; i++)
+        {
+            Vector3 open = fingerOpenPositions[i];
+            Vector3 closed = open + fingerClosedOffsets[i];
+            leftFingerTargets[i].localPosition = Vector3.Lerp(open, closed, NetworkLeftGrip);
+        }
+        for (int i = 0; i < rightFingerTargets.Count; i++)
+        {
+            Vector3 open = rightFingerOpenPositions[i];
+            Vector3 closed = open + rightFingerClosedOffsets[i];
+            rightFingerTargets[i].localPosition = Vector3.Lerp(open, closed, NetworkRightGrip);
         }
 
         // 애니메이션 블렌딩 (로컬 & 리모트 모두 적용)
