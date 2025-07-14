@@ -88,47 +88,44 @@ public class RiggingManager : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        if (hmd == null || leftHandController == null || rightHandController == null) return;
+        if (!Object.HasInputAuthority) return;
 
-        // 오프셋 적용한 손 위치
         Vector3 leftPos = leftHandController.position + leftHandController.rotation * leftHandPositionOffset;
         Quaternion leftRot = leftHandController.rotation * Quaternion.Euler(leftHandRotationOffset);
-
-        Vector3 rightPos = rightHandController.position + rightHandController.rotation * rightHandPositionOffset;
+        Vector3 rightPos = rightHandController.position + rightHandController.rotation * rightHandRotationOffset;
         Quaternion rightRot = rightHandController.rotation * Quaternion.Euler(rightHandRotationOffset);
 
-        // IK 위치 직접 적용
-        if (Object.HasInputAuthority)
-        {
-            leftHandIK.position = leftPos;
-            leftHandIK.rotation = leftRot;
+        NetworkHeadPos = hmd.position;
+        NetworkHeadRot = hmd.rotation;
+        NetworkLeftHandPos = leftPos;
+        NetworkLeftHandRot = leftRot;
+        NetworkRightHandPos = rightPos;
+        NetworkRightHandRot = rightRot;
 
-            rightHandIK.position = rightPos;
-            rightHandIK.rotation = rightRot;
+        if (leftGripAction.action != null)
+            NetworkLeftGrip = leftGripAction.action.ReadValue<float>();
+        if (rightGripAction.action != null)
+            NetworkRightGrip = rightGripAction.action.ReadValue<float>();
 
-            headIK.position = hmd.position;
-            headIK.rotation = hmd.rotation;
-
-            if (leftGripAction != null && leftGripAction.action != null)
-                NetworkLeftGrip = leftGripAction.action.ReadValue<float>();
-            if (rightGripAction != null && rightGripAction.action != null)
-                NetworkRightGrip = rightGripAction.action.ReadValue<float>();
-        }
-
-        // 호스트면 직접 할당, 아니면 RPC로 전달
-        if (Object.HasStateAuthority)
-        {
-            NetworkHeadPos = hmd.position;
-            NetworkHeadRot = hmd.rotation;
-            NetworkLeftHandPos = leftPos;
-            NetworkLeftHandRot = leftRot;
-            NetworkRightHandPos = rightPos;
-            NetworkRightHandRot = rightRot;
-        }
-        else
-        {
-            RPC_UpdateIK(hmd.position, hmd.rotation, leftPos, leftRot, rightPos, rightRot);
-        }
+        //// 호스트면 직접 할당, 아니면 RPC로 전달
+        //if (Object.HasStateAuthority)
+        //{
+        //    NetworkHeadPos = hmd.position;
+        //    NetworkHeadRot = hmd.rotation;
+        //    NetworkLeftHandPos = leftPos;
+        //    NetworkLeftHandRot = leftRot;
+        //    NetworkRightHandPos = rightPos;
+        //    NetworkRightHandRot = rightRot;
+        //
+        //    if (leftGripAction != null && leftGripAction.action != null)
+        //        NetworkLeftGrip = leftGripAction.action.ReadValue<float>();
+        //    if (rightGripAction != null && rightGripAction.action != null)
+        //        NetworkRightGrip = rightGripAction.action.ReadValue<float>();
+        //}
+        //else
+        //{
+        //    RPC_UpdateIK(hmd.position, hmd.rotation, leftPos, leftRot, rightPos, rightRot);
+        //}
 
         // 애니메이션 블렌드 계산
         Vector3 velocity = (hmd.position - lastHmdPosition) / Runner.DeltaTime;
