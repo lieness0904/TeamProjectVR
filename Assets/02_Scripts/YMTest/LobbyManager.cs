@@ -10,6 +10,10 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     // 스폰할 플레이어 프리팹을 여기에 할당합니다.
     [SerializeField] private NetworkObject playerPrefab;
 
+    [Header("Spawn Points")]
+    [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
+    private int nextSpawnPointIndex = 0;
+
     // 현재 세션에 있는 플레이어들의 정보를 저장하는 딕셔너리
     private Dictionary<PlayerRef, NetworkObject> spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
 
@@ -44,11 +48,14 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             Debug.Log($"OnPlayerJoined: Player {player.PlayerId} joined. Spawning character.");
 
-            // 스폰될 위치를 무작위로 정합니다.
-            Vector3 spawnPosition = new Vector3(UnityEngine.Random.Range(-3f, 3f), 1, UnityEngine.Random.Range(-3f, 3f));
+            Transform spawnPoint = spawnPoints[nextSpawnPointIndex];
+
+            // 다음 플레이어를 위해 인덱스를 1 증가시킵니다.
+            // 만약 인덱스가 리스트 크기를 넘어서면 다시 0으로 돌아가 순환합니다.
+            nextSpawnPointIndex = (nextSpawnPointIndex + 1) % spawnPoints.Count;
 
             // 플레이어 프리팹을 스폰하고, 해당 플레이어에게 입력 권한을 부여합니다.
-            NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player);
+            NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPoint.position, spawnPoint.rotation, player);
 
             // 스폰된 플레이어 정보를 딕셔너리에 추가하여 관리합니다.
             spawnedCharacters.Add(player, networkPlayerObject);
