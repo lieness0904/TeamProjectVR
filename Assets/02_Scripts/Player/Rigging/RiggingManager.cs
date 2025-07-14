@@ -140,12 +140,12 @@ public class RiggingManager : NetworkBehaviour
             headIK.rotation = Quaternion.Slerp(headIK.rotation, NetworkHeadRot, Runner.DeltaTime * 20f);
 
             Vector3 leftPos = NetworkLeftHandPos + NetworkLeftHandRot * leftHandPositionOffset;
-            Quaternion leftRot = NetworkLeftHandRot * Quaternion.Euler(leftHandRotationOffset);
+            Quaternion leftRot = NetworkLeftHandRot * Quaternion.Euler(leftHandRotationOffset) * Quaternion.Euler(0, 180, 0);
             leftHandIK.position = Vector3.Lerp(leftHandIK.position, leftPos, Runner.DeltaTime * 20f);
             leftHandIK.rotation = Quaternion.Slerp(leftHandIK.rotation, leftRot, Runner.DeltaTime * 20f);
 
             Vector3 rightPos = NetworkRightHandPos + NetworkRightHandRot * rightHandPositionOffset;
-            Quaternion rightRot = NetworkRightHandRot * Quaternion.Euler(rightHandRotationOffset);
+            Quaternion rightRot = NetworkRightHandRot * Quaternion.Euler(rightHandRotationOffset) * Quaternion.Euler(0, 180, 0);
             rightHandIK.position = Vector3.Lerp(rightHandIK.position, rightPos, Runner.DeltaTime * 20f);
             rightHandIK.rotation = Quaternion.Slerp(rightHandIK.rotation, rightRot, Runner.DeltaTime * 20f);
         }
