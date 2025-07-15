@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 
 public class RiggingManager : NetworkBehaviour
 {
+
     // --- 인스펙터에서 직접 할당할 변수들 ---
     [Header("제어할 오브젝트")]
     public GameObject xrOrigin; // NetworkPlayer > XR_Origin
@@ -59,6 +60,7 @@ public class RiggingManager : NetworkBehaviour
 
     public override void Spawned()
     {
+
         // --- [추가된 로직] 이전에 NetworkVRPlayer가 하던 역할 ---
         // 이 NetworkObject가 스폰될 때(생성될 때) 호출됩니다.
         if (Object.HasInputAuthority)
@@ -151,6 +153,7 @@ public class RiggingManager : NetworkBehaviour
         }
         else
         {
+
             headIK.position = hmd.position;
             headIK.rotation = hmd.rotation;
 
