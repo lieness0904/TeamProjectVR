@@ -100,3 +100,13 @@ InitTestScene*.unity*
 
 # Custom: Ignore TempAssets folder
 /[Aa]ssets/TempAssets/
+
+# firebase 관련무시
+Assets/Firebase/*.keystore
+Assets/Firebase/*.jks
+Assets/Firebase/*.p12
+Assets/Firebase/*.pem
+Assets/Firebase/*.der
+Assets/Firebase/*.crt
+Assets/Firebase/google-services.json
+Assets/Firebase/GoogleService-Info.plist
