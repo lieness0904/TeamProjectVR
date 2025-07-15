@@ -78,7 +78,7 @@ public class LoginManager : MonoBehaviour
                     // --- [수정 3] 불필요해진 파괴 로직 삭제 ---
 
                     yield return new WaitForSeconds(1);
-                    SceneManager.LoadScene("Lobby");
+                    SceneManager.LoadScene("HouseScene");
                 }
                 else
                 {
