@@ -153,18 +153,6 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
-    public void OnSceneLoadDone(NetworkRunner runner)
-    {
-        Debug.Log("[Fusion] 씬 로딩 완료");
-        if (spawnedCharacters.ContainsKey(runner.LocalPlayer)) return;
-        var phoneUI = GameObject.Find("PhoneUI");
-        if (phoneUI != null)
-            phoneUI.SetActive(false);
-    }
-    public void OnSceneLoadStart(NetworkRunner runner)
-    {
-        Debug.Log("[Fusion] 씬 로딩 시작");
-    }
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     #endregion

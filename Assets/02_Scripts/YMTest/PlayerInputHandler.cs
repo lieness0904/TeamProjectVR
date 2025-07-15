@@ -51,10 +51,7 @@ public class PlayerInputHandler : NetworkBehaviour, INetworkRunnerCallbacks
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        if (!Object.HasInputAuthority)
-        {
-            return;
-        }
+        if (Object == null || !Object.HasInputAuthority) return;
 
         Vector2 moveValue = moveAction.action.ReadValue<Vector2>();
 
