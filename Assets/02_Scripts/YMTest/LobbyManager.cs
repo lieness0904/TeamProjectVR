@@ -3,9 +3,12 @@ using Fusion;
 using Fusion.Sockets;
 using System.Collections.Generic;
 using System;
+using UnityEngine.SceneManagement;
 
 public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 {
+    public static LobbyManager Instance { get; private set; }
+
     [Header("Player Prefab")]
     [SerializeField] private NetworkObject playerPrefab;
 
@@ -17,6 +20,20 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
     // 현재 세션에 있는 플레이어들의 정보를 저장하는 딕셔너리
     private Dictionary<PlayerRef, NetworkObject> spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
+
+    private NetworkObject spawnedPlayer;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
 
     void Start()
     {
@@ -96,8 +113,18 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
-    public void OnSceneLoadDone(NetworkRunner runner) { }
-    public void OnSceneLoadStart(NetworkRunner runner) { }
+    public void OnSceneLoadDone(NetworkRunner runner)
+    {
+        Debug.Log("[Fusion] 씬 로딩 완료");
+        if (spawnedCharacters.ContainsKey(runner.LocalPlayer)) return;
+        var phoneUI = GameObject.Find("PhoneUI");
+        if (phoneUI != null)
+            phoneUI.SetActive(false);
+    }
+    public void OnSceneLoadStart(NetworkRunner runner)
+    {
+        Debug.Log("[Fusion] 씬 로딩 시작");
+    }
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     #endregion
