@@ -2068,6 +2068,7 @@ GameObject:
   - component: {fileID: 82764882}
   - component: {fileID: 82764884}
   - component: {fileID: 82764883}
+  - component: {fileID: 82764885}
   m_Layer: 0
   m_Name: Light_Room1 (2)
   m_TagString: Untagged
@@ -2175,6 +2176,22 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0.01
   m_ShadowAngle: 0
+--- !u!114 &82764885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 82764881}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 82764884}
+  _guid: ea928abe-ba18-405b-
 --- !u!1001 &88438711
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3354,6 +3371,7 @@ GameObject:
   - component: {fileID: 154778914}
   - component: {fileID: 154778916}
   - component: {fileID: 154778915}
+  - component: {fileID: 154778917}
   m_Layer: 0
   m_Name: Light_Room1_2
   m_TagString: Untagged
@@ -3461,6 +3479,22 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &154778917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 154778913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 154778916}
+  _guid: 9640cc87-7f2a-49f1-
 --- !u!4 &158212920 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1484859547178151607, guid: 72245f0dc1eb36f40974ccc120c5aa45,
@@ -5616,37 +5650,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 72245f0dc1eb36f40974ccc120c5aa45, type: 3}
---- !u!1 &279726405
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 279726406}
-  m_Layer: 0
-  m_Name: SpawnPoint_1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &279726406
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 279726405}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1092223514}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &281355881 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4184253342463519348, guid: 5c270b112160daf4f85b1099b8f98a8c,
@@ -9708,6 +9711,7 @@ GameObject:
   - component: {fileID: 531763083}
   - component: {fileID: 531763085}
   - component: {fileID: 531763084}
+  - component: {fileID: 531763086}
   m_Layer: 0
   m_Name: Light_Room1_1
   m_TagString: Untagged
@@ -9815,6 +9819,22 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &531763086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 531763082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 531763085}
+  _guid: ab0b073a-4987-4c8a-
 --- !u!1001 &535375817
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10198,9 +10218,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 8820101840433199315, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
     type: 3}
-  spawnPoints:
-  - {fileID: 279726406}
-  spawnRotation: {x: 0, y: 90, z: 0}
 --- !u!4 &559624206
 Transform:
   m_ObjectHideFlags: 0
@@ -13633,6 +13650,7 @@ GameObject:
   - component: {fileID: 735666999}
   - component: {fileID: 735667001}
   - component: {fileID: 735667000}
+  - component: {fileID: 735667002}
   m_Layer: 0
   m_Name: Light_Kitchen1 (10)
   m_TagString: Untagged
@@ -13740,6 +13758,22 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &735667002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 735666998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 735667001}
+  _guid: 74455fc3-2c07-4d94-
 --- !u!1 &736690185
 GameObject:
   m_ObjectHideFlags: 0
@@ -13751,6 +13785,7 @@ GameObject:
   - component: {fileID: 736690188}
   - component: {fileID: 736690187}
   - component: {fileID: 736690186}
+  - component: {fileID: 736690189}
   m_Layer: 0
   m_Name: VoiceNetwork
   m_TagString: Untagged
@@ -13820,12 +13855,81 @@ Transform:
   m_GameObject: {fileID: 736690185}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.03, y: 0, z: -2.29}
+  m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &736690189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 736690185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -232609262, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnInput:
+    m_PersistentCalls:
+      m_Calls: []
+  OnInputMissing:
+    m_PersistentCalls:
+      m_Calls: []
+  OnConnectedToServer:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDisconnectedFromServer:
+    m_PersistentCalls:
+      m_Calls: []
+  OnConnectRequest:
+    m_PersistentCalls:
+      m_Calls: []
+  OnConnectFailed:
+    m_PersistentCalls:
+      m_Calls: []
+  PlayerJoined:
+    m_PersistentCalls:
+      m_Calls: []
+  PlayerLeft:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSimulationMessage:
+    m_PersistentCalls:
+      m_Calls: []
+  OnShutdown:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSessionListUpdate:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCustomAuthenticationResponse:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHostMigration:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSceneLoadDone:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSceneLoadStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnReliableData:
+    m_PersistentCalls:
+      m_Calls: []
+  OnReliableProgress:
+    m_PersistentCalls:
+      m_Calls: []
+  OnObjectEnterAOI:
+    m_PersistentCalls:
+      m_Calls: []
+  OnObjectExitAOI:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &743734187
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14415,6 +14519,7 @@ GameObject:
   - component: {fileID: 784975486}
   - component: {fileID: 784975488}
   - component: {fileID: 784975487}
+  - component: {fileID: 784975489}
   m_Layer: 0
   m_Name: Light_Room1 (1)
   m_TagString: Untagged
@@ -14522,6 +14627,22 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0.01
   m_ShadowAngle: 0
+--- !u!114 &784975489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 784975485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 784975488}
+  _guid: 7f8293f1-6c65-4709-
 --- !u!1001 &792510850
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19178,38 +19299,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d80fcce363d1b80468934372a18d8da9, type: 3}
---- !u!1 &1092223513
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1092223514}
-  m_Layer: 0
-  m_Name: SpawnPointGroup_HouseScene
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1092223514
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1092223513}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.971, y: 0, z: -1.901}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 279726406}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1093246929 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2744116533724290705, guid: aec196a7b661d3b4f8aa20398d9a28fe,
@@ -20939,6 +21028,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f40f4250ccfee7f499e31026fa1346a1, type: 3}
+--- !u!1 &1191886187
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1191886188}
+  m_Layer: 0
+  m_Name: SpawnPoint
+  m_TagString: SpawnPoint
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1191886188
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1191886187}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.529, y: 0, z: -0.526}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1192353650
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21283,6 +21403,7 @@ GameObject:
   - component: {fileID: 1209667604}
   - component: {fileID: 1209667606}
   - component: {fileID: 1209667605}
+  - component: {fileID: 1209667607}
   m_Layer: 0
   m_Name: Light_Room1
   m_TagString: Untagged
@@ -21390,6 +21511,22 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0.01
   m_ShadowAngle: 0
+--- !u!114 &1209667607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1209667603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 1209667606}
+  _guid: 826167c7-0716-41b9-
 --- !u!4 &1213913440 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8614705571903581126, guid: 37a5ba00c8f35e0439811f213c246a30,
@@ -23629,79 +23766,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 25940477}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &1327484403
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 763074577358944841, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
-        type: 3}
-      propertyPath: m_Name
-      value: NetworkPlayer
-      objectReference: {fileID: 0}
-    - target: {fileID: 4097064386834629628, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4097064386834629628, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4097064386834629628, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4097064386834629628, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4097064386834629628, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4097064386834629628, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4097064386834629628, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4097064386834629628, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4097064386834629628, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4097064386834629628, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8820101840433199315, guid: 0dadc1716afdc0c4b88f8c13d4d31438,
-        type: 3}
-      propertyPath: SortKey
-      value: 2348303247
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 0dadc1716afdc0c4b88f8c13d4d31438, type: 3}
 --- !u!4 &1328455730 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3895849663166564342, guid: aa45b114bc2109a4f9803277bb2fca80,
@@ -26033,6 +26097,7 @@ GameObject:
   - component: {fileID: 1475562625}
   - component: {fileID: 1475562627}
   - component: {fileID: 1475562626}
+  - component: {fileID: 1475562628}
   m_Layer: 0
   m_Name: Light_Bathroom1
   m_TagString: Untagged
@@ -26140,6 +26205,22 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &1475562628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1475562624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 1475562627}
+  _guid: f564e032-b3c9-41af-
 --- !u!4 &1477246171 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5070699156396395357, guid: 5bedc409afc376849866b144493c737c,
@@ -28248,6 +28329,7 @@ GameObject:
   - component: {fileID: 1597397305}
   - component: {fileID: 1597397307}
   - component: {fileID: 1597397306}
+  - component: {fileID: 1597397308}
   m_Layer: 0
   m_Name: Light_Room1 (3)
   m_TagString: Untagged
@@ -28355,6 +28437,22 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0.01
   m_ShadowAngle: 0
+--- !u!114 &1597397308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1597397304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 1597397307}
+  _guid: e0f56eba-e39a-48f2-
 --- !u!1001 &1597452067
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30154,6 +30252,7 @@ GameObject:
   - component: {fileID: 1697243415}
   - component: {fileID: 1697243414}
   - component: {fileID: 1697243416}
+  - component: {fileID: 1697243417}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -30261,6 +30360,22 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!114 &1697243417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1697243413}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 1697243414}
+  _guid: 06701df7-6d50-431e-
 --- !u!1001 &1697260600
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30699,6 +30814,7 @@ GameObject:
   - component: {fileID: 1732129890}
   - component: {fileID: 1732129892}
   - component: {fileID: 1732129891}
+  - component: {fileID: 1732129893}
   m_Layer: 0
   m_Name: Light_Room2
   m_TagString: Untagged
@@ -30806,6 +30922,22 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &1732129893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1732129889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 1732129892}
+  _guid: 7aed820a-0750-4a37-
 --- !u!4 &1732440521 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3613171927361863750, guid: 88d77cc40367d014e9941459653c6d2a,
@@ -37474,6 +37606,7 @@ GameObject:
   - component: {fileID: 2131886990}
   - component: {fileID: 2131886992}
   - component: {fileID: 2131886991}
+  - component: {fileID: 2131886993}
   m_Layer: 0
   m_Name: Light_Room1
   m_TagString: Untagged
@@ -37581,6 +37714,22 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &2131886993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2131886989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 2131886992}
+  _guid: f0cb6e66-ae54-432e-
 --- !u!1001 &2135124433
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -37978,6 +38127,7 @@ GameObject:
   - component: {fileID: 2146100336}
   - component: {fileID: 2146100338}
   - component: {fileID: 2146100337}
+  - component: {fileID: 2146100339}
   m_Layer: 0
   m_Name: Light_Kitchen1 (11)
   m_TagString: Untagged
@@ -38085,6 +38235,22 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &2146100339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2146100335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 2146100338}
+  _guid: f958f8b9-3189-46d2-
 --- !u!4 &2146162409 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2739119757628154013, guid: c5859091ac2b9864eaee2483234bf1c4,
@@ -38105,6 +38271,5 @@ SceneRoots:
   - {fileID: 736690188}
   - {fileID: 559624206}
   - {fileID: 2112325479}
-  - {fileID: 1092223514}
   - {fileID: 1282574285}
-  - {fileID: 1327484403}
+  - {fileID: 1191886188}
