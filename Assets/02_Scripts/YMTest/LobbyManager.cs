@@ -4,39 +4,26 @@ using Fusion.Sockets;
 using System.Collections.Generic;
 using System;
 using UnityEngine.SceneManagement;
+using Photon.Realtime;
+using System.Linq;
 
 public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 {
-    public static LobbyManager Instance { get; private set; }
-
     [Header("Player Prefab")]
     [SerializeField] private NetworkObject playerPrefab;
-
-    [Header("Spawn Settings")]
-    [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
-    [SerializeField] private Vector3 spawnRotation = Vector3.zero;
-
-    private int nextSpawnPointIndex = 0;
+    
     private Dictionary<PlayerRef, NetworkObject> spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
     private NetworkRunner runner;
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
 
     private void Start()
     {
         StartGame();
     }
 
+    private void Awake()
+    {
+        DontDestroyOnLoad(this.gameObject);
+    }
     private async void StartGame()
     {
         runner = gameObject.AddComponent<NetworkRunner>();
@@ -52,12 +39,21 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        if (runner.IsServer)
-        {
-            SpawnPlayer(player);
-        }
-    }
+        if (!runner.IsServer) return;
 
+        Vector3 basePos = Vector3.zero;
+        var spawnObj = GameObject.FindWithTag("SpawnPoint");
+        if (spawnObj != null)
+            basePos = spawnObj.transform.position;
+
+        // 스폰 포인트 기준으로 ±1.5m 범위 랜덤 오프셋
+        float offsetX = UnityEngine.Random.Range(-1.5f, 1.5f);
+        float offsetZ = UnityEngine.Random.Range(-1.5f, 1.5f);
+        Vector3 spawnPos = basePos + new Vector3(offsetX, 0f, offsetZ);
+
+        var playerObj = runner.Spawn(playerPrefab, spawnPos, Quaternion.identity, player);
+        spawnedCharacters[player] = playerObj;
+    }
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         if (spawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
@@ -71,72 +67,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    private void SpawnPlayer(PlayerRef player)
-    {
-        if (!runner.IsServer) return;
-        if (spawnedCharacters.ContainsKey(player)) return;
-
-        if (spawnPoints.Count == 0)
-        {
-            Debug.LogWarning("No spawn points available!");
-            return;
-        }
-
-        Transform spawnPoint = spawnPoints[nextSpawnPointIndex];
-        nextSpawnPointIndex = (nextSpawnPointIndex + 1) % spawnPoints.Count;
-
-        Quaternion rotation = Quaternion.Euler(spawnRotation);
-
-        NetworkObject playerObj = runner.Spawn(playerPrefab, spawnPoint.position, rotation, player);
-        spawnedCharacters.Add(player, playerObj);
-
-        Debug.Log($"[Fusion] Spawned player {player.PlayerId} at index {nextSpawnPointIndex}");
-    }
-
-    public void OnSceneLoadDone(NetworkRunner runner)
-    {
-        Debug.Log("[Fusion] 씬 로딩 완료");
-
-        RefreshSpawnPoints();
-
-        if (runner.IsServer)
-        {
-            foreach (var player in runner.ActivePlayers)
-            {
-                SpawnPlayer(player);
-            }
-        }
-
-        var phoneUI = GameObject.Find("PhoneUI");
-        if (phoneUI != null)
-            phoneUI.SetActive(false);
-    }
-
-    public void OnSceneLoadStart(NetworkRunner runner)
-    {
-        Debug.Log("[Fusion] 씬 로딩 시작");
-    }
-
-    private void RefreshSpawnPoints()
-    {
-        spawnPoints.Clear();
-
-        string groupName = $"SpawnPointGroup_{SceneManager.GetActiveScene().name}";
-        GameObject group = GameObject.Find(groupName);
-
-        if (group == null)
-        {
-            Debug.LogWarning($"[LobbyManager] Spawn group '{groupName}' not found.");
-            return;
-        }
-
-        foreach (Transform child in group.transform)
-        {
-            spawnPoints.Add(child);
-        }
-
-        nextSpawnPointIndex = 0;
-    }
+    
 
     #region 사용하지 않는 콜백들
     // 이 스크립트에서는 사용하지 않지만, INetworkRunnerCallbacks 인터페이스를 위해 필요한 빈 함수들입니다.
@@ -155,5 +86,42 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
+    public void OnSceneLoadDone(NetworkRunner runner)
+    {
+        if (!runner.IsServer) return;
+
+        foreach (var player in runner.ActivePlayers)
+        {
+            if (!spawnedCharacters.ContainsKey(player))
+            {
+                Vector3 basePos = Vector3.zero;
+                var spawnObj = GameObject.FindWithTag("SpawnPoint");
+                if (spawnObj != null)
+                    basePos = spawnObj.transform.position;
+
+                // 스폰 포인트 기준으로 ±1.5m 범위 랜덤 오프셋
+                float offsetX = UnityEngine.Random.Range(-1.5f, 1.5f);
+                float offsetZ = UnityEngine.Random.Range(-1.5f, 1.5f);
+                Vector3 spawnPos = basePos + new Vector3(offsetX, 0f, offsetZ);
+
+                var playerObj = runner.Spawn(playerPrefab, spawnPos, Quaternion.identity, player);
+                spawnedCharacters[player] = playerObj;
+                
+            }
+        }
+    }
+    public void OnSceneLoadStart(NetworkRunner runner)
+    {
+        var keys = spawnedCharacters.Keys.ToList();
+        foreach (var player in keys)
+        {
+            var obj = spawnedCharacters[player];
+            if (obj != null)
+            {
+                runner.Despawn(obj);
+            }
+        }
+        spawnedCharacters.Clear(); // 딕셔너리 초기화
+    }
     #endregion
 }
