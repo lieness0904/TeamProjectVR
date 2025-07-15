@@ -22,6 +22,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     private Dictionary<PlayerRef, NetworkObject> spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
 
     private NetworkObject spawnedPlayer;
+    private NetworkRunner runner;
 
     private void Awake()
     {
@@ -44,7 +45,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     private async void StartGame()
     {
         // NetworkRunner 컴포넌트를 이 게임 오브젝트에 추가합니다.
-        var runner = gameObject.AddComponent<NetworkRunner>();
+        runner = gameObject.AddComponent<NetworkRunner>();
 
         // 이 스크립트가 네트워크 이벤트를 받을 수 있도록 콜백으로 등록합니다.
         runner.AddCallbacks(this);
@@ -60,30 +61,11 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        // 새로운 플레이어가 세션에 참여했을 때 호출됩니다.
-        // 호스트(서버 역할)만 플레이어를 스폰할 권한이 있습니다.
         if (runner.IsServer)
         {
-            Debug.Log($"OnPlayerJoined: Player {player.PlayerId} joined. Spawning character.");
-
-            Transform spawnPoint = spawnPoints[nextSpawnPointIndex];
-
-            // 다음 플레이어를 위해 인덱스를 1 증가시킵니다.
-            nextSpawnPointIndex = (nextSpawnPointIndex + 1) % spawnPoints.Count;
-
-            // --- [수정된 부분] ---
-            // 인스펙터에서 설정한 Vector3 회전 값을 Quaternion으로 변환합니다.
-            Quaternion rotation = Quaternion.Euler(spawnRotation);
-
-            // 플레이어 프리팹을 스폰할 때, 스폰 포인트의 위치와 우리가 지정한 회전 값을 사용합니다.
-            NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPoint.position, rotation, player);
-            // --------------------
-
-            // 스폰된 플레이어 정보를 딕셔너리에 추가하여 관리합니다.
-            spawnedCharacters.Add(player, networkPlayerObject);
+            SpawnPlayer(player);
         }
     }
-
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         // 플레이어가 세션을 떠났을 때 호출됩니다.
@@ -96,6 +78,74 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
             spawnedCharacters.Remove(player);
             Debug.Log($"OnPlayerLeft: Player {player.PlayerId} left. Despawned character.");
         }
+    }
+    private void SpawnPlayer(PlayerRef player)
+    {
+        if (!runner.IsServer) return;
+        if (spawnedCharacters.ContainsKey(player)) return;
+
+        if (spawnPoints.Count == 0)
+        {
+            Debug.LogWarning("No spawn points available!");
+            return;
+        }
+
+        Transform spawnPoint = spawnPoints[nextSpawnPointIndex];
+        nextSpawnPointIndex = (nextSpawnPointIndex + 1) % spawnPoints.Count;
+
+        Quaternion rotation = Quaternion.Euler(spawnRotation);
+
+        NetworkObject playerObj = runner.Spawn(playerPrefab, spawnPoint.position, rotation, player);
+        spawnedCharacters.Add(player, playerObj);
+
+        Debug.Log($"[Fusion] Spawned player {player.PlayerId} at index {nextSpawnPointIndex}");
+    }
+    public void OnSceneLoadDone(NetworkRunner runner)
+    {
+        Debug.Log("[Fusion] 씬 로딩 완료");
+
+        // 씬 바뀌면 스폰포인트 갱신 필수
+        RefreshSpawnPoints();
+
+        // 서버일 경우, 씬 전환 직후에도 스폰 재확인
+        if (runner.IsServer)
+        {
+            foreach (var player in runner.ActivePlayers)
+            {
+                if (!spawnedCharacters.ContainsKey(player))
+                {
+                    SpawnPlayer(player);
+                }
+            }
+        }
+
+        var phoneUI = GameObject.Find("PhoneUI");
+        if (phoneUI != null)
+            phoneUI.SetActive(false);
+    }
+    public void OnSceneLoadStart(NetworkRunner runner)
+    {
+        Debug.Log("[Fusion] 씬 로딩 시작");
+    }
+    private void RefreshSpawnPoints()
+    {
+        spawnPoints.Clear();
+
+        string groupName = $"SpawnPointGroup_{SceneManager.GetActiveScene().name}";
+        GameObject group = GameObject.Find(groupName);
+
+        if (group == null)
+        {
+            Debug.LogWarning($"[LobbyManager] Spawn group '{groupName}' not found.");
+            return;
+        }
+
+        foreach (Transform child in group.transform)
+        {
+            spawnPoints.Add(child);
+        }
+
+        nextSpawnPointIndex = 0;
     }
 
     #region 사용하지 않는 콜백들
@@ -113,19 +163,9 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
-    public void OnSceneLoadDone(NetworkRunner runner)
-    {
-        Debug.Log("[Fusion] 씬 로딩 완료");
-        if (spawnedCharacters.ContainsKey(runner.LocalPlayer)) return;
-        var phoneUI = GameObject.Find("PhoneUI");
-        if (phoneUI != null)
-            phoneUI.SetActive(false);
-    }
-    public void OnSceneLoadStart(NetworkRunner runner)
-    {
-        Debug.Log("[Fusion] 씬 로딩 시작");
-    }
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     #endregion
+
+
 }
