@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
@@ -15,4 +15,9 @@ public class ItemData
     public int value;
 }
 
-public enum ItemType { Equipment, Consumable, Common}
+public enum ItemType
+{
+    Equipment = 0,
+    Consumable = 1,
+    Common = 2
+}

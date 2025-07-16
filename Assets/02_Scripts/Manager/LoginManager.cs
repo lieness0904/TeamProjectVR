@@ -19,6 +19,7 @@ public class LoginManager : MonoBehaviour
     public Button loginButton;
     public TextMeshProUGUI statusText;
 
+    private bool isLoggingIn = false;
     void Start()
     {
         // --- [수정 2] 씬 시작 시 XR Origin 프리팹이 할당되어 있으면 생성 ---
@@ -30,6 +31,7 @@ public class LoginManager : MonoBehaviour
 
         if (loginButton != null)
         {
+            loginButton.onClick.RemoveListener(OnLoginButtonClick); // 리스너 중복 제거
             loginButton.onClick.AddListener(OnLoginButtonClick);
         }
     }
@@ -37,12 +39,16 @@ public class LoginManager : MonoBehaviour
 
     public void OnLoginButtonClick()
     {
+        if (isLoggingIn) return; // 중복 방지
+        isLoggingIn = true;
+
         string userId = idInputField.text;
         string password = passwordInputField.text;
 
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
         {
             statusText.text = "아이디와 비밀번호를 모두 입력하세요.";
+            isLoggingIn = false;
             return;
         }
 
@@ -72,9 +78,16 @@ public class LoginManager : MonoBehaviour
                     Debug.Log("로그인 성공! 데이터 로드 완료.");
 
                     PlayerDataManager.Instance.UserID = response.data.userId;
-                    PlayerDataManager.Instance.InventoryJson = response.data.inventory;
 
-                    // --- [수정 3] 불필요해진 파괴 로직 삭제 ---
+                    if (!string.IsNullOrEmpty(response.data.inventory))
+                    {
+                        PlayerDataManager.Instance.InventoryJson = response.data.inventory;
+                        InventorySyncManager.Instance.LoadInventoryFromServer(response.data.userId);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("서버에서 인벤토리 데이터가 비어 있음 (신규 유저 또는 초기 상태)");
+                    }
 
                     yield return new WaitForSeconds(1);
                     SceneManager.LoadScene("HouseScene");
@@ -90,6 +103,8 @@ public class LoginManager : MonoBehaviour
                 Debug.LogError("Web Request Error: " + www.error);
             }
         }
+
+        isLoggingIn = false;
     }
 
     private void OnDestroy()

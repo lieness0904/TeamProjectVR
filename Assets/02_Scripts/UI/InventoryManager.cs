@@ -6,19 +6,19 @@ using UnityEngine.UI;
 public class InventoryManager : MonoBehaviour
 {
     [Header("Inventory Panels")]
-    public GameObject fishInventory;
-    public GameObject treeInventory;
-    public GameObject orangeInventory;
+    public GameObject equipmentInventory;
+    public GameObject consumableInventory;
+    public GameObject commonInventory;
 
     [Header("Panel Controllers")]
-    public InventoryPanelCtrl fishController;
-    public InventoryPanelCtrl treeController;
-    public InventoryPanelCtrl orangeController;
+    public InventoryPanelCtrl equipmentController;
+    public InventoryPanelCtrl consumableController;
+    public InventoryPanelCtrl commonController;
 
     [Header("Category Buttons")]
-    public Button fishButton;
-    public Button treeButton;
-    public Button orangeButton;
+    public Button equipButton;
+    public Button consumeButton;
+    public Button commonButton;
 
     [Header("Paging Buttons")]
     public Button prevButton;
@@ -31,58 +31,51 @@ public class InventoryManager : MonoBehaviour
     private GameObject currentInventory;
     private InventoryPanelCtrl currentController;
 
-    public void InitInventory()
+    private void Start()
     {
-        ShowFishInventory();
+        ShowInventory(equipmentInventory, equipmentController, equipButton);
     }
 
-    public void ShowFishInventory()
+    private void ShowInventory(GameObject panel, InventoryPanelCtrl controller, Button highlightTarget)
     {
-        ShowInventory(fishInventory, fishController);
-        HighlightButton(fishButton);
-    }
+        // 패널 전부 끄고, 선택된 것만 켜기
+        equipmentInventory.SetActive(false);
+        consumableInventory.SetActive(false);
+        commonInventory.SetActive(false);
 
-    public void ShowTreeInventory()
-    {
-        ShowInventory(treeInventory, treeController);
-        HighlightButton(treeButton);
-    }
-
-    public void ShowOrangeInventory()
-    {
-        ShowInventory(orangeInventory, orangeController);
-        HighlightButton(orangeButton);
-    }
-
-    private void ShowInventory(GameObject inventoryPanel, InventoryPanelCtrl controller)
-    {
-        fishInventory.SetActive(false);
-        treeInventory.SetActive(false);
-        orangeInventory.SetActive(false);
-
-        inventoryPanel.SetActive(true);
-        currentInventory = inventoryPanel;
+        panel.SetActive(true);
+        currentInventory = panel;
         currentController = controller;
 
-        currentController.ShowPage(0);
-        BindPagingButtons();
+        // 인벤토리 데이터 로드
+        var playerInventory = FindObjectOfType<PlayerInventory>();
+        controller.ShowItem(playerInventory.items);
+
+        // 버튼 색상 하이라이트
+        HighlightButton(highlightTarget);
+
+        foreach (var i in playerInventory.items)
+        {
+            Debug.Log($"[확인] 아이템 ID: {i.id}, 수량: {i.amount}, 타입: {InventoryHelper.GetItemType(i.id)}");
+        }
     }
 
     private void HighlightButton(Button selected)
     {
-        fishButton.image.color = defaultColor;
-        treeButton.image.color = defaultColor;
-        orangeButton.image.color = defaultColor;
+        equipButton.image.color = defaultColor;
+        consumeButton.image.color = defaultColor;
+        commonButton.image.color = defaultColor;
 
         selected.image.color = selectedColor;
     }
 
-    private void BindPagingButtons()
+    public void RefreshCurrentPanel(List<InventoryItem> items)
     {
-        prevButton.onClick.RemoveAllListeners();
-        nextButton.onClick.RemoveAllListeners();
-
-        prevButton.onClick.AddListener(() => currentController.PrevPage());
-        nextButton.onClick.AddListener(() => currentController.NextPage());
+        currentController?.ShowItem(items);
     }
+    public void ShowEquipmentInventory() => ShowInventory(equipmentInventory, equipmentController, equipButton);
+    public void ShowConsumableInventory() => ShowInventory(consumableInventory, consumableController, consumeButton);
+    public void ShowCommonInventory() => ShowInventory(commonInventory, commonController, commonButton);
+    public void PrevButton() => currentController?.PrevPage();
+    public void NextButton() => currentController?.NextPage();
 }

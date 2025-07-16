@@ -3,18 +3,26 @@
     {
       "id": 1,
       "name": "Orange",
-      "itemType": "Common",
+      "itemType": 2,
       "description": "달콤한 귤",
-      "iconPath": "09_UI/Sprites/Orange_Sprite",
+      "iconPath": "Sprites/Orange_Sprite",
       "value": 10
     },
     {
       "id": 2,
       "name": "미끼",
-      "itemType": "Consumable",
+      "itemType": 1,
       "description": "물고기가 싫어할것만 같은 미끼다,,",
-      "iconPath": "09_UI/Sprites/Bait_Sprite",
+      "iconPath": "Sprites/Bait_Sprite",
       "value": 20
+    },
+    {
+      "id": 100,
+      "name": "일반 낚시대",
+      "itemType": 0,
+      "description": "후진 낚시대",
+      "iconPath": "Sprites/Normal_Rod_Sprite",
+      "value": 200
     }
   ]
 }
