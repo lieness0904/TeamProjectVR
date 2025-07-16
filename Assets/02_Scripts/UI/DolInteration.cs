@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
@@ -15,8 +16,17 @@ public class DolInteration : MonoBehaviour
 
     public void ShowInfo()
     {
-        if (infoUI != null)
-            infoUI.SetActive(true);
+        if (infoUI == null) return;
+
+        Transform cam = Camera.main.transform;
+
+        // 카메라 앞에 UI 배치
+        infoUI.transform.position = cam.position + cam.forward * 1f;
+
+        // UI가 카메라를 정확히 바라보게
+        infoUI.transform.rotation = Quaternion.LookRotation(infoUI.transform.position - cam.position);
+
+        infoUI.SetActive(true);
     }
 
     public void HideInfo()
