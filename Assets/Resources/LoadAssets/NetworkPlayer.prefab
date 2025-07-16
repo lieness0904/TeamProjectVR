@@ -894,6 +894,7 @@ GameObject:
   - component: {fileID: 5356605634537307701}
   - component: {fileID: 2844160205959358355}
   - component: {fileID: 3202657160016435967}
+  - component: {fileID: 6646289629237945430}
   m_Layer: 0
   m_Name: NetworkPlayer
   m_TagString: Respawn
@@ -1119,6 +1120,19 @@ MonoBehaviour:
   inventoryManager: {fileID: 0}
   togglePhoneUIAction: {fileID: 4335090648579581189, guid: e0ca4504471ca124088e1e2cfe6804ae,
     type: 3}
+--- !u!114 &6646289629237945430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763074577358944841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b336f149a1a2bf14eb6719d968e3667a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  items: []
 --- !u!1 &784138813812748246
 GameObject:
   m_ObjectHideFlags: 0

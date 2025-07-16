@@ -71,9 +71,8 @@ public class LoginManager : MonoBehaviour
                     statusText.text = response.message;
                     Debug.Log("로그인 성공! 데이터 로드 완료.");
 
-                    Debug.Log($"[LoginManager] 저장할 UserID: '{response.data.userId}'");
                     PlayerDataManager.Instance.UserID = response.data.userId;
-                    Debug.Log($"[LoginManager] 저장된 UserID: '{PlayerDataManager.Instance.UserID}'");
+                    PlayerDataManager.Instance.InventoryJson = response.data.inventory;
 
                     // --- [수정 3] 불필요해진 파괴 로직 삭제 ---
 
@@ -117,4 +116,5 @@ public class PlayerDataFields
     public float maxFishSize;
     public string fishCaughtList;
     public int points;
+    public string inventory;
 }
