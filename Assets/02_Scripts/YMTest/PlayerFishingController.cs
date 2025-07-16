@@ -1,11 +1,17 @@
 using UnityEngine;
 using Fusion;
+using UnityEngine.InputSystem; // InputAction을 직접 사용하기 위해 추가
 
 [RequireComponent(typeof(RiggingManager))]
 public class PlayerFishingController : NetworkBehaviour
 {
-    [Header("낚시 설정")]
+    [Header("프리팹 연결")]
     [SerializeField] private NetworkObject fishingRodPrefab;
+    [SerializeField] private NetworkObject bobberPrefab;
+
+    [Header("컴포넌트 연결")]
+    // 오른손 컨트롤러에 있는 CastingHandler를 여기에 연결해야 합니다.
+    [SerializeField] private CastingHandler castingHandler;
 
     [Networked]
     public NetworkBool IsFishing { get; set; }
@@ -13,9 +19,10 @@ public class PlayerFishingController : NetworkBehaviour
     [Networked]
     private NetworkObject SpawnedRod { get; set; }
 
+    [Networked]
+    public NetworkObject CurrentBobber { get; private set; }
+
     private RiggingManager _riggingManager;
-    // --- [추가] ---
-    // 로컬 플레이어의 PlayerFishingController를 쉽게 찾을 수 있도록 static 변수 추가
     public static PlayerFishingController Local { get; private set; }
 
     private void Awake()
@@ -25,7 +32,6 @@ public class PlayerFishingController : NetworkBehaviour
 
     public override void Spawned()
     {
-        // 이 오브젝트가 로컬 플레이어의 것이라면, static 변수에 자기 자신을 할당합니다.
         if (HasInputAuthority)
         {
             Local = this;
@@ -34,14 +40,27 @@ public class PlayerFishingController : NetworkBehaviour
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
-        // 오브젝트가 파괴될 때 static 참조를 비워줍니다.
         if (Local == this)
         {
             Local = null;
         }
     }
 
-    // "낚시하기/그만하기" 버튼을 눌렀을 때 UI 매니저가 호출할 함수입니다.
+    public override void FixedUpdateNetwork()
+    {
+        if (HasInputAuthority)
+        {
+            // ▼▼▼▼▼ [핵심 최종 수정] ▼▼▼▼▼
+            // 클라이언트 측의 IsFishing 확인 로직을 제거하여 타이밍 문제를 해결합니다.
+            if (castingHandler != null && castingHandler.castAction.action.WasReleasedThisFrame())
+            {
+                // CastingHandler에 저장된 마지막 캐스팅 힘으로 RPC를 호출합니다.
+                RPC_CastBobber(castingHandler.LastCastVelocity);
+            }
+            // ▲▲▲▲▲ [핵심 최종 수정] ▲▲▲▲▲
+        }
+    }
+
     public void ToggleFishingState()
     {
         if (HasInputAuthority)
@@ -50,11 +69,9 @@ public class PlayerFishingController : NetworkBehaviour
         }
     }
 
-    // [Client] -> [Server] : 클라이언트가 서버에게 낚시 상태 변경을 요청
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void RPC_SetFishingState(NetworkBool isFishing)
     {
-        // 서버에서 플레이어의 낚시 상태를 변경합니다.
         IsFishing = isFishing;
 
         if (isFishing)
@@ -66,76 +83,72 @@ public class PlayerFishingController : NetworkBehaviour
         }
         else
         {
-            if (SpawnedRod != null)
-            {
-                Runner.Despawn(SpawnedRod);
-                SpawnedRod = null;
-            }
+            if (SpawnedRod != null) Runner.Despawn(SpawnedRod);
+            if (CurrentBobber != null) Runner.Despawn(CurrentBobber);
+            SpawnedRod = null;
+            CurrentBobber = null;
         }
 
-        // --- [핵심 변경사항] ---
-        // 서버는 상태 변경 후, 모든 클라이언트에게 시각적 업데이트를 하라고 다시 RPC를 보냅니다.
         RPC_UpdateVisuals(isFishing, SpawnedRod);
     }
 
-    // [Server] -> [All Clients] : 서버가 모든 클라이언트에게 시각적 업데이트를 명령
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    private void RPC_UpdateVisuals(NetworkBool isFishing, NetworkObject rod)
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    private void RPC_CastBobber(Vector3 force)
     {
-        // 이 RPC를 받은 모든 클라이언트는 낚싯대를 손에 붙이는 로직을 실행합니다.
-        AttachRodToHand(isFishing, rod);
-
-        // 이 RPC를 받은 클라이언트 중, 로컬 플레이어만 UI를 업데이트합니다.
-        if (HasInputAuthority)
+        // 최종 결정은 서버가 내립니다. 낚시 중이 아니면 찌를 생성하지 않습니다.
+        if (IsFishing && CurrentBobber == null && bobberPrefab != null)
         {
-            // FishingUIManager 스크립트는 다음에 만들 예정입니다.
-            // FindObjectOfType<FishingUIManager>()?.UpdateFishingButton(isFishing);
+            Transform rodTip = SpawnedRod?.GetComponentInChildren<RodInfo>()?.rodTip;
+            Vector3 spawnPos = rodTip != null ? rodTip.position : transform.position;
+
+            CurrentBobber = Runner.Spawn(bobberPrefab, spawnPos, Quaternion.identity, Object.InputAuthority);
+
+            Rigidbody rb = CurrentBobber.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.AddForce(force, ForceMode.Impulse);
+            }
         }
     }
 
-    // 스폰된 낚싯대를 오른손에 부착하는 로직
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_UpdateVisuals(NetworkBool isFishing, NetworkObject rod)
+    {
+        AttachRodToHand(isFishing, rod);
+        if (HasInputAuthority)
+        {
+            FishingUIManager.Instance?.UpdateFishingButton(isFishing);
+        }
+    }
+
     private void AttachRodToHand(bool isFishing, NetworkObject rod)
     {
         if (isFishing && rod != null)
         {
-            // 낚시 중이고 낚싯대가 유효하다면 오른손을 부모로 설정합니다.
             Transform rightHand = _riggingManager.rightHandController;
             if (rightHand != null)
             {
                 rod.transform.SetParent(rightHand, false);
-                rod.transform.localPosition = Vector3.zero;
+                rod.transform.localPosition = new Vector3(0, 0, 1f);
                 rod.transform.localRotation = Quaternion.identity;
             }
         }
     }
+
     private void OnTriggerEnter(Collider other)
     {
-        // 이 로직은 로컬 플레이어에게만 작동해야 합니다.
-        if (!HasInputAuthority)
-        {
-            return;
-        }
-
-        // 들어온 트리거의 태그가 "CastingZone"이면
+        if (!HasInputAuthority) return;
         if (other.CompareTag("CastingZone"))
         {
-            // UI 매니저에게 버튼을 보여달라고 요청합니다.
             FishingUIManager.Instance?.ShowButton();
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        // 이 로직은 로컬 플레이어에게만 작동해야 합니다.
-        if (!HasInputAuthority)
-        {
-            return;
-        }
-
-        // 나간 트리거의 태그가 "CastingZone"이면
+        if (!HasInputAuthority) return;
         if (other.CompareTag("CastingZone"))
         {
-            // UI 매니저에게 버튼을 숨겨달라고 요청합니다.
             FishingUIManager.Instance?.HideButton();
         }
     }

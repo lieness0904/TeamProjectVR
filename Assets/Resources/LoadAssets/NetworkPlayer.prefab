@@ -1074,7 +1074,7 @@ MonoBehaviour:
   jumpImpulse: 8
   acceleration: 10
   braking: 10
-  maxSpeed: 1
+  maxSpeed: 1.8
   rotationSpeed: 1
 --- !u!114 &2844160205959358355
 MonoBehaviour:
@@ -1149,8 +1149,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fishingRodPrefab: {fileID: -1738820333853545119, guid: 3bdab65660b3e5547b14d2491138f786,
     type: 3}
+  bobberPrefab: {fileID: -4729191417813426738, guid: fc1929e7f76cda94c82218321f0f6650,
+    type: 3}
+  castingHandler: {fileID: 4839604113307382270}
   _IsFishing:
     _value: 0
+  _CurrentBobber: {fileID: 0}
 --- !u!1 &784138813812748246
 GameObject:
   m_ObjectHideFlags: 0
@@ -16806,6 +16810,7 @@ GameObject:
   - component: {fileID: 4633215884959695886}
   - component: {fileID: 235756619262701645}
   - component: {fileID: 7530877806516428494}
+  - component: {fileID: 4839604113307382270}
   m_Layer: 0
   m_Name: Right Controller
   m_TagString: Untagged
@@ -17292,6 +17297,21 @@ MonoBehaviour:
   uiLayer:
     serializedVersion: 2
     m_Bits: 32
+--- !u!114 &4839604113307382270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9120569952956067704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 252a1581fa614554d8be18181d2b5636, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  castAction: {fileID: -5684558904543120851, guid: e0ca4504471ca124088e1e2cfe6804ae,
+    type: 3}
+  castPowerMultiplier: 0.2
 --- !u!1 &9167484419136852364
 GameObject:
   m_ObjectHideFlags: 0
