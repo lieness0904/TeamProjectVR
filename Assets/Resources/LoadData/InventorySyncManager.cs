@@ -19,7 +19,6 @@ public class InventorySyncManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-
     public void LoadInventoryFromServer(string userId)
     {
         StartCoroutine(LoadInventoryRoutine(userId));
@@ -70,7 +69,7 @@ public class InventorySyncManager : MonoBehaviour
         string inventoryJson = inventory.ToJson();
 
         WWWForm form = new WWWForm();
-        form.AddField("action", "saveInventory");
+        form.AddField("action", "saveData");
         form.AddField("userId", userId);
         form.AddField("inventory", inventoryJson);
 

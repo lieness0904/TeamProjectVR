@@ -1,18 +1,18 @@
 using UnityEngine;
 
-// ÇÃ·¹ÀÌ¾î µ¥ÀÌÅÍ¸¦ °ÔÀÓ ÀüÃ¼¿¡¼­ Á¢±ÙÇÒ ¼ö ÀÖ°Ô °ü¸®ÇÏ´Â ½Ì±ÛÅæ Å¬·¡½º
+// í”Œë ˆì´ì–´ ë°ì´í„°ë¥¼ ê²Œì„ ì „ì²´ì—ì„œ ì ‘ê·¼í•  ìˆ˜ ìˆê²Œ ê´€ë¦¬í•˜ëŠ” ì‹±ê¸€í†¤ í´ë˜ìŠ¤
 public class PlayerDataManager : MonoBehaviour
 {
     public static PlayerDataManager Instance { get; private set; }
 
-    public string UserID; // ·Î±×ÀÎÇÑ À¯ÀúÀÇ ¾ÆÀÌµğ¸¦ ÀúÀåÇÒ º¯¼ö
-
+    public string UserID; // ë¡œê·¸ì¸í•œ ìœ ì €ì˜ ì•„ì´ë””ë¥¼ ì €ì¥í•  ë³€ìˆ˜
+    public string InventoryJson;
     void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // ¾ÀÀÌ ¹Ù²î¾îµµ ÀÌ ¿ÀºêÁ§Æ®´Â ÆÄ±«µÇÁö ¾ÊÀ½
+            DontDestroyOnLoad(gameObject); // ì”¬ì´ ë°”ë€Œì–´ë„ ì´ ì˜¤ë¸Œì íŠ¸ëŠ” íŒŒê´´ë˜ì§€ ì•ŠìŒ
         }
         else
         {
