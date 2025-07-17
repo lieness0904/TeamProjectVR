@@ -7,7 +7,7 @@ public class InventorySyncManager : MonoBehaviour
 {
     public static InventorySyncManager Instance { get; private set; }
 
-    private string scriptURL = "https://script.google.com/macros/s/AKfycbxsVIFFP0aRSLTljhqnSI0KAso8jv3Hx3UPdIiWsl1UynSyyk1EVABCf2Fpz6WwzcNn/exec";
+    private string scriptURL = "https://script.google.com/macros/s/AKfycbxbEbhCsVmqMWCuZOtPEcfGFperFw3nRjDw5OsECes9IFx2pbeXZMFmMAS0E20XUVy3/exec";
 
     private void Awake()
     {
@@ -79,11 +79,33 @@ public class InventorySyncManager : MonoBehaviour
 
             if (www.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log("인벤토리 저장 성공");
+                string responseText = www.downloadHandler.text;
+                Debug.Log($"[서버 응답] {responseText}");
+
+                try
+                {
+                    SaveResponse response = JsonUtility.FromJson<SaveResponse>(responseText);
+
+                    if (response.status == "success")
+                    {
+                        Debug.Log("인벤토리 저장 성공");
+
+                        if (PlayerDataManager.Instance != null)
+                            PlayerDataManager.Instance.InventoryJson = inventoryJson;
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"저장 실패: {response.message}");
+                    }
+                }
+                catch
+                {
+                    Debug.LogError("JSON 파싱 실패: 응답이 JSON 형식이 아닐 수 있음");
+                }
             }
             else
             {
-                Debug.LogError("인벤토리 저장 실패: " + www.error);
+                Debug.LogError("UnityWebRequest 실패: " + www.error);
             }
         }
     }
