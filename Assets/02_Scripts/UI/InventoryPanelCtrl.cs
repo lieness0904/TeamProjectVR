@@ -16,12 +16,18 @@ public class InventoryPanelCtrl : MonoBehaviour
     public void NextPage()
     {
         if (currentPage < GetMaxPage())
+        {
             ShowPage(currentPage + 1);
+            UpdateSlots();
+        }
     }
     public void PrevPage()
     {
         if (currentPage > 0)
+        {
             ShowPage(currentPage - 1);
+            UpdateSlots();
+        }
     }
     private int GetMaxPage()
     {
