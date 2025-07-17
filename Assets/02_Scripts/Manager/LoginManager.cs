@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 public class LoginManager : MonoBehaviour
 {
-    private string scriptURL = "https://script.google.com/macros/s/AKfycbxsVIFFP0aRSLTljhqnSI0KAso8jv3Hx3UPdIiWsl1UynSyyk1EVABCf2Fpz6WwzcNn/exec";
+    private string scriptURL = "https://script.google.com/macros/s/AKfycbxbEbhCsVmqMWCuZOtPEcfGFperFw3nRjDw5OsECes9IFx2pbeXZMFmMAS0E20XUVy3/exec";
 
     [Header("XR Origin 프리팹 설정")]
     // --- [수정 1] XR Origin 프리팹을 할당받을 변수 ---
