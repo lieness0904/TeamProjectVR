@@ -6694,6 +6694,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Filter
       objectReference: {fileID: 0}
+    - target: {fileID: 559609985375382880, guid: 5303119d0b07d9d46be53838ee2854ab,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5365610269632715234, guid: 5303119d0b07d9d46be53838ee2854ab,
         type: 3}
       propertyPath: m_LocalPosition.x
