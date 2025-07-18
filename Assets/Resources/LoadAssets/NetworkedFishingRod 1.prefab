@@ -506,7 +506,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc9e405683cc1f44280de0e3fc0de47d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  reelSpeedMultiplier: 5
+  fixedRotationSpeed: 360
+  fixedReelInSpeed: 2
+  movementThreshold: 0.005
+  handleToRotate: {fileID: 0}
 --- !u!114 &662559367091844796
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -849,6 +852,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 6527735220274847340}
   - {fileID: 8322552672463926840}
+  - {fileID: 6690740799201703178}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &8322552672463926840
 MonoBehaviour:

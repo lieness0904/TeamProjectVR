@@ -1088,7 +1088,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fixedRotationSpeed: -900
-  fixedReelInSpeed: 2
+  fixedReelInSpeed: 5
   movementThreshold: 0.005
   handleToRotate: {fileID: 194148361492041820}
 --- !u!114 &7950328416977702215
@@ -1914,6 +1914,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 2768826595606117318}
   - {fileID: 2136182256314379674}
+  - {fileID: 633607056397398896}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &2136182256314379674
 MonoBehaviour:

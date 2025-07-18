@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using Fusion; // 포톤 퓨전 네임스페이스 추가
 
-public class ReelController : MonoBehaviour
+// MonoBehaviour에서 NetworkBehaviour로 변경
+public class ReelController : NetworkBehaviour
 {
     [Header("새로운 릴링 방식 설정")]
     [Tooltip("손잡이가 1초에 회전하는 각도입니다. (예: 360은 1초에 한 바퀴)")]
@@ -22,9 +24,24 @@ public class ReelController : MonoBehaviour
     private bool _isGrabbed = false;
     private Vector3 _lastPosition; // 이전 프레임의 컨트롤러 위치
 
-    void Start()
+    // --- [수정] Start() 대신 Spawned() 사용 ---
+    public override void Spawned()
     {
-        _playerFishingController = GetComponentInParent<PlayerFishingController>();
+        // 이 오브젝트(낚싯대)의 소유권을 가진 플레이어를 찾습니다.
+        var playerObject = Runner.GetPlayerObject(Object.InputAuthority);
+        if (playerObject != null)
+        {
+            // 찾은 플레이어 오브젝트에서 PlayerFishingController 컴포넌트를 가져옵니다.
+            _playerFishingController = playerObject.GetComponent<PlayerFishingController>();
+            if (_playerFishingController == null)
+            {
+                Debug.LogError("ReelController: PlayerFishingController를 찾지 못했습니다!", playerObject);
+            }
+        }
+        else
+        {
+            Debug.LogError("ReelController: 이 낚싯대의 소유 플레이어를 찾지 못했습니다!", this.gameObject);
+        }
     }
 
     void Update()
@@ -45,7 +62,7 @@ public class ReelController : MonoBehaviour
                     handleToRotate.Rotate(0, 0, fixedRotationSpeed * Time.deltaTime, Space.Self);
                 }
 
-                // 2. 기능적 릴링: 고정된 속도로 찌를 감아들입니다.
+                // 2. 기능적 릴링: _playerFishingController가 null이 아닌지 확인 후 ReelIn 호출
                 if (_playerFishingController != null)
                 {
                     // PlayerFishingController의 ReelIn은 이동 '거리'를 받으므로, 속도에 시간을 곱해 전달합니다.

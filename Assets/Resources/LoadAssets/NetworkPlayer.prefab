@@ -1154,7 +1154,7 @@ MonoBehaviour:
   castingHandler: {fileID: 4839604113307382270}
   vibrationAmplitude: 0.7
   vibrationDuration: 1
-  retrievalDistance: 1.5
+  retrievalDistance: 3
   _IsFishing:
     _value: 0
   _CurrentBobber: {fileID: 0}

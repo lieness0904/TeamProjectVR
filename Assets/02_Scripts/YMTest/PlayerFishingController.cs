@@ -17,11 +17,9 @@ public class PlayerFishingController : NetworkBehaviour
     [SerializeField] private float vibrationAmplitude = 0.7f;
     [SerializeField] private float vibrationDuration = 1.0f;
 
-    // ▼▼▼ [릴 기능 추가] ▼▼▼
     [Header("릴 설정")]
     [Tooltip("찌가 이 거리 안으로 들어오면 회수된 것으로 간주합니다.")]
     [SerializeField] private float retrievalDistance = 1.5f;
-    // ▲▲▲▲▲ [릴 기능 추가] ▲▲▲▲▲
 
     [Networked]
     public NetworkBool IsFishing { get; set; }
@@ -187,45 +185,47 @@ public class PlayerFishingController : NetworkBehaviour
         }
     }
 
-    // ▼▼▼▼▼ [릴 기능 추가] ▼▼▼▼▼
-    /// <summary>
-    /// ReelController가 호출하여 릴을 감는 양을 전달합니다. (클라이언트에서 실행)
-    /// </summary>
     public void ReelIn(float reelAmount)
     {
-        // 찌가 없거나, 입력 권한이 없으면 실행하지 않습니다.
         if (CurrentBobber == null || !HasInputAuthority) return;
-
-        // 서버에 릴을 감는 양을 전달합니다.
         RPC_ReelIn(reelAmount);
     }
 
-    /// <summary>
-    /// 서버에서 실행되어 실제로 찌를 움직이고 회수를 판정합니다.
-    /// </summary>
+    // --- [수정된 함수] ---
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void RPC_ReelIn(float reelAmount)
     {
         if (CurrentBobber == null) return;
 
-        // 찌를 낚싯대 끝(rodTip) 방향으로 이동시킵니다.
+        // 1. 낚싯대 끝(rodTip)을 찾고, 없으면 에러를 명확히 출력합니다.
         Transform rodTip = SpawnedRod?.GetComponentInChildren<RodInfo>()?.rodTip;
-        if (rodTip == null) return; // 낚싯대 끝을 찾을 수 없으면 중단
-
-        var bobberTransform = CurrentBobber.transform;
-        // MoveTowards를 사용하여 찌를 낚싯대 끝으로 reelAmount만큼 이동
-        bobberTransform.position = Vector3.MoveTowards(bobberTransform.position, rodTip.position, reelAmount);
-
-        // 낚싯대 끝과의 거리를 확인하여 회수 처리
-        if (Vector3.Distance(bobberTransform.position, rodTip.position) < retrievalDistance)
+        if (rodTip == null)
         {
-            Debug.Log("찌 회수 완료!");
-            Runner.Despawn(CurrentBobber); // 찌를 네트워크에서 파괴
-            CurrentBobber = null; // 참조 제거
+            // 이 에러가 콘솔에 보인다면, 낚싯대 프리팹 설정을 확인해야 합니다.
+            Debug.LogError("[Server] ReelIn 실패: 낚싯대 프리팹에서 'RodInfo' 컴포넌트 또는 'rodTip'을 찾을 수 없습니다!");
+            return;
+        }
+
+        // 2. 찌의 Rigidbody를 가져옵니다.
+        Rigidbody bobberRigidbody = CurrentBobber.GetComponent<Rigidbody>();
+        if (bobberRigidbody == null)
+        {
+            Debug.LogError("[Server] ReelIn 실패: 찌(Bobber) 프리팹에 Rigidbody가 없습니다!");
+            return;
+        }
+
+        // 3. Rigidbody.MovePosition을 사용하여 물리적으로 안전하게 찌를 이동시킵니다.
+        Vector3 newPosition = Vector3.MoveTowards(bobberRigidbody.position, rodTip.position, reelAmount);
+        bobberRigidbody.MovePosition(newPosition);
+
+        // 4. 낚싯대 끝과의 거리를 확인하여 회수 처리
+        if (Vector3.Distance(bobberRigidbody.position, rodTip.position) < retrievalDistance)
+        {
+            Debug.Log("[Server] 찌 회수 완료!");
+            Runner.Despawn(CurrentBobber);
+            CurrentBobber = null;
         }
     }
-    // ▲▲▲▲▲ [릴 기능 추가] ▲▲▲▲▲
-
 
     private void OnTriggerEnter(Collider other)
     {
