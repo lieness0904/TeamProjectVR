@@ -193,11 +193,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 2597384372163427294, guid: 4d92dc7fa4f2bb34294094f418942da2,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2844263502472752173, guid: 4d92dc7fa4f2bb34294094f418942da2,
         type: 3}
       propertyPath: m_Name
@@ -258,11 +253,6 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 218942145}
-    - target: {fileID: 8213434125923194078, guid: 4d92dc7fa4f2bb34294094f418942da2,
-        type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnLoginButtonClick
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -504,6 +494,7 @@ GameObject:
   - component: {fileID: 1261740542}
   - component: {fileID: 1658191579}
   - component: {fileID: 1658191582}
+  - component: {fileID: 1658191583}
   m_Layer: 0
   m_Name: DataHandler
   m_TagString: Untagged
@@ -525,6 +516,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UserID: 
   InventoryJson: 
+  Points: 0
   playerInventory: {fileID: 0}
 --- !u!4 &1261740543
 Transform:
@@ -577,6 +569,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e659e61de9357e4ead8d601108e9c41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1658191583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1261740541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c427e0b88e41cd34cbf4999447dbafbd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pointText: {fileID: 0}
 --- !u!1 &1737038571
 GameObject:
   m_ObjectHideFlags: 0

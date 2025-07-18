@@ -100,14 +100,21 @@ public class InventoryPanelCtrl : MonoBehaviour
 
             int itemIndex = startIndex + i;
 
-            // 방어 코드
             if (itemIndex < 0 || itemIndex >= currentItems.Count)
                 continue;
 
             var item = currentItems[itemIndex];
             Sprite sprite = GetSpriteById(item.id);
+
             if (sprite != null)
+            {
+                Debug.Log($"[UpdateSlots] 슬롯 {i} 에 아이템 {item.id} (수량: {item.amount}) 세팅");
                 AddItemIconToSlot(slot, sprite, item.amount);
+            }
+            else
+            {
+                Debug.LogWarning($"[UpdateSlots] 아이템 {item.id} 스프라이트 없음");
+            }
         }
     }
     private void ClearSlot(Transform slot)
@@ -135,10 +142,12 @@ public class InventoryPanelCtrl : MonoBehaviour
 
     private void AddItemIconToSlot(Transform slot, Sprite sprite, int amount)
     {
+        Debug.Log($"[AddItemIconToSlot] sprite: {sprite}, amount: {amount}");
+
         Transform itemSlotObj = slot.Find("ItemSlot");
         if (itemSlotObj != null)
         {
-            itemSlotObj.gameObject.SetActive(true); // 여기 추가!
+            itemSlotObj.gameObject.SetActive(true); 
             Image iconImage = itemSlotObj.GetComponent<Image>();
             if (iconImage != null)
             {
@@ -167,10 +176,16 @@ public class InventoryPanelCtrl : MonoBehaviour
 
     private Sprite GetSpriteById(int id)
     {
-        var data = ItemDataLoader.Instance.LoadedItems.Find(i => i.id == id);
+        var data = ItemDataLoader.Instance?.LoadedItems?.Find(i => i.id == id);
+
         if (data == null)
+        {
+            Debug.LogError($"❌ [GetSpriteById] 아이템 ID {id} 에 해당하는 데이터 없음");
             return null;
-        return Resources.Load<Sprite>(data.iconPath); 
+        }
+
+        Debug.Log($"✅ 아이템 {id} 의 iconPath: {data.iconPath}, 타입: {data.itemType}");
+        return Resources.Load<Sprite>(data.iconPath);
     }
 
     private void ActivateOnlyCurrentPanel()

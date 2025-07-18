@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class PlayerInventory : MonoBehaviour
 {
@@ -8,19 +9,33 @@ public class PlayerInventory : MonoBehaviour
 
     public List<InventoryItem> items = new();
     public int maxSlots = 27;
+
+    private void Start()
+    {
+        if (PlayerPointManager.Instance != null && PlayerPointManager.Instance.GetPoints() > 0)
+        {
+            var text = GameObject.Find("PlayerPointText")?.GetComponent<TextMeshProUGUI>();
+            if (text != null)
+            {
+                PlayerPointManager.Instance.SetPointText(text);
+                Debug.Log("[PlayerInventory] PointText 자동 연결 성공");
+            }
+        }
+    }
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Z))
         {
-            FindObjectOfType<PlayerInventory>().AddItem(1, 2); // id=1, 수량=2
-            FindObjectOfType<PlayerInventory>().AddItem(2, 2); // id=1, 수량=2
-            FindObjectOfType<PlayerInventory>().AddItem(100, 2); // id=1, 수량=2
+            FindObjectOfType<PlayerInventory>().AddItem(100, 2); 
+            FindObjectOfType<PlayerInventory>().AddItem(200, 2);
+            FindObjectOfType<PlayerInventory>().AddItem(300, 2);
+            PlayerPointManager.Instance.AddPoints(300); // 포인트 추가
         }
         if (Input.GetKeyDown(KeyCode.X))
         {
-            FindObjectOfType<PlayerInventory>().RemoveItem(1, 1); // id=1, 수량=2
-            FindObjectOfType<PlayerInventory>().RemoveItem(2, 1); // id=1, 수량=2
-            FindObjectOfType<PlayerInventory>().RemoveItem(100, 1); // id=1, 수량=2
+            FindObjectOfType<PlayerInventory>().RemoveItem(100, 1); 
+            FindObjectOfType<PlayerInventory>().RemoveItem(200, 1); 
+            FindObjectOfType<PlayerInventory>().RemoveItem(300, 1); 
         }
         if (Input.GetKeyDown(KeyCode.C))
         {
@@ -84,7 +99,7 @@ public class PlayerInventory : MonoBehaviour
     }
     private void UpdateInventoryUI()
     {
-        inventoryManager.RefreshCurrentPanel(items);
+        inventoryManager?.RefreshCurrentPanel(items);
     }
 
     public string ToJson()
