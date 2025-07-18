@@ -6,6 +6,7 @@ TagManager:
   tags:
   - SpawnPoint
   - CastingZone
+  - LeftHandController
   layers:
   - Default
   - TransparentFX
