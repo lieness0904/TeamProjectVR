@@ -78,6 +78,7 @@ public class LoginManager : MonoBehaviour
                     Debug.Log("로그인 성공! 데이터 로드 완료.");
 
                     PlayerDataManager.Instance.UserID = response.data.userId;
+                    PlayerDataManager.Instance.Points = response.data.points;
 
                     if (!string.IsNullOrEmpty(response.data.inventory))
                     {

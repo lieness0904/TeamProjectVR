@@ -25,6 +25,8 @@ public class InventoryHelper : MonoBehaviour
 
     public static List<InventoryItem> FilterByType(List<InventoryItem> items, ItemType type)
     {
-        return items.Where(i => GetItemType(i.id) == type).ToList();
+        var result = items.Where(i => GetItemType(i.id) == type).ToList();
+        Debug.Log($"[InventoryHelper] FilterByType 결과: {result.Count}개");
+        return result;
     }
 }

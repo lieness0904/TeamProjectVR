@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,6 +34,12 @@ public class InventoryManager : MonoBehaviour
 
     private void Start()
     {
+        var playerInventory = FindObjectOfType<PlayerInventory>();
+
+        equipmentController.ShowItem(playerInventory.items);
+        consumableController.ShowItem(playerInventory.items);
+        commonController.ShowItem(playerInventory.items);
+
         ShowInventory(equipmentInventory, equipmentController, equipButton);
     }
 
@@ -53,11 +60,6 @@ public class InventoryManager : MonoBehaviour
 
         // 버튼 색상 하이라이트
         HighlightButton(highlightTarget);
-
-        foreach (var i in playerInventory.items)
-        {
-            Debug.Log($"[확인] 아이템 ID: {i.id}, 수량: {i.amount}, 타입: {InventoryHelper.GetItemType(i.id)}");
-        }
     }
 
     private void HighlightButton(Button selected)
