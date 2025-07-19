@@ -19,7 +19,7 @@ public class PlayerFishingController : NetworkBehaviour
 
     [Header("릴 설정")]
     [Tooltip("찌가 이 거리 안으로 들어오면 회수된 것으로 간주합니다.")]
-    [SerializeField] private float retrievalDistance = 1.5f;
+    [SerializeField] private float retrievalDistance = 1.5f; // 이 값을 조절하셨을 수 있습니다.
 
     [Networked]
     public NetworkBool IsFishing { get; set; }
@@ -124,21 +124,27 @@ public class PlayerFishingController : NetworkBehaviour
         RPC_UpdateVisuals(isFishing, SpawnedRod);
     }
 
+    // --- [수정된 함수] ---
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void RPC_CastBobber(Vector3 force)
     {
-        if (IsFishing && CurrentBobber == null && bobberPrefab != null)
+        // [진단 코드 추가] 캐스팅 조건이 맞지 않으면, 왜 무시되었는지 로그를 남기고 함수를 종료합니다.
+        if (!IsFishing || CurrentBobber != null || bobberPrefab == null)
         {
-            Transform rodTip = SpawnedRod?.GetComponentInChildren<RodInfo>()?.rodTip;
-            Vector3 spawnPos = rodTip != null ? rodTip.position : transform.position;
+            // 이 로그가 보인다면, CurrentBobber가 null이 아니어서 캐스팅이 실패한 것입니다.
+            Debug.LogWarning($"[Server] Cast Ignored. IsFishing: {IsFishing}, CurrentBobber is null: {CurrentBobber == null}, bobberPrefab is null: {bobberPrefab == null}");
+            return;
+        }
 
-            CurrentBobber = Runner.Spawn(bobberPrefab, spawnPos, Quaternion.identity, Object.InputAuthority);
+        Transform rodTip = SpawnedRod?.GetComponentInChildren<RodInfo>()?.rodTip;
+        Vector3 spawnPos = rodTip != null ? rodTip.position : transform.position;
 
-            Rigidbody rb = CurrentBobber.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.AddForce(force, ForceMode.Impulse);
-            }
+        CurrentBobber = Runner.Spawn(bobberPrefab, spawnPos, Quaternion.identity, Object.InputAuthority);
+
+        Rigidbody rb = CurrentBobber.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.AddForce(force, ForceMode.Impulse);
         }
     }
 
@@ -191,22 +197,18 @@ public class PlayerFishingController : NetworkBehaviour
         RPC_ReelIn(reelAmount);
     }
 
-    // --- [수정된 함수] ---
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void RPC_ReelIn(float reelAmount)
     {
         if (CurrentBobber == null) return;
 
-        // 1. 낚싯대 끝(rodTip)을 찾고, 없으면 에러를 명확히 출력합니다.
         Transform rodTip = SpawnedRod?.GetComponentInChildren<RodInfo>()?.rodTip;
         if (rodTip == null)
         {
-            // 이 에러가 콘솔에 보인다면, 낚싯대 프리팹 설정을 확인해야 합니다.
             Debug.LogError("[Server] ReelIn 실패: 낚싯대 프리팹에서 'RodInfo' 컴포넌트 또는 'rodTip'을 찾을 수 없습니다!");
             return;
         }
 
-        // 2. 찌의 Rigidbody를 가져옵니다.
         Rigidbody bobberRigidbody = CurrentBobber.GetComponent<Rigidbody>();
         if (bobberRigidbody == null)
         {
@@ -214,11 +216,9 @@ public class PlayerFishingController : NetworkBehaviour
             return;
         }
 
-        // 3. Rigidbody.MovePosition을 사용하여 물리적으로 안전하게 찌를 이동시킵니다.
         Vector3 newPosition = Vector3.MoveTowards(bobberRigidbody.position, rodTip.position, reelAmount);
         bobberRigidbody.MovePosition(newPosition);
 
-        // 4. 낚싯대 끝과의 거리를 확인하여 회수 처리
         if (Vector3.Distance(bobberRigidbody.position, rodTip.position) < retrievalDistance)
         {
             Debug.Log("[Server] 찌 회수 완료!");
