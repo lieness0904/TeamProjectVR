@@ -216,6 +216,7 @@ public class PlayerFishingController : NetworkBehaviour
             return;
         }
 
+        bobberRigidbody.WakeUp();  // 리지드바디 깨우기 
         Vector3 newPosition = Vector3.MoveTowards(bobberRigidbody.position, rodTip.position, reelAmount);
         bobberRigidbody.MovePosition(newPosition);
 
