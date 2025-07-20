@@ -12,6 +12,27 @@ public class InventoryPanelCtrl : MonoBehaviour
 
     private int currentPage = 0;
     private List<InventoryItem> currentItems = new();
+    private InventoryItem currentItem;
+
+    [Header("Item Info Panel")]
+    [SerializeField] private GameObject itemInfoPanel;
+    [SerializeField] private Image iconImage;
+    [SerializeField] private TextMeshProUGUI nameText;
+    [SerializeField] private TextMeshProUGUI typeText;
+    [SerializeField] private TextMeshProUGUI descText;
+    [SerializeField] private Button sellButton;
+    [SerializeField] private Button dropButton;
+    [SerializeField] private Button closeButton;
+
+    [Header("Confirm Panel")]
+    [SerializeField] private GameObject confirmPanel;
+    [SerializeField] private Image confirmIcon;
+    [SerializeField] private TextMeshProUGUI confirmNameText;
+    [SerializeField] private TextMeshProUGUI confirmAmountText;
+    [SerializeField] private Slider amountSlider;
+    [SerializeField] private Button confirmSellButton;
+    [SerializeField] private Button confirmDropButton;
+    [SerializeField] private Button confirmCancelButton;
 
     public void NextPage()
     {
@@ -108,12 +129,8 @@ public class InventoryPanelCtrl : MonoBehaviour
 
             if (sprite != null)
             {
-                Debug.Log($"[UpdateSlots] 슬롯 {i} 에 아이템 {item.id} (수량: {item.amount}) 세팅");
                 AddItemIconToSlot(slot, sprite, item.amount);
-            }
-            else
-            {
-                Debug.LogWarning($"[UpdateSlots] 아이템 {item.id} 스프라이트 없음");
+                AddClickListenerToSlot(slot, item); 
             }
         }
     }
@@ -173,6 +190,88 @@ public class InventoryPanelCtrl : MonoBehaviour
             }
         }
     }
+    private void AddClickListenerToSlot(Transform slot, InventoryItem item)
+    {
+        Button button = slot.GetComponent<Button>();
+        if (button != null)
+        {
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(() => ShowItemInfo(item));
+        }
+    }
+    private void ShowItemInfo(InventoryItem item)
+    {
+        var data = ItemDataLoader.Instance?.LoadedItems?.Find(x => x.id == item.id);
+        if (data == null) return;
+
+        itemInfoPanel.SetActive(true);
+        iconImage.sprite = Resources.Load<Sprite>(data.iconPath);
+        nameText.text = "이름 : " + data.name;
+        typeText.text = "타입 : " + data.itemType.ToString();
+        descText.text = "설명 : " + data.description;
+
+        sellButton.onClick.RemoveAllListeners();
+        dropButton.onClick.RemoveAllListeners();
+        closeButton.onClick.RemoveAllListeners();
+
+        sellButton.onClick.AddListener(() => ShowConfirmPanel(item, true));
+        dropButton.onClick.AddListener(() => ShowConfirmPanel(item, false));
+        closeButton.onClick.AddListener(CloseInfo);
+
+        currentItem = item;
+    }
+    private void ShowConfirmPanel(InventoryItem item, bool isSell)
+    {
+        itemInfoPanel.SetActive(false);
+
+        var data = ItemDataLoader.Instance?.LoadedItems?.Find(x => x.id == item.id);
+        if (data == null) return;
+
+        confirmPanel.SetActive(true);
+        confirmIcon.sprite = Resources.Load<Sprite>(data.iconPath);
+        confirmNameText.text = "이름 : " + data.name;
+
+        amountSlider.minValue = 1;
+        amountSlider.maxValue = item.amount;
+        amountSlider.value = 1;
+
+        confirmAmountText.text = "수량 : 1"; 
+        // 슬라이더 값 변경될 때 수량 텍스트 갱신
+    amountSlider.onValueChanged.RemoveAllListeners();
+    amountSlider.onValueChanged.AddListener((value) =>
+    {
+        confirmAmountText.text = $"수량 : {Mathf.RoundToInt(value)}";
+    });
+
+        confirmSellButton.gameObject.SetActive(isSell);
+        confirmDropButton.gameObject.SetActive(!isSell);
+
+        confirmSellButton.onClick.RemoveAllListeners();
+        confirmDropButton.onClick.RemoveAllListeners();
+        confirmCancelButton.onClick.RemoveAllListeners();
+
+        confirmSellButton.onClick.AddListener(() => ConfirmSell((int)amountSlider.value));
+        confirmDropButton.onClick.AddListener(() => ConfirmDrop((int)amountSlider.value));
+        confirmCancelButton.onClick.AddListener(() => confirmPanel.SetActive(false));
+    }
+    private void ConfirmSell(int quantity)
+    {
+        Debug.Log($"[ConfirmSell] 아이템 {currentItem.id} 수량 {quantity} 판매");
+        PlayerInventory inv = FindObjectOfType<PlayerInventory>();
+        inv.RemoveItem(currentItem.id, quantity);
+        PlayerPointManager.Instance.AddPoints(currentItem.id * quantity); // 가격 처리 따로 필요
+        confirmPanel.SetActive(false);
+    }
+
+    private void ConfirmDrop(int quantity)
+    {
+        Debug.Log($"[ConfirmDrop] 아이템 {currentItem.id} 수량 {quantity} 버림");
+        PlayerInventory inv = FindObjectOfType<PlayerInventory>();
+        inv.RemoveItem(currentItem.id, quantity);
+        confirmPanel.SetActive(false);
+    }
+
+    private void CloseInfo() => itemInfoPanel.SetActive(false);
 
     private Sprite GetSpriteById(int id)
     {
@@ -180,11 +279,11 @@ public class InventoryPanelCtrl : MonoBehaviour
 
         if (data == null)
         {
-            Debug.LogError($"❌ [GetSpriteById] 아이템 ID {id} 에 해당하는 데이터 없음");
+            Debug.LogError($"[GetSpriteById] 아이템 ID {id} 에 해당하는 데이터 없음");
             return null;
         }
 
-        Debug.Log($"✅ 아이템 {id} 의 iconPath: {data.iconPath}, 타입: {data.itemType}");
+        Debug.Log($"아이템 {id} 의 iconPath: {data.iconPath}, 타입: {data.itemType}");
         return Resources.Load<Sprite>(data.iconPath);
     }
 
