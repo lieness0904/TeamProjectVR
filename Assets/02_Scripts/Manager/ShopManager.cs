@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ShopManager : MonoBehaviour
 {
@@ -10,13 +11,18 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private Transform itemGridParent;
     [SerializeField] private TextAsset itemJson;
     [SerializeField] private List<int> shopItemIds = new(); // Inspector에서 id 직접 설정
-
+    [SerializeField] private Button closeShopButton;
+    [SerializeField] private GameObject purchaseCompleteUI;
 
     private List<ItemData> shopItems = new();
 
     private void Start()
     {
         shopPanel.SetActive(false);
+        if (purchaseCompleteUI != null)
+        {
+            purchaseCompleteUI.SetActive(false);
+        }
     }
 
     public void OpenShop()
@@ -24,6 +30,10 @@ public class ShopManager : MonoBehaviour
         shopPanel.SetActive(true);
         LoadItemData();
         PopulateShopUI();
+    }
+    public void CloseShop()
+    {
+        shopPanel.SetActive(false);
     }
 
     private void LoadItemData()
@@ -59,6 +69,11 @@ public class ShopManager : MonoBehaviour
         {
             PlayerPointManager.Instance.AddPoints(-totalCost);
             FindObjectOfType<PlayerInventory>()?.AddItem(item.id, quantity);
+            StartCoroutine(ShowPurchaseComplete());
+        }
+        else
+        {
+            Debug.LogWarning("[ShopManager] 포인트가 부족합니다. 현재 포인트: " + PlayerPointManager.Instance.GetPoints());
         }
     }
 
@@ -68,5 +83,14 @@ public class ShopManager : MonoBehaviour
         {
             shopPanel.SetActive(false);
         }
+    }
+
+    private IEnumerator ShowPurchaseComplete()
+    {
+        if (purchaseCompleteUI == null) yield break;
+
+        purchaseCompleteUI.SetActive(true);
+        yield return new WaitForSeconds(1.5f);
+        purchaseCompleteUI.SetActive(false);
     }
 }

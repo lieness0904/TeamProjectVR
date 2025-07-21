@@ -73,7 +73,6 @@ public class PhoneUIController : MonoBehaviour
     {
         ResetPanels();
         inventoryPanel.SetActive(true);
-        // inventoryManager?.InitInventory();
     }
 
     public void GoBackToMenu()
