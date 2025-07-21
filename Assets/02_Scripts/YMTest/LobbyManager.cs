@@ -58,6 +58,11 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
         runner.SetPlayerObject(player, playerObj);
 
+        if (player == runner.LocalPlayer)
+        {
+            runner.SetPlayerObject(player, playerObj);
+        }
+
         // 플레이어 포인트 연결
         if (player == runner.LocalPlayer)
         {
@@ -113,6 +118,11 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
                 // --- [핵심 수정] ---
                 // 씬 로드 후 스폰된 플레이어 역시 공식 객체로 등록합니다.
                 runner.SetPlayerObject(player, playerObj);
+
+                if (player == runner.LocalPlayer)
+                {
+                    runner.SetPlayerObject(player, playerObj); 
+                }
             }
         }
     }
