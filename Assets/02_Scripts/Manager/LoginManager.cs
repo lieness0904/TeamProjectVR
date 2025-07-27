@@ -18,6 +18,7 @@ public class LoginManager : MonoBehaviour
     public TMP_InputField passwordInputField;
     public Button loginButton;
     public TextMeshProUGUI statusText;
+    public Button customButton;
 
     private bool isLoggingIn = false;
     void Start()
@@ -33,6 +34,12 @@ public class LoginManager : MonoBehaviour
         {
             loginButton.onClick.RemoveListener(OnLoginButtonClick); // 리스너 중복 제거
             loginButton.onClick.AddListener(OnLoginButtonClick);
+        }
+
+        if (customButton != null)
+        {
+            customButton.onClick.RemoveListener(OnCustomButtonClick);
+            customButton.onClick.AddListener(OnCustomButtonClick);
         }
     }
 
@@ -90,6 +97,13 @@ public class LoginManager : MonoBehaviour
                         Debug.LogWarning("서버에서 인벤토리 데이터가 비어 있음 (신규 유저 또는 초기 상태)");
                     }
 
+                    // 외형 불러오기
+                    CustomizationDataLoader.LoadCustomizationFromSheet(userId, data =>
+                    {
+                        PlayerDataManager.Instance.CustomizationData = data;
+                        Debug.Log("커스터마이징 데이터 로드 완료");
+                    });
+
                     yield return new WaitForSeconds(1);
                     SceneManager.LoadScene("HouseScene");
                 }
@@ -114,6 +128,27 @@ public class LoginManager : MonoBehaviour
         {
             loginButton.onClick.RemoveListener(OnLoginButtonClick);
         }
+    }
+    public void OnCustomButtonClick()
+    {
+        string userId = idInputField.text;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            statusText.text = "아이디를 입력하세요.";
+            return;
+        }
+
+        statusText.text = "외형 정보 불러오는 중...";
+
+        CustomizationDataLoader.LoadCustomizationFromSheet(userId, data =>
+        {
+            PlayerDataManager.Instance.UserID = userId;
+            PlayerDataManager.Instance.CustomizationData = data;
+            Debug.Log("커스터마이징 데이터 로드 완료 (Custom 버튼)");
+
+            SceneManager.LoadScene("CustomizationScene");
+        });
     }
 }
 

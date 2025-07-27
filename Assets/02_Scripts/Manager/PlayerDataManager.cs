@@ -11,6 +11,9 @@ public class PlayerDataManager : MonoBehaviour
     public string InventoryJson;
     public int Points;
     public PlayerInventory playerInventory;
+
+    public CustomizationData CustomizationData;
+
     private void Awake()
     {
         if (Instance == null)
