@@ -1,7 +1,9 @@
 using Rukha93.ModularAnimeCharacter.Customization.UI;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
+using UnityEngine.Analytics;
 
 namespace Rukha93.ModularAnimeCharacter.Customization
 {
@@ -17,7 +19,7 @@ namespace Rukha93.ModularAnimeCharacter.Customization
             public Renderer[] renderers;
         }
 
-        [SerializeField] private UICustomizationDemo m_UI;
+        public UICustomizationDemo m_UI;
 
         private IAssetLoader m_AssetLoader;
         private List<string> m_Categories = new List<string>
@@ -66,6 +68,11 @@ namespace Rukha93.ModularAnimeCharacter.Customization
                 m_UI.SetCategoryValue(i, "");
 
             m_LoadingCoroutine = StartCoroutine(Co_LoadAndInitBody("f"));
+
+            if (CustomizationManager.Instance != null)
+            {
+                CustomizationManager.Instance.SetTarget(this);
+            }
         }
 
         private void InitBody(string path, GameObject prefab)
@@ -383,5 +390,65 @@ namespace Rukha93.ModularAnimeCharacter.Customization
         }
 
         #endregion
+        public Dictionary<string, string> GetCurrentCustomization()
+        {
+            var result = new Dictionary<string, string>();
+            string gender = null;
+
+            // gender 추출 (body path 기준으로 상위 폴더 확인)
+            if (m_Equiped.TryGetValue("body", out var bodyItem))
+            {
+                if (!string.IsNullOrEmpty(bodyItem.path))
+                {
+                    string[] tokens = bodyItem.path.Split('/');
+                    if (tokens.Length >= 2)
+                    {
+                        string folder = tokens[^2].ToLower();
+                        if (folder == "m" || folder == "f")
+                        {
+                            gender = folder;
+                        }
+                    }
+                }
+            }
+
+            // path 저장 (경로는 파일명만)
+            foreach (var kvp in m_Equiped)
+            {
+                if (string.IsNullOrEmpty(kvp.Value.path)) continue;
+
+                string[] tokens = kvp.Value.path.Split('/');
+                string filename = tokens[^1]; // Top.11, Bot.06 등
+
+                result[kvp.Key] = filename;
+            }
+
+            if (!string.IsNullOrEmpty(gender))
+                result["gender"] = gender;
+
+            return result;
+        }
+
+        private string GetFullResourcePath(string gender, string filename)
+        {
+            if (string.IsNullOrEmpty(filename)) return "";
+
+            // 경로가 이미 완성된 형태면 그대로 사용
+            if (filename.StartsWith("Customization/"))
+                return filename;
+
+            string cleanName = Path.GetFileNameWithoutExtension(filename);
+
+            // Shared에 존재하는지 먼저 확인
+            string sharedPath = $"Customization/Shared/{cleanName}";
+            var sharedAsset = Resources.Load<CustomizationItemAsset>(sharedPath);
+            if (sharedAsset != null)
+                return sharedPath;
+
+            // 그렇지 않으면 성별 폴더에서 로드
+            string genderFolder = gender.ToUpper();
+            return $"Customization/{genderFolder}/{cleanName}";
+        }
+
     }
 }

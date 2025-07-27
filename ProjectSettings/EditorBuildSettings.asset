@@ -26,6 +26,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/01_Scenes/MountainScene.unity
     guid: 9adf3bda3afda48498175cca5e142ca1
+  - enabled: 1
+    path: Assets/01_Scenes/Demo_Scene/Modular_Character/CustomizationScene.unity
+    guid: 8f40d3a03c6622141bba42a47a7a0dcf
   - enabled: 0
     path: Assets/TempAssets/TestScene.unity
     guid: 5eecc7e13112e184da104d3c6321710b
