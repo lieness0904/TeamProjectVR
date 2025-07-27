@@ -17331,7 +17331,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   castAction: {fileID: -5684558904543120851, guid: e0ca4504471ca124088e1e2cfe6804ae,
     type: 3}
+  hmdTransform: {fileID: 6396313080151331964}
   castPowerMultiplier: 0.2
+  minCastSpeed: 10
 --- !u!1 &9167484419136852364
 GameObject:
   m_ObjectHideFlags: 0
