@@ -29,37 +29,32 @@ public class CustomPlayer : NetworkBehaviour
         {
             Debug.Log("내 플레이어니까 커스터마이징 불러올 준비 가능");
 
-            if (!string.IsNullOrEmpty(CustomizationDataStore.LatestDataJson))
+            var data = !string.IsNullOrEmpty(CustomizationDataStore.LatestDataJson)
+                ? JsonUtility.FromJson<CustomizationData>(CustomizationDataStore.LatestDataJson)
+                : PlayerDataManager.Instance.CustomizationData;
+
+            ApplyCustomizationFromData(data);
+
+            if (Object.HasStateAuthority) 
             {
-                var data = JsonUtility.FromJson<CustomizationData>(CustomizationDataStore.LatestDataJson);
-                ApplyCustomizationFromData(data);
-                CustomizationDataStore.Clear();
+                CustomData = new CustomizationData
+                {
+                    gender = data.gender,
+                    body = data.body,
+                    head = data.head,
+                    top = data.top,
+                    bottom = data.bottom,
+                    shoes = data.shoes,
+                    outfit = data.outfit,
+                    hairstyle = data.hairstyle,
+                    acc_head = data.acc_head
+                };
             }
-        }
 
-        if (Object.HasInputAuthority)
-        {
-            Debug.Log("내 플레이어니까 커스터마이징 불러올 준비 가능");
-
-            ApplyCustomizationFromData(PlayerDataManager.Instance.CustomizationData);
-
-            var d = PlayerDataManager.Instance.CustomizationData;
-            CustomData = new CustomizationData
-            {
-                gender = d.gender,
-                body = d.body,
-                head = d.head,
-                top = d.top,
-                bottom = d.bottom,
-                shoes = d.shoes,
-                outfit = d.outfit,
-                hairstyle = d.hairstyle,
-                acc_head = d.acc_head
-            };
+            CustomizationDataStore.Clear();
         }
 
         Debug.Log($"CustomData 현재 값: {CustomData.gender} / {CustomData.body}");
-        Debug.Log($"[Spawned] LatestDataJson: {CustomizationDataStore.LatestDataJson}");
     }
 
     public override void Render()
