@@ -105,7 +105,7 @@ public class LoginManager : MonoBehaviour
                     });
 
                     yield return new WaitForSeconds(1);
-                    SceneManager.LoadScene("HouseScene");
+                    SceneManager.LoadScene("HomeScene");
                 }
                 else
                 {

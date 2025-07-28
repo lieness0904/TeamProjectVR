@@ -21,6 +21,9 @@ EditorBuildSettings:
     path: Assets/01_Scenes/HouseScene.unity
     guid: c9adc2e89cb38ad4e90e56634f7a925a
   - enabled: 1
+    path: Assets/01_Scenes/HomeScene.unity
+    guid: d9c5b8e795d4f054d98dd86a92a0e776
+  - enabled: 1
     path: Assets/01_Scenes/FarmScene.unity
     guid: b799bb92b0a44034b85ebf42a6420d36
   - enabled: 1

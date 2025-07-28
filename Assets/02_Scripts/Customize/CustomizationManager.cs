@@ -92,8 +92,8 @@ public class CustomizationManager : MonoBehaviour
 
     private IEnumerator BackToHouseAndRestartFusion()
     {
-        SceneManager.LoadScene("HouseScene", LoadSceneMode.Single);
-        yield return new WaitUntil(() => SceneManager.GetActiveScene().name == "HouseScene");
+        SceneManager.LoadScene("HomeScene", LoadSceneMode.Single);
+        yield return new WaitUntil(() => SceneManager.GetActiveScene().name == "HomeScene");
     }
 
     public void SaveCustomizationToSheet(string userId, string customizationJson)
