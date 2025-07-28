@@ -33,37 +33,35 @@ public static class CustomizationDataLoader
             catch
             {
                 Debug.LogWarning("Wrapper 파싱 실패! 응답: " + response);
-                onLoaded?.Invoke(new CustomizationData()); // 디폴트라도 넘겨줘
+                onLoaded?.Invoke(new CustomizationData());
                 yield break;
             }
 
             if (wrapper == null || string.IsNullOrEmpty(wrapper.customizationData))
             {
                 Debug.LogWarning("wrapper.customizationData 비어있음 (신규 유저일 수 있음)");
-                onLoaded?.Invoke(new CustomizationData()); // 디폴트 값으로 진입
+                onLoaded?.Invoke(new CustomizationData());
                 yield break;
             }
 
-            CustomizationData data = default;
             try
             {
-                data = JsonUtility.FromJson<CustomizationData>(wrapper.customizationData);
+                var dto = JsonUtility.FromJson<CustomizationDataDTO>(wrapper.customizationData);
+                var data = CustomizationDataConverter.FromDTO(dto);
 
                 CustomizationDataStore.LatestDataJson = wrapper.customizationData;
+                onLoaded?.Invoke(data);
             }
             catch
             {
-                Debug.LogWarning("CustomizationData 파싱 실패! 내용: " + wrapper.customizationData);
-                onLoaded?.Invoke(new CustomizationData()); // 혹시 파싱 실패해도 기본값
-                yield break;
+                Debug.LogWarning("CustomizationDataDTO 파싱 실패! 내용: " + wrapper.customizationData);
+                onLoaded?.Invoke(new CustomizationData());
             }
-
-            onLoaded?.Invoke(data);
         }
         else
         {
             Debug.LogError("외형 불러오기 실패: " + www.error);
-            onLoaded?.Invoke(new CustomizationData()); // 네트워크 실패시도 기본값
+            onLoaded?.Invoke(new CustomizationData());
         }
     }
 }
