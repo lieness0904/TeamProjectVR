@@ -57,14 +57,9 @@ public class CustomPlayer : NetworkBehaviour
     public void ApplyCustomizationFromData(CustomizationData data)
     {
         Debug.Log($"ApplyCustomizationFromData 호출됨 - {data.gender} / {data.body}");
-        RPC_ApplyCustomization(data);
-    }
-
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    private void RPC_ApplyCustomization(CustomizationData data)
-    {
         CustomData = data;
     }
+    
 
     private IEnumerator ApplyRoutine(CustomizationData data)
     {
