@@ -37,6 +37,17 @@ public class CustomPlayer : NetworkBehaviour
             }
         }
 
+        if (Object.HasStateAuthority && CustomData.gender.Value == "")
+        {
+            Debug.LogWarning("StateAuthority에서 커스터마이징 데이터 초기화 시도");
+
+            if (!string.IsNullOrEmpty(CustomizationDataStore.LatestDataJson))
+            {
+                var data = JsonUtility.FromJson<CustomizationData>(CustomizationDataStore.LatestDataJson);
+                CustomData = data;
+            }
+        }
+
         Debug.Log($"CustomData 현재 값: {CustomData.gender} / {CustomData.body}");
     }
 
