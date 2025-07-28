@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     public AudioManager AudioManager { get; private set; }
+    public VoiceManager VoiceManager { get; private set; }
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -18,5 +19,6 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         
         AudioManager = GetComponentInChildren<AudioManager>();
+        VoiceManager = GetComponentInChildren<VoiceManager>();
     }
 }

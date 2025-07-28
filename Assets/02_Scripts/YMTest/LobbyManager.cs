@@ -139,12 +139,15 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         }
         spawnedCharacters.Clear();
     }
+    public void OnConnectedToServer(NetworkRunner runner)
+    {
+        GameManager.Instance.VoiceManager.ConnectToVoiceRoom(runner.SessionInfo.Name);
+    }
 
     #region 사용하지 않는 콜백들
     public void OnInput(NetworkRunner runner, NetworkInput input) { }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
-    public void OnConnectedToServer(NetworkRunner runner) { }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
