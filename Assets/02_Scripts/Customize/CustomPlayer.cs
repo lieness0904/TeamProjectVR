@@ -43,8 +43,19 @@ public class CustomPlayer : NetworkBehaviour
 
             ApplyCustomizationFromData(PlayerDataManager.Instance.CustomizationData);
 
-            string json = JsonUtility.ToJson(PlayerDataManager.Instance.CustomizationData);
-            RPC_SetCustomizationData(json); 
+            var d = PlayerDataManager.Instance.CustomizationData;
+            CustomData = new CustomizationData
+            {
+                gender = d.gender,
+                body = d.body,
+                head = d.head,
+                top = d.top,
+                bottom = d.bottom,
+                shoes = d.shoes,
+                outfit = d.outfit,
+                hairstyle = d.hairstyle,
+                acc_head = d.acc_head
+            };
         }
 
         Debug.Log($"CustomData 현재 값: {CustomData.gender} / {CustomData.body}");
@@ -64,21 +75,11 @@ public class CustomPlayer : NetworkBehaviour
             }
         }
     }
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    public void RPC_SetCustomizationData(string json)
-    {
-        Debug.Log("StateAuthority가 CustomizationData 설정함");
-        var data = JsonUtility.FromJson<CustomizationData>(json);
-        CustomData = data;
-    }
-
     public void ApplyCustomizationFromData(CustomizationData data)
     {
         Debug.Log($"ApplyCustomizationFromData 호출됨 - {data.gender} / {data.body}");
-        CustomData = data;
+        StartCoroutine(ApplyRoutine(data));
     }
-    
-
     private IEnumerator ApplyRoutine(CustomizationData data)
     {
         isApplying = true;
