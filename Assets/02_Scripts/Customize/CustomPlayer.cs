@@ -9,74 +9,40 @@ using System;
 
 public class CustomPlayer : NetworkBehaviour
 {
-    [Networked] public CustomizationData CustomData { get; set; }
-
     [SerializeField] private GameObject customizationTargetRoot;
     private IAssetLoader assetLoader;
-    private ChangeDetector _changeDetector;
 
     private Dictionary<string, List<GameObject>> equippedObjects = new();
     private SkinnedMeshRenderer referenceSMR;
-    private bool isApplying = false;
 
     public override void Spawned()
     {
         assetLoader = GetComponentInChildren<IAssetLoader>();
-        _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
-        if (Object.HasInputAuthority || Object.HasStateAuthority)
+        if (Object.HasInputAuthority)
         {
-            Debug.Log("내 플레이어거나 서버니까 커스터마이징 준비");
-
             var data = !string.IsNullOrEmpty(CustomizationDataStore.LatestDataJson)
                 ? JsonUtility.FromJson<CustomizationData>(CustomizationDataStore.LatestDataJson)
                 : PlayerDataManager.Instance.CustomizationData;
 
-            if (Object.HasInputAuthority)
-            {
-                ApplyCustomizationFromData(data);
-            }
-
-            if (Object.HasStateAuthority)
-            {
-                CustomData = new CustomizationData
-                {
-                    gender = data.gender,
-                    body = data.body,
-                    head = data.head,
-                    top = data.top,
-                    bottom = data.bottom,
-                    shoes = data.shoes,
-                    outfit = data.outfit,
-                    hairstyle = data.hairstyle,
-                    acc_head = data.acc_head
-                };
-            }
-
+            ApplyCustomizationFromData(data);
+            RPC_ApplyCustomization(JsonUtility.ToJson(data));
             CustomizationDataStore.Clear();
         }
-
-        Debug.Log($"CustomData 현재 값: {CustomData.gender} / {CustomData.body}");
     }
 
-    public override void Render()
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority | RpcTargets.All)]
+    private void RPC_ApplyCustomization(string json)
     {
-        if (isApplying) return;
-
-        foreach (var change in _changeDetector.DetectChanges(this))
-        {
-            if (change == nameof(CustomData))
-            {
-                Debug.Log("커스터마이징 데이터 변경 감지됨 -> 적용");
-                StartCoroutine(ApplyRoutine(CustomData));
-            }
-        }
-    }
-    public void ApplyCustomizationFromData(CustomizationData data)
-    {
-        Debug.Log($"ApplyCustomizationFromData 호출됨 - {data.gender} / {data.body}");
+        var data = JsonUtility.FromJson<CustomizationData>(json);
         StartCoroutine(ApplyRoutine(data));
     }
+
+    public void ApplyCustomizationFromData(CustomizationData data)
+    {
+        StartCoroutine(ApplyRoutine(data));
+    }
+
     private IEnumerator ApplyRoutine(CustomizationData data)
     {
         isApplying = true;
@@ -129,8 +95,7 @@ public class CustomPlayer : NetworkBehaviour
             }
             else
             {
-                // 기존 body 파츠 정리만 하고 새 prefab 인스턴스화는 하지 않음
-                ClearEquippedParts(); // body 포함 모든 파츠 제거
+                ClearEquippedParts();
             }
 
             equippedObjects.Clear();
@@ -150,7 +115,7 @@ public class CustomPlayer : NetworkBehaviour
             else
             {
                 Debug.Log($"[LoadAndEquip] asset 로드 성공 - {fullPath}");
-                Equip(category, path, asset);
+                Equip(category, asset);
             }
 
             isDone = true;
@@ -158,6 +123,7 @@ public class CustomPlayer : NetworkBehaviour
 
         yield return new WaitUntil(() => isDone);
     }
+
     private void ClearEquippedParts()
     {
         foreach (var list in equippedObjects.Values)
@@ -212,7 +178,7 @@ public class CustomPlayer : NetworkBehaviour
         return "";
     }
 
-    private void Equip(string category, string path, CustomizationItemAsset asset)
+    private void Equip(string category, CustomizationItemAsset asset)
     {
         if (customizationTargetRoot == null)
         {
@@ -245,7 +211,6 @@ public class CustomPlayer : NetworkBehaviour
             return;
         }
 
-        // 메시 파츠 처리
         foreach (var mesh in asset.meshes)
         {
             if (mesh == null || mesh.sharedMesh == null)
@@ -271,7 +236,6 @@ public class CustomPlayer : NetworkBehaviour
             newEquipped.Add(go);
         }
 
-        // 본에 붙이는 오브젝트 처리 (인덱스 기반)
         for (int i = 0; i < asset.objects.Length; i++)
         {
             var obj = asset.objects[i];
@@ -325,4 +289,5 @@ public class CustomPlayer : NetworkBehaviour
         equippedObjects[category] = newEquipped;
     }
 }
+
 
