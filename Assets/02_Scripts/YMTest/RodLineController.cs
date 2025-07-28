@@ -1,84 +1,95 @@
 using UnityEngine;
 using Fusion;
-using System.Collections.Generic; // List를 사용하기 위해 필요합니다.
 
 [RequireComponent(typeof(LineRenderer))]
 public class RodLineController : NetworkBehaviour
 {
-    [Header("낚싯줄 경로 설정")]
-    [Tooltip("릴부터 시작해서 낚싯대 끝(RodTip)까지, 낚싯줄이 통과할 지점들을 순서대로 넣어주세요.")]
-    public List<Transform> lineGuidePoints;
-
-    [Header("캐스팅 전 찌")]
-    [Tooltip("캐스팅 전, 낚싯줄 끝에 매달려 있을 가짜 찌(Bobber)입니다.")]
     [SerializeField] private Transform precastBobber;
 
-    // --- Private 변수 ---
     private LineRenderer _lineRenderer;
+    private Transform _rodTip;
     private PlayerFishingController _playerFishingController;
 
     public override void Spawned()
     {
         _lineRenderer = GetComponent<LineRenderer>();
-        var playerObject = Runner.GetPlayerObject(Object.InputAuthority);
+        Debug.Log("--- RodLineController Spawned() Debug Start ---");
 
-        if (playerObject != null)
+        // 1. RodInfo 컴포넌트 찾기
+        RodInfo rodInfo = GetComponent<RodInfo>();
+        if (rodInfo == null)
         {
-            _playerFishingController = playerObject.GetComponent<PlayerFishingController>();
+            Debug.LogError("DEBUG: GetComponent<RodInfo>() FAILED. 'RodInfo' 컴포넌트를 이 오브젝트에서 찾을 수 없습니다.");
         }
-
-        if (_playerFishingController == null)
+        else
         {
-            Debug.LogError("RodLineController가 PlayerFishingController를 찾지 못했습니다!", this.gameObject);
-            this.enabled = false;
-            return;
-        }
-
-        if (lineGuidePoints == null || lineGuidePoints.Count == 0)
-        {
-            Debug.LogError("Line Guide Points가 설정되지 않았습니다!", this.gameObject);
-            this.enabled = false;
-            return;
-        }
-    }
-
-    // LateUpdate는 모든 물리/게임 로직이 끝난 후에 호출되어 시각적인 떨림을 방지합니다.
-    void LateUpdate()
-    {
-        if (_playerFishingController == null) return;
-
-        if (precastBobber != null)
-        {
-            precastBobber.gameObject.SetActive(_playerFishingController.CurrentBobber == null);
-        }
-
-        // 1. 실제 찌(CurrentBobber)가 있는지 확인하고, 없으면 가짜 찌(precastBobber)를 최종 목적지로 사용합니다.
-        Transform lineEndPoint = _playerFishingController.CurrentBobber != null
-                               ? _playerFishingController.CurrentBobber.transform
-                               : precastBobber;
-
-        if (lineEndPoint == null)
-        {
-            _lineRenderer.enabled = false;
-            return;
-        }
-
-        _lineRenderer.enabled = true;
-
-        // 2. Line Renderer가 그려야 할 점의 총개수를 계산합니다. (가이드 포인트 개수 + 끝점 1개)
-        int totalPoints = lineGuidePoints.Count + 1;
-        _lineRenderer.positionCount = totalPoints;
-
-        // 3. 가이드 포인트들을 순서대로 Line Renderer에 설정합니다.
-        for (int i = 0; i < lineGuidePoints.Count; i++)
-        {
-            if (lineGuidePoints[i] != null)
+            Debug.Log("DEBUG: GetComponent<RodInfo>() SUCCESS. 'RodInfo' 컴포넌트를 찾았습니다.");
+            // 2. rodTip 변수 확인
+            if (rodInfo.rodTip == null)
             {
-                _lineRenderer.SetPosition(i, lineGuidePoints[i].position);
+                Debug.LogError("DEBUG: rodInfo.rodTip is NULL. 'RodInfo' 스크립트의 'Rod Tip' 변수가 할당되지 않았습니다.");
+            }
+            else
+            {
+                Debug.Log("DEBUG: rodInfo.rodTip is NOT NULL. 'Rod Tip' 변수가 할당되었습니다. 이름: " + rodInfo.rodTip.name);
+                _rodTip = rodInfo.rodTip;
             }
         }
 
-        // 4. 마지막 점을 최종 목적지(찌)의 위치로 설정합니다.
-        _lineRenderer.SetPosition(totalPoints - 1, lineEndPoint.position);
+        // 3. PlayerObject 찾기
+        var playerObject = Runner.GetPlayerObject(Object.InputAuthority);
+        if (playerObject == null)
+        {
+            Debug.LogError("DEBUG: GetPlayerObject FAILED. 이 낚싯대를 소유한 플레이어 오브젝트를 찾을 수 없습니다.");
+        }
+        else
+        {
+            Debug.Log("DEBUG: GetPlayerObject SUCCESS. 플레이어 오브젝트를 찾았습니다. 이름: " + playerObject.name);
+            // 4. PlayerFishingController 컴포넌트 찾기
+            _playerFishingController = playerObject.GetComponent<PlayerFishingController>();
+            if (_playerFishingController == null)
+            {
+                Debug.LogError("DEBUG: GetComponent<PlayerFishingController> FAILED. 플레이어 오브젝트에서 'PlayerFishingController' 컴포넌트를 찾을 수 없습니다.");
+            }
+            else
+            {
+                Debug.Log("DEBUG: GetComponent<PlayerFishingController> SUCCESS. 'PlayerFishingController'를 찾았습니다.");
+            }
+        }
+
+        // 최종 확인 및 기존 에러 메시지
+        if (_rodTip == null || _playerFishingController == null)
+        {
+            // 이 에러는 여전히 나타나지만, 위의 디버그 로그가 원인을 알려줄 것입니다.
+            Debug.LogError("RodLineController가 낚싯대 끝(RodTip)이나 PlayerFishingController를 찾지 못했습니다!", this.gameObject);
+            this.enabled = false;
+            return;
+        }
+
+        _lineRenderer.enabled = false;
+        Debug.Log("--- RodLineController Spawned() Debug End ---");
+    }
+
+    public override void Render()
+    {
+        if (_playerFishingController == null || _rodTip == null) return;
+
+        NetworkObject currentBobber = _playerFishingController.CurrentBobber;
+        _lineRenderer.enabled = true;
+
+        if (currentBobber != null)
+        {
+            _lineRenderer.SetPosition(0, _rodTip.position);
+            _lineRenderer.SetPosition(1, currentBobber.transform.position);
+        }
+        else if (precastBobber != null)
+        {
+            _lineRenderer.SetPosition(0, _rodTip.position);
+            _lineRenderer.SetPosition(1, precastBobber.position);
+        }
+        else
+        {
+            _lineRenderer.enabled = false;
+        }
     }
 }
