@@ -24,7 +24,6 @@ public class CustomPlayer : NetworkBehaviour
         assetLoader = GetComponentInChildren<IAssetLoader>();
         _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
-        // InputAuthority: 본인일 때 적용
         if (Object.HasInputAuthority || Object.HasStateAuthority)
         {
             var data = !string.IsNullOrEmpty(CustomizationDataStore.LatestDataJson)
@@ -42,6 +41,10 @@ public class CustomPlayer : NetworkBehaviour
             }
 
             CustomizationDataStore.Clear();
+        }
+        else
+        {
+            StartCoroutine(ApplyRoutine(CustomData));
         }
 
         Debug.Log($"[CustomPlayer] Spawned 완료 - gender: {CustomData.gender} / body: {CustomData.body}");
