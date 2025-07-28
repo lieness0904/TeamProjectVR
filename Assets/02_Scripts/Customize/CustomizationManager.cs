@@ -78,7 +78,8 @@ public class CustomizationManager : MonoBehaviour
                 gender = dict.GetValueOrDefault("gender"),
             };
 
-            CustomizationDataStore.LatestDataJson = JsonUtility.ToJson(data);
+            CustomizationDataDTO dto = CustomizationDataConverter.ToDTO(data);
+            CustomizationDataStore.LatestDataJson = JsonUtility.ToJson(dto);
 
             string userId = PlayerDataManager.Instance.UserID;
             SaveCustomizationToSheet(userId, CustomizationDataStore.LatestDataJson);
