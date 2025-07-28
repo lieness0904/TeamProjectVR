@@ -29,11 +29,6 @@ public class ItemDataLoader : MonoBehaviour
             ItemDatabase database = JsonUtility.FromJson<ItemDatabase>(jsonFile.text);
             LoadedItems = database.items;
             Debug.Log($"아이템 {LoadedItems.Count}개 로드 완료");
-
-            foreach (var item in LoadedItems)
-            {
-                Debug.Log($"[검증] ID: {item.id}, Type: {item.itemType}");
-            }
         }
         else
         {

@@ -3199,23 +3199,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8217190108cd624cb10f54698b25747, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  leftHandIK: {fileID: 2257197209847775587}
-  rightHandIK: {fileID: 8051466978107478468}
-  headIK: {fileID: 7796080444577610122}
+  xrOrigin: {fileID: 0}
+  characterAvatar: {fileID: 0}
+  hmd: {fileID: 0}
   leftHandController: {fileID: 0}
   rightHandController: {fileID: 0}
-  hmd: {fileID: 0}
-  leftOffset:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 90, z: 90}
-  rightOffset:
-  - {x: 0, y: 0, z: 0}
-  - {x: -180, y: 90, z: 90}
-  headOffset:
-  - {x: 0, y: -0.1, z: 0}
-  - {x: 0, y: 0, z: 0}
-  smoothValue: 0.1
-  modelHeight: 1.5
+  headIK: {fileID: 7796080444577610122}
+  leftHandIK: {fileID: 2257197209847775587}
+  rightHandIK: {fileID: 8051466978107478468}
+  animator: {fileID: 0}
+  blendSmoothSpeed: 10
+  leftHandPositionOffset: {x: 0, y: 0, z: 0}
+  leftHandRotationOffset: {x: 0, y: 0, z: 0}
+  rightHandPositionOffset: {x: 0, y: 0, z: 0}
+  rightHandRotationOffset: {x: 0, y: 0, z: 0}
+  leftFingerTargets: []
+  fingerOpenPositions: []
+  fingerClosedOffsets: []
+  leftGripAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Left Grip
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: fbaf4043-e5cb-41be-ac0c-0829e1fe7e27
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  rightFingerTargets: []
+  rightFingerOpenPositions: []
+  rightFingerClosedOffsets: []
+  rightGripAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Right Grip
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 221ee4b8-8158-41ee-98cc-0233442e1cee
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
 --- !u!114 &6899253321482367251
 MonoBehaviour:
   m_ObjectHideFlags: 0

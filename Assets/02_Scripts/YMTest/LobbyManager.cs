@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using TMPro;
 
 public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -33,8 +34,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         await runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
-            //SessionName = "Jeju_Lobby",
-            SessionName = "Test_Lobby11",
+            SessionName = "Jeju_Lobby",
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
         });
     }
@@ -55,9 +55,31 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         var playerObj = runner.Spawn(playerPrefab, spawnPos, Quaternion.identity, player);
         spawnedCharacters[player] = playerObj;
 
-        // --- [핵심 수정] ---
-        // 스폰된 플레이어 오브젝트를 퓨전 엔진에 공식 플레이어 객체로 등록합니다.
         runner.SetPlayerObject(player, playerObj);
+
+        if (player == runner.LocalPlayer)
+        {
+            runner.SetPlayerObject(player, playerObj);
+        }
+
+        // 플레이어 포인트 연결
+        if (player == runner.LocalPlayer)
+        {
+            var text = playerObj.GetComponentsInChildren<TextMeshProUGUI>(true)
+                                .FirstOrDefault(t => t.name == "PlayerPointText");
+
+            if (text != null)
+            {
+                PlayerPointManager.Instance.SetPointText(text);
+                Debug.Log("PlayerPointText 연결 성공");
+            }
+            else
+            {
+                Debug.LogWarning("PlayerPointText를 찾을 수 없음");
+            }
+
+            PlayerDataManager.Instance.StartCoroutine(PlayerDataManager.Instance.WaitAndApplyInventory());
+        }
     }
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
@@ -95,6 +117,11 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
                 // --- [핵심 수정] ---
                 // 씬 로드 후 스폰된 플레이어 역시 공식 객체로 등록합니다.
                 runner.SetPlayerObject(player, playerObj);
+
+                if (player == runner.LocalPlayer)
+                {
+                    runner.SetPlayerObject(player, playerObj); 
+                }
             }
         }
     }
