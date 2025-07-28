@@ -49,6 +49,7 @@ public class CustomPlayer : NetworkBehaviour
         }
 
         Debug.Log($"CustomData 현재 값: {CustomData.gender} / {CustomData.body}");
+        Debug.Log($"[Spawned] LatestDataJson: {CustomizationDataStore.LatestDataJson}");
     }
 
     public override void Render()

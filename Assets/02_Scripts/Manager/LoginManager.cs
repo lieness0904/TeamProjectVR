@@ -101,6 +101,7 @@ public class LoginManager : MonoBehaviour
                     CustomizationDataLoader.LoadCustomizationFromSheet(userId, data =>
                     {
                         PlayerDataManager.Instance.CustomizationData = data;
+                        CustomizationDataStore.LatestDataJson = JsonUtility.ToJson(data);
                         Debug.Log("커스터마이징 데이터 로드 완료");
                     });
 
