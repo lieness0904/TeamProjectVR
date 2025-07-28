@@ -122,13 +122,16 @@ public class CustomPlayer : NetworkBehaviour
                 yield break;
             }
 
-            if (customizationTargetRoot != null)
+            if (customizationTargetRoot == null)
             {
-                Destroy(customizationTargetRoot);
+                customizationTargetRoot = Instantiate(prefab, transform);
+                customizationTargetRoot.name = "CharacterAvatar";
             }
-
-            customizationTargetRoot = Instantiate(prefab, transform);
-            customizationTargetRoot.name = "CharacterAvatar";
+            else
+            {
+                // 기존 body 파츠 정리만 하고 새 prefab 인스턴스화는 하지 않음
+                ClearEquippedParts(); // body 포함 모든 파츠 제거
+            }
 
             equippedObjects.Clear();
             referenceSMR = null;
@@ -155,33 +158,57 @@ public class CustomPlayer : NetworkBehaviour
 
         yield return new WaitUntil(() => isDone);
     }
-
-    private string GetFullResourcePath(string gender, string filename)
+    private void ClearEquippedParts()
     {
-        if (string.IsNullOrEmpty(gender) || string.IsNullOrEmpty(filename))
+        foreach (var list in equippedObjects.Values)
         {
-            Debug.LogWarning("[GetFullResourcePath] gender 또는 filename이 비어있음");
+            foreach (var go in list)
+            {
+                if (go != null)
+                    Destroy(go);
+            }
+        }
+
+        equippedObjects.Clear();
+    }
+
+    private string GetFullResourcePath(string gender, string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            Debug.LogWarning($"[GetFullResourcePath] 경로 비어있음 - gender: {gender}, path: {path}");
             return "";
         }
 
-        string genderUpper = gender.ToUpper();
-        string genderPath = $"Customization/{genderUpper}/{filename}";
-        var genderAsset = Resources.Load<CustomizationItemAsset>(genderPath);
-        if (genderAsset != null)
+        if (path.StartsWith("Customization/"))
         {
-            Debug.Log($"[GetFullResourcePath] Gender 경로 사용됨: {genderPath}");
+            if (Resources.Load(path) != null)
+            {
+                Debug.Log($"[GetFullResourcePath] 직접 경로 사용: {path}");
+                return path;
+            }
+            else
+            {
+                Debug.LogError($"[GetFullResourcePath] 직접 경로 실패: {path}");
+                return "";
+            }
+        }
+
+        string genderPath = $"Customization/{gender.ToUpper()}/{path}";
+        if (Resources.Load(genderPath) != null)
+        {
+            Debug.Log($"[GetFullResourcePath] Gender fallback 사용: {genderPath}");
             return genderPath;
         }
 
-        string sharedPath = $"Customization/Shared/{filename}";
-        var sharedAsset = Resources.Load<CustomizationItemAsset>(sharedPath);
-        if (sharedAsset != null)
+        string sharedPath = $"Customization/Shared/{path}";
+        if (Resources.Load(sharedPath) != null)
         {
-            Debug.Log($"[GetFullResourcePath] Shared 경로 사용됨: {sharedPath}");
+            Debug.Log($"[GetFullResourcePath] Shared fallback 사용: {sharedPath}");
             return sharedPath;
         }
 
-        Debug.LogError($"[GetFullResourcePath] ❌ 에셋 없음 - Gender: {genderPath} / Shared: {sharedPath}");
+        Debug.LogError($"[GetFullResourcePath] 모든 경로 실패 - 원본: {path}");
         return "";
     }
 
