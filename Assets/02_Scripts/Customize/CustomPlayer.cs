@@ -42,10 +42,6 @@ public class CustomPlayer : NetworkBehaviour
 
             CustomizationDataStore.Clear();
         }
-        else
-        {
-            StartCoroutine(ApplyRoutine(CustomData));
-        }
 
         Debug.Log($"[CustomPlayer] Spawned 완료 - gender: {CustomData.gender} / body: {CustomData.body}");
     }
