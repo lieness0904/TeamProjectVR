@@ -6,8 +6,8 @@ TagManager:
   tags:
   - SpawnPoint
   - CastingZone
-  - LeftHandController
-
+  - Climbable
+  - XRRig
   layers:
   - Default
   - TransparentFX

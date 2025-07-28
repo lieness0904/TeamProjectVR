@@ -4696,9 +4696,8 @@ GameObject:
   m_Component:
   - component: {fileID: 544716705}
   - component: {fileID: 544716704}
-  - component: {fileID: 544716706}
-  m_Layer: 6
-  m_Name: MyFishingZone
+  m_Layer: 0
+  m_Name: FishingZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4734,25 +4733,12 @@ Transform:
   m_GameObject: {fileID: 544716703}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.18628588, z: -0, w: 0.98249555}
-  m_LocalPosition: {x: -59.5, y: -9.2, z: -30.8}
+  m_LocalPosition: {x: -59.5, y: -15, z: -30.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -21.472, z: 0}
---- !u!114 &544716706
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 544716703}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af94da0c4c57a104a9a075872a8d9882, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  availableFishPrefabs: []
 --- !u!1001 &548674584
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7371,7 +7357,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 100, y: 0.1, z: 100}
+  m_Size: {x: 100, y: 0.01, z: 100}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &739786830
 PrefabInstance:
@@ -17109,9 +17095,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1567347924}
   - component: {fileID: 1567347923}
-  - component: {fileID: 1567347925}
-  m_Layer: 6
-  m_Name: MyFishingZone2
+  m_Layer: 0
+  m_Name: FishingZone (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17147,25 +17132,12 @@ Transform:
   m_GameObject: {fileID: 1567347922}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.18628588, z: -0, w: 0.98249555}
-  m_LocalPosition: {x: -63.8, y: -13.4, z: -110.6}
+  m_LocalPosition: {x: -63.8, y: -15, z: -110.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -21.472, z: 0}
---- !u!114 &1567347925
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1567347922}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af94da0c4c57a104a9a075872a8d9882, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  availableFishPrefabs: []
 --- !u!1001 &1586541425
 PrefabInstance:
   m_ObjectHideFlags: 0
