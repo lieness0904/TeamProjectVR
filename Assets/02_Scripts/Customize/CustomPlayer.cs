@@ -14,6 +14,7 @@ public class CustomPlayer : NetworkBehaviour
 
     private Dictionary<string, List<GameObject>> equippedObjects = new();
     private SkinnedMeshRenderer referenceSMR;
+    private bool isApplying = false;
 
     public override void Spawned()
     {
