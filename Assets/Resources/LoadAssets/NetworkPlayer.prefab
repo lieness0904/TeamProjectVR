@@ -1992,6 +1992,7 @@ GameObject:
   - component: {fileID: -6790463601198364985}
   - component: {fileID: 5479044659269707123}
   - component: {fileID: 222207354456290721}
+  - component: {fileID: 5906618414608869536}
   m_Layer: 0
   m_Name: NetworkPlayer
   m_TagString: Player
@@ -2038,6 +2039,7 @@ MonoBehaviour:
   - {fileID: 2844160205959358355}
   - {fileID: 5479044659269707123}
   - {fileID: 222207354456290721}
+  - {fileID: 5906618414608869536}
   - {fileID: 7819527730710472739}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &1124782400498874914
@@ -2366,6 +2368,29 @@ MonoBehaviour:
       _data:
         Data: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   customizationTargetRoot: {fileID: 2780985804329322144}
+--- !u!114 &5906618414608869536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763074577358944841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f30f1bd6784d900409db8146554c3eee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fishingRodPrefab: {fileID: -1738820333853545119, guid: 3bdab65660b3e5547b14d2491138f786,
+    type: 3}
+  bobberPrefab: {fileID: -4729191417813426738, guid: fc1929e7f76cda94c82218321f0f6650,
+    type: 3}
+  castingHandler: {fileID: 3152192115052407573}
+  vibrationAmplitude: 0.7
+  vibrationDuration: 1
+  retrievalDistance: 3
+  _IsFishing:
+    _value: 0
+  _CurrentBobber: {fileID: 0}
 --- !u!1 &769997040941160783
 GameObject:
   m_ObjectHideFlags: 0
@@ -33164,6 +33189,7 @@ GameObject:
   - component: {fileID: 4633215884959695886}
   - component: {fileID: 235756619262701645}
   - component: {fileID: 7530877806516428494}
+  - component: {fileID: 3152192115052407573}
   m_Layer: 0
   m_Name: Right Controller
   m_TagString: Untagged
@@ -33650,6 +33676,23 @@ MonoBehaviour:
   uiLayer:
     serializedVersion: 2
     m_Bits: 32
+--- !u!114 &3152192115052407573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9120569952956067704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 252a1581fa614554d8be18181d2b5636, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  castAction: {fileID: -5684558904543120851, guid: e0ca4504471ca124088e1e2cfe6804ae,
+    type: 3}
+  hmdTransform: {fileID: 6396313080151331964}
+  castPowerMultiplier: 0.2
+  minCastSpeed: 10
 --- !u!1 &9139776375118437405
 GameObject:
   m_ObjectHideFlags: 0
