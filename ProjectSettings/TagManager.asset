@@ -7,6 +7,7 @@ TagManager:
   - SpawnPoint
   - CastingZone
   - LeftHandController
+
   layers:
   - Default
   - TransparentFX
@@ -15,7 +16,7 @@ TagManager:
   - Water
   - UI
   - FishingZone
-  - 
+  - Climbable
   - 
   - 
   - 

@@ -17,7 +17,7 @@ RenderSettings:
   m_Fog: 1
   m_FogColor: {r: 0.6650944, g: 0.941622, b: 1, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.0015
+  m_FogDensity: 0.0025
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.44011766, g: 0.5640588, b: 0.645, a: 1}
@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 681969165}
-  m_IndirectSpecularColor: {r: 0.37071133, g: 0.7267857, b: 0.8735156, a: 1}
+  m_IndirectSpecularColor: {r: 0.6453991, g: 0.877905, b: 1.0491812, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -97,7 +97,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 112000000, guid: 3dc8bc759650f2b42b1c6fb0220d6028,
+  m_LightingDataAsset: {fileID: 112000000, guid: 45f8de58b630a3a4281160f1c1edb20a,
     type: 2}
   m_LightingSettings: {fileID: 4890085278179872738, guid: 3e9a3fff7357003448842ce7cfb18edd,
     type: 2}
@@ -6160,7 +6160,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 1.5
+  m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208

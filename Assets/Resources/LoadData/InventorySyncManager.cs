@@ -7,7 +7,7 @@ public class InventorySyncManager : MonoBehaviour
 {
     public static InventorySyncManager Instance { get; private set; }
 
-    private string scriptURL = "https://script.google.com/macros/s/AKfycbxsVIFFP0aRSLTljhqnSI0KAso8jv3Hx3UPdIiWsl1UynSyyk1EVABCf2Fpz6WwzcNn/exec";
+    private string scriptURL = "https://script.google.com/macros/s/AKfycbxbEbhCsVmqMWCuZOtPEcfGFperFw3nRjDw5OsECes9IFx2pbeXZMFmMAS0E20XUVy3/exec";
 
     private void Awake()
     {
@@ -41,13 +41,25 @@ public class InventorySyncManager : MonoBehaviour
 
             if (www.result == UnityWebRequest.Result.Success)
             {
-                string inventoryJson = www.downloadHandler.text;
+                string responseText = www.downloadHandler.text;
+                var data = JsonUtility.FromJson<LoadResponse>(responseText);
 
+                // 인벤토리 반영
                 PlayerInventory inventory = FindObjectOfType<PlayerInventory>();
                 if (inventory != null)
                 {
-                    inventory.LoadFromJson(inventoryJson);
-                    Debug.Log("인벤토리 로드 완료: " + inventoryJson);
+                    inventory.LoadFromJson(data.inventory);
+                    Debug.Log("인벤토리 로드 완료: " + data.inventory);
+                }
+
+                // 포인트 반영 (여기가 진짜 동기화)
+                PlayerPointManager.Instance.Initialize(data.points);
+
+                // PlayerDataManager에도 동기화(선택)
+                if (PlayerDataManager.Instance != null)
+                {
+                    PlayerDataManager.Instance.Points = data.points;
+                    PlayerDataManager.Instance.InventoryJson = data.inventory;
                 }
             }
             else
@@ -65,13 +77,18 @@ public class InventorySyncManager : MonoBehaviour
             Debug.LogWarning("PlayerInventory 없음. 저장 생략");
             yield break;
         }
-
         string inventoryJson = inventory.ToJson();
+
+        int currentPoints = PlayerPointManager.Instance.GetPoints();
+        PlayerDataManager.Instance.Points = currentPoints;
 
         WWWForm form = new WWWForm();
         form.AddField("action", "saveData");
         form.AddField("userId", userId);
         form.AddField("inventory", inventoryJson);
+        form.AddField("points", currentPoints);
+
+        PlayerDataManager.Instance.Points = PlayerPointManager.Instance.GetPoints();
 
         using (UnityWebRequest www = UnityWebRequest.Post(scriptURL, form))
         {
@@ -79,11 +96,33 @@ public class InventorySyncManager : MonoBehaviour
 
             if (www.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log("인벤토리 저장 성공");
+                string responseText = www.downloadHandler.text;
+                Debug.Log($"[서버 응답] {responseText}");
+
+                try
+                {
+                    SaveResponse response = JsonUtility.FromJson<SaveResponse>(responseText);
+
+                    if (response.status == "success")
+                    {
+                        Debug.Log("인벤토리 저장 성공");
+
+                        if (PlayerDataManager.Instance != null)
+                            PlayerDataManager.Instance.InventoryJson = inventoryJson;
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"저장 실패: {response.message}");
+                    }
+                }
+                catch
+                {
+                    Debug.LogError("JSON 파싱 실패: 응답이 JSON 형식이 아닐 수 있음");
+                }
             }
             else
             {
-                Debug.LogError("인벤토리 저장 실패: " + www.error);
+                Debug.LogError("UnityWebRequest 실패: " + www.error);
             }
         }
     }

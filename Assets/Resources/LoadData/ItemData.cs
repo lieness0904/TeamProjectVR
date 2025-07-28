@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
@@ -12,7 +12,18 @@ public class ItemData
     public ItemType itemType;
     public string description;
     public string iconPath;
-    public int value;
+    public float value;
+    public int price;
 }
 
-public enum ItemType { Equipment, Consumable, Common}
+public enum ItemType
+{
+    [Description("장비")]
+    Equipment = 0,
+    [Description("소모품")]
+    Consumable = 1,
+    [Description("일반 아이템")]
+    Common = 2
+}
+
+
