@@ -9,8 +9,11 @@ using System;
 
 public class CustomPlayer : NetworkBehaviour
 {
+    [Networked] public CustomizationData CustomData { get; set; }
+
     [SerializeField] private GameObject customizationTargetRoot;
     private IAssetLoader assetLoader;
+    private ChangeDetector _changeDetector;
 
     private Dictionary<string, List<GameObject>> equippedObjects = new();
     private SkinnedMeshRenderer referenceSMR;
@@ -19,28 +22,48 @@ public class CustomPlayer : NetworkBehaviour
     public override void Spawned()
     {
         assetLoader = GetComponentInChildren<IAssetLoader>();
+        _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
-        if (Object.HasInputAuthority)
+        // InputAuthority: 본인일 때 적용
+        if (Object.HasInputAuthority || Object.HasStateAuthority)
         {
             var data = !string.IsNullOrEmpty(CustomizationDataStore.LatestDataJson)
-                ? JsonUtility.FromJson<CustomizationData>(CustomizationDataStore.LatestDataJson)
+                ? CustomizationDataConverter.FromJson(CustomizationDataStore.LatestDataJson)
                 : PlayerDataManager.Instance.CustomizationData;
 
-            ApplyCustomizationFromData(data);
-            RPC_ApplyCustomization(JsonUtility.ToJson(data));
+            if (Object.HasInputAuthority)
+            {
+                ApplyCustomizationFromData(data);
+            }
+
+            if (Object.HasStateAuthority)
+            {
+                CustomData = data;
+            }
+
             CustomizationDataStore.Clear();
         }
+
+        Debug.Log($"[CustomPlayer] Spawned 완료 - gender: {CustomData.gender} / body: {CustomData.body}");
     }
 
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority | RpcTargets.All)]
-    private void RPC_ApplyCustomization(string json)
+    public override void Render()
     {
-        var data = JsonUtility.FromJson<CustomizationData>(json);
-        StartCoroutine(ApplyRoutine(data));
+        if (isApplying) return;
+
+        foreach (var change in _changeDetector.DetectChanges(this))
+        {
+            if (change == nameof(CustomData))
+            {
+                Debug.Log("[CustomPlayer] CustomData 변경 감지됨 -> 적용 시작");
+                StartCoroutine(ApplyRoutine(CustomData));
+            }
+        }
     }
 
     public void ApplyCustomizationFromData(CustomizationData data)
     {
+        Debug.Log($"[CustomPlayer] ApplyCustomizationFromData 호출 - {data.gender}, {data.body}");
         StartCoroutine(ApplyRoutine(data));
     }
 
@@ -72,13 +95,6 @@ public class CustomPlayer : NetworkBehaviour
         }
 
         string fullPath = GetFullResourcePath(gender, path);
-        Debug.Log($"[LoadAndEquip] 경로: {fullPath}");
-
-        if (assetLoader == null)
-        {
-            Debug.LogError("[LoadAndEquip] assetLoader가 null임");
-            yield break;
-        }
 
         if (category == "body")
         {
@@ -96,7 +112,7 @@ public class CustomPlayer : NetworkBehaviour
             }
             else
             {
-                ClearEquippedParts();
+                ClearEquippedParts(); // 기존 파츠 제거
             }
 
             equippedObjects.Clear();
@@ -115,8 +131,7 @@ public class CustomPlayer : NetworkBehaviour
             }
             else
             {
-                Debug.Log($"[LoadAndEquip] asset 로드 성공 - {fullPath}");
-                Equip(category, asset);
+                Equip(category, path, asset);
             }
 
             isDone = true;
@@ -142,83 +157,46 @@ public class CustomPlayer : NetworkBehaviour
     private string GetFullResourcePath(string gender, string path)
     {
         if (string.IsNullOrEmpty(path))
-        {
-            Debug.LogWarning($"[GetFullResourcePath] 경로 비어있음 - gender: {gender}, path: {path}");
             return "";
-        }
 
-        if (path.StartsWith("Customization/"))
-        {
-            if (Resources.Load(path) != null)
-            {
-                Debug.Log($"[GetFullResourcePath] 직접 경로 사용: {path}");
-                return path;
-            }
-            else
-            {
-                Debug.LogError($"[GetFullResourcePath] 직접 경로 실패: {path}");
-                return "";
-            }
-        }
+        if (path.StartsWith("Customization/") && Resources.Load(path) != null)
+            return path;
 
         string genderPath = $"Customization/{gender.ToUpper()}/{path}";
         if (Resources.Load(genderPath) != null)
-        {
-            Debug.Log($"[GetFullResourcePath] Gender fallback 사용: {genderPath}");
             return genderPath;
-        }
 
         string sharedPath = $"Customization/Shared/{path}";
         if (Resources.Load(sharedPath) != null)
-        {
-            Debug.Log($"[GetFullResourcePath] Shared fallback 사용: {sharedPath}");
             return sharedPath;
-        }
 
-        Debug.LogError($"[GetFullResourcePath] 모든 경로 실패 - 원본: {path}");
         return "";
     }
 
-    private void Equip(string category, CustomizationItemAsset asset)
+    private void Equip(string category, string path, CustomizationItemAsset asset)
     {
         if (customizationTargetRoot == null)
-        {
-            Debug.LogError("[Equip] customizationTargetRoot가 null임");
             return;
-        }
 
         if (equippedObjects.TryGetValue(category, out var existingList))
         {
             foreach (var go in existingList)
-            {
                 if (go != null) Destroy(go);
-            }
             equippedObjects.Remove(category);
         }
 
         List<GameObject> newEquipped = new();
 
-        var animator = customizationTargetRoot.GetComponentInChildren<Animator>() ?? GetComponentInChildren<Animator>();
-        if (animator == null)
-        {
-            Debug.LogError("[Equip] Animator 못 찾음");
-            return;
-        }
-
+        var animator = customizationTargetRoot.GetComponentInChildren<Animator>();
         referenceSMR ??= customizationTargetRoot.GetComponentInChildren<SkinnedMeshRenderer>();
-        if (referenceSMR == null || referenceSMR.bones == null || referenceSMR.rootBone == null)
-        {
-            Debug.LogError("[Equip] referenceSMR 또는 bones, rootBone이 없음");
-            return;
-        }
 
+        if (animator == null || referenceSMR == null || referenceSMR.rootBone == null)
+            return;
+
+        // 메시 처리
         foreach (var mesh in asset.meshes)
         {
-            if (mesh == null || mesh.sharedMesh == null)
-            {
-                Debug.LogError($"[Equip] mesh 또는 sharedMesh가 null - category: {category}");
-                continue;
-            }
+            if (mesh?.sharedMesh == null) continue;
 
             GameObject go = new GameObject($"{category}_Mesh");
             go.transform.SetParent(customizationTargetRoot.transform, false);
@@ -230,46 +208,29 @@ public class CustomPlayer : NetworkBehaviour
             smr.sharedMaterials = mesh.sharedMaterials;
 
             if (Object.HasInputAuthority && (category == "head" || category == "hairstyle" || category == "acc_head"))
-            {
                 smr.enabled = false;
-            }
 
             newEquipped.Add(go);
         }
 
+        // 본 오브젝트 처리
         for (int i = 0; i < asset.objects.Length; i++)
         {
             var obj = asset.objects[i];
-
-            if (obj.prefab == null)
-            {
-                Debug.LogWarning($"[Equip] prefab이 null - category: {category}");
-                continue;
-            }
+            if (obj.prefab == null) continue;
 
             var bone = animator.GetBoneTransform(obj.targetBone);
-            if (bone == null)
-            {
-                Debug.LogWarning($"[Equip] Bone {obj.targetBone} 찾을 수 없음 - category: {category}");
-                continue;
-            }
+            if (bone == null) continue;
 
-            string uniqueSlotName = $"{category}_{i}";
-            Transform slot = bone.Find(uniqueSlotName);
-            if (slot == null)
-            {
-                GameObject slotGO = new GameObject(uniqueSlotName);
-                slotGO.transform.SetParent(bone);
-                slotGO.transform.localPosition = Vector3.zero;
-                slotGO.transform.localRotation = Quaternion.identity;
-                slotGO.transform.localScale = Vector3.one;
-                slot = slotGO.transform;
-            }
+            string slotName = $"{category}_{i}";
+            var slot = bone.Find(slotName) ?? new GameObject(slotName).transform;
+            slot.SetParent(bone);
+            slot.localPosition = Vector3.zero;
+            slot.localRotation = Quaternion.identity;
+            slot.localScale = Vector3.one;
 
             for (int j = slot.childCount - 1; j >= 0; j--)
-            {
                 Destroy(slot.GetChild(j).gameObject);
-            }
 
             var go = Instantiate(obj.prefab, slot);
             go.name = $"{category}_Obj";
@@ -279,8 +240,7 @@ public class CustomPlayer : NetworkBehaviour
 
             if (Object.HasInputAuthority && (category == "head" || category == "hairstyle" || category == "acc_head"))
             {
-                var renderers = go.GetComponentsInChildren<Renderer>();
-                foreach (var renderer in renderers)
+                foreach (var renderer in go.GetComponentsInChildren<Renderer>())
                     renderer.enabled = false;
             }
 

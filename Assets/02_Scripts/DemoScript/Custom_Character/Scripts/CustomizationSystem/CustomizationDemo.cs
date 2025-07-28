@@ -395,7 +395,6 @@ namespace Rukha93.ModularAnimeCharacter.Customization
             var result = new Dictionary<string, string>();
             string gender = null;
 
-            // gender 추출 (body path 기준으로 상위 폴더 확인)
             if (m_Equiped.TryGetValue("body", out var bodyItem))
             {
                 if (!string.IsNullOrEmpty(bodyItem.path))
@@ -412,14 +411,12 @@ namespace Rukha93.ModularAnimeCharacter.Customization
                 }
             }
 
-            // path 저장 (경로는 파일명만)
             foreach (var kvp in m_Equiped)
             {
                 if (string.IsNullOrEmpty(kvp.Value.path)) continue;
 
                 string[] tokens = kvp.Value.path.Split('/');
-                string filename = tokens[^1]; // Top.11, Bot.06 등
-
+                string filename = tokens[^1]; 
                 result[kvp.Key] = filename;
             }
 

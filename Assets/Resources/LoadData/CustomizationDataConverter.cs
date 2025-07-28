@@ -8,34 +8,39 @@ public static class CustomizationDataConverter
     {
         return new CustomizationDataDTO
         {
-            body = BuildPath(data.gender.ToString(), data.body.ToString()),
-            head = BuildPath(data.gender.ToString(), data.head.ToString()),
-            top = BuildPath(data.gender.ToString(), data.top.ToString()),
-            bottom = BuildPath(data.gender.ToString(), data.bottom.ToString()),
-            shoes = BuildPath(data.gender.ToString(), data.shoes.ToString()),
-            outfit = BuildPath(data.gender.ToString(), data.outfit.ToString()),
-            hairstyle = BuildPath(data.gender.ToString(), data.hairstyle.ToString()),
-            acc_head = BuildPath(data.gender.ToString(), data.acc_head.ToString()),
+            body = StripPath(data.body.ToString()),
+            head = StripPath(data.head.ToString()),
+            top = StripPath(data.top.ToString()),
+            bottom = StripPath(data.bottom.ToString()),
+            shoes = StripPath(data.shoes.ToString()),
+            outfit = StripPath(data.outfit.ToString()),
+            hairstyle = StripPath(data.hairstyle.ToString()),
+            acc_head = StripPath(data.acc_head.ToString()),
             gender = data.gender.ToString(),
         };
     }
 
     public static CustomizationData FromDTO(CustomizationDataDTO dto)
     {
+        var gender = (dto.gender ?? "").ToLower() == "m" ? "m" : "f";
         return new CustomizationData
         {
-            body = dto.body,
-            head = dto.head,
-            top = dto.top,
-            bottom = dto.bottom,
-            shoes = dto.shoes,
-            outfit = dto.outfit,
-            hairstyle = dto.hairstyle,
-            acc_head = dto.acc_head,
-            gender = (dto.gender ?? "").ToLower() == "m" ? "m" : "f",
+            body = BuildPath(gender, dto.body),       // 여기!
+            head = BuildPath(gender, dto.head),
+            top = BuildPath(gender, dto.top),
+            bottom = BuildPath(gender, dto.bottom),
+            shoes = BuildPath(gender, dto.shoes),
+            outfit = BuildPath(gender, dto.outfit),
+            hairstyle = BuildPath(gender, dto.hairstyle),
+            acc_head = BuildPath(gender, dto.acc_head),
+            gender = gender,
         };
     }
-
+    public static CustomizationData FromJson(string json)
+    {
+        var dto = JsonUtility.FromJson<CustomizationDataDTO>(json);
+        return FromDTO(dto);
+    }
     private static string BuildPath(string gender, string name)
     {
         if (string.IsNullOrEmpty(name))
@@ -51,5 +56,12 @@ public static class CustomizationDataConverter
             return fullPath;
 
         return ""; // 못 찾은 경우
+    }
+    private static string StripPath(string fullPath)
+    {
+        if (string.IsNullOrEmpty(fullPath))
+            return "";
+        var parts = fullPath.Split('/');
+        return parts[^1]; // 마지막 파츠 이름만 반환
     }
 }
