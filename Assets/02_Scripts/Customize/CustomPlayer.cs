@@ -18,24 +18,26 @@ public class CustomPlayer : NetworkBehaviour
     private Dictionary<string, List<GameObject>> equippedObjects = new();
     private SkinnedMeshRenderer referenceSMR;
     private bool isApplying = false;
-    private HeadHider headHider;
 
     public override void Spawned()
     {
         assetLoader = GetComponentInChildren<IAssetLoader>();
         _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
-        if (Object.HasInputAuthority)
+        if (Object.HasInputAuthority || Object.HasStateAuthority)
         {
-            Debug.Log("내 플레이어니까 커스터마이징 불러올 준비 가능");
+            Debug.Log("내 플레이어거나 서버니까 커스터마이징 준비");
 
             var data = !string.IsNullOrEmpty(CustomizationDataStore.LatestDataJson)
                 ? JsonUtility.FromJson<CustomizationData>(CustomizationDataStore.LatestDataJson)
                 : PlayerDataManager.Instance.CustomizationData;
 
-            ApplyCustomizationFromData(data);
+            if (Object.HasInputAuthority)
+            {
+                ApplyCustomizationFromData(data);
+            }
 
-            if (Object.HasStateAuthority) 
+            if (Object.HasStateAuthority)
             {
                 CustomData = new CustomizationData
                 {
