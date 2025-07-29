@@ -35,7 +35,10 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         await runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
-            SessionName = "Jeju_Lobby123",
+
+            SessionName = "Jeju_Lobby111",
+            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
+
         });
     }
 
