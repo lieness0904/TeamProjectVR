@@ -6,6 +6,7 @@ using System;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using TMPro;
+using System.Collections;
 
 public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -40,8 +41,21 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        if (!runner.IsServer) return;
+        Debug.Log($"[OnPlayerJoined] Player {player.PlayerId} joined. IsServer={runner.IsServer}, Local={runner.LocalPlayer}");
 
+        if (runner.IsServer)
+        {
+            SpawnPlayerForServer(runner, player);
+        }
+
+        if (player == runner.LocalPlayer)
+        {
+            StartCoroutine(WaitForPlayerObject(runner, player));
+        }
+    }
+
+    private void SpawnPlayerForServer(NetworkRunner runner, PlayerRef player)
+    {
         Vector3 basePos = Vector3.zero;
         var spawnObj = GameObject.FindWithTag("SpawnPoint");
         if (spawnObj != null)
@@ -53,35 +67,29 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
         var playerObj = runner.Spawn(playerPrefab, spawnPos, Quaternion.identity, player);
         spawnedCharacters[player] = playerObj;
-
         runner.SetPlayerObject(player, playerObj);
+    }
 
-        if (player == runner.LocalPlayer)
+    private IEnumerator WaitForPlayerObject(NetworkRunner runner, PlayerRef player)
+    {
+        NetworkObject playerObj = null;
+        while ((playerObj = runner.GetPlayerObject(player)) == null)
+            yield return null;
+
+        var text = playerObj.GetComponentsInChildren<TextMeshProUGUI>(true)
+                            .FirstOrDefault(t => t.name == "PlayerPointText");
+
+        if (text != null)
         {
-            runner.SetPlayerObject(player, playerObj);
+            PlayerPointManager.Instance.SetPointText(text);
+        }
+        else
+        {
+            Debug.LogWarning("PlayerPointText를 찾을 수 없음");
         }
 
-        // 플레이어 포인트 연결
-        if (player == runner.LocalPlayer)
-        {
-            var text = playerObj.GetComponentsInChildren<TextMeshProUGUI>(true)
-                                .FirstOrDefault(t => t.name == "PlayerPointText");
-
-            if (text != null)
-            {
-                PlayerPointManager.Instance.SetPointText(text);
-                Debug.Log("PlayerPointText 연결 성공");
-            }
-            else
-            {
-                Debug.LogWarning("PlayerPointText를 찾을 수 없음");
-            }
-
-            PlayerDataManager.Instance.StartCoroutine(PlayerDataManager.Instance.WaitAndApplyInventory());
-
-            GameManager.Instance.VoiceManager.ConnectToVoiceRoom(runner.SessionInfo.Name);
-        }
-
+        PlayerDataManager.Instance.StartCoroutine(PlayerDataManager.Instance.WaitAndApplyInventory());
+        GameManager.Instance.VoiceManager.ConnectToVoiceRoom(runner.SessionInfo.Name);
     }
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {

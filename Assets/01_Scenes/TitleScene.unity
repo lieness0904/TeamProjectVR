@@ -570,7 +570,7 @@ MonoBehaviour:
   testClipName: TestVoice
   micToggleKey: 121
   testToggleKey: 116
-  useDebugEcho: 0
+  useDebugEcho: 1
 --- !u!1 &1056924314
 GameObject:
   m_ObjectHideFlags: 0

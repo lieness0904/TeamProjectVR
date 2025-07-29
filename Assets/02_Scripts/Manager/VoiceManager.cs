@@ -17,12 +17,18 @@ public class VoiceManager : MonoBehaviour
 
         // Speaker 자동 연결
         VoiceConnection.SpeakerLinked += OnSpeakerLinked;
+
+
+        if (VoiceConnection.Settings == null)
+        {
+            Debug.LogError("[VoiceManager] VoiceConnection Settings 없음!");
+        }
     }
 
 
     public void ConnectToVoiceRoom(string roomName)
     {
-        Debug.Log($"[VoiceManager] 보이스 서버 연결 시도 - Room: {roomName}");
+        Debug.Log($"[VoiceManager] ConnectToVoiceRoom 호출됨 - Room: {roomName}");
         currentRoomName = roomName;
 
         VoiceConnection.Client.StateChanged -= OnVoiceClientStateChanged;
@@ -30,11 +36,12 @@ public class VoiceManager : MonoBehaviour
 
         if (!VoiceConnection.Client.IsConnected)
         {
-            VoiceConnection.Settings.FixedRegion = "hk"; 
+            Debug.Log("[VoiceManager] Photon Voice Connect 실행");
             VoiceConnection.ConnectUsingSettings();
         }
         else
         {
+            Debug.Log("[VoiceManager] 이미 연결됨, 바로 Join");
             JoinVoiceRoom(currentRoomName);
         }
     }
@@ -44,12 +51,13 @@ public class VoiceManager : MonoBehaviour
         if (newState == ClientState.ConnectedToMasterServer)
         {
             Debug.Log("[VoiceManager] 마스터 서버 연결됨 → 보이스 룸 입장 시도");
-            JoinVoiceRoom(currentRoomName);
+            StartCoroutine(DelayedJoin());
         }
-        else if (newState == ClientState.Joined)
-        {
-            Debug.Log("[VoiceManager] 보이스 룸 입장 완료!");
-        }
+    }
+    private IEnumerator DelayedJoin()
+    {
+        yield return null;
+        JoinVoiceRoom(currentRoomName);
     }
 
     private void JoinVoiceRoom(string roomName)
@@ -70,17 +78,12 @@ public class VoiceManager : MonoBehaviour
     private void OnSpeakerLinked(Speaker speaker)
     {
         Debug.Log($"[VoiceManager] Speaker 연결됨: {speaker.name}");
-
-        var audioSource = speaker.gameObject.AddComponent<AudioSource>();
-        if (speaker == null)
-        {
-            audioSource = speaker.gameObject.AddComponent<AudioSource>();
-            audioSource.spatialBlend = 1f;
-            audioSource.minDistance = 1f;
-            audioSource.maxDistance = 33f;
-        }
-    
+        var audioSource = speaker.GetComponent<AudioSource>() ?? speaker.gameObject.AddComponent<AudioSource>();
+        audioSource.spatialBlend = 1f;
+        audioSource.minDistance = 1f;
+        audioSource.maxDistance = 33f;
     }
+
     public void SetVoice(bool enabled)
     {
         if (Recorder != null)
