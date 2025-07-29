@@ -566,6 +566,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5649ac625ce3d154ba046aabcedc4cdb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  recorder: {fileID: 1755192330}
+  testClipName: TestVoice
+  micToggleKey: 121
+  testToggleKey: 116
+  useDebugEcho: 0
 --- !u!1 &1056924314
 GameObject:
   m_ObjectHideFlags: 0
