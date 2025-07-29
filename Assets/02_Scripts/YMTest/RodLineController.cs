@@ -25,6 +25,9 @@ public class RodLineController : NetworkBehaviour
     private Transform currentBobber;     // 찌 Transform
     private Rigidbody bobberRigidbody;   // 찌 Rigidbody
 
+    // 외부에서 Hook(바늘) Transform을 요청할 수 있게 Property 제공 (PlayerFishingController가 사용)
+    public Transform GetCurrentHookTransform() => spawnedHook != null ? spawnedHook.transform : null;
+
     public override void Spawned()
     {
         _lineRenderer = GetComponent<LineRenderer>();

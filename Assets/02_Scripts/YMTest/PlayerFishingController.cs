@@ -38,14 +38,13 @@ public class PlayerFishingController : NetworkBehaviour
     [Tooltip("'HIT!' 메시지를 표시할 UI 텍스트")]
     [SerializeField] private TextMeshProUGUI hitText;
 
-
     [Networked] public NetworkBool IsFishing { get; set; }
     [Networked] private NetworkObject SpawnedRod { get; set; }
     [Networked] public NetworkObject CurrentBobber { get; private set; }
     [Networked] private TickTimer CastingCooldown { get; set; }
 
     [Networked] public NetworkBool IsFighting { get; set; }
-    [Networked] public NetworkObject HookedFish { get; set; } // 이 변수는 챔질 후 '실제로' 낚싯대에 걸린 물고기입니다.
+    [Networked] public NetworkObject HookedFish { get; set; }
 
     private RiggingManager _riggingManager;
     public static PlayerFishingController Local { get; private set; }
@@ -56,6 +55,9 @@ public class PlayerFishingController : NetworkBehaviour
 
     private Vector3 _lastControllerPos;
     private Vector3 _currentControllerVel;
+
+    private Transform _hookTransform;
+
     #endregion
 
     private void Awake()
@@ -67,9 +69,6 @@ public class PlayerFishingController : NetworkBehaviour
         }
     }
 
-    /// <summary>
-    /// Update는 매 프레임 호출되며, 로컬 플레이어의 입력을 감지하기에 적합합니다.
-    /// </summary>
     private void Update()
     {
         if (!HasInputAuthority) return;
@@ -82,31 +81,42 @@ public class PlayerFishingController : NetworkBehaviour
             _lastControllerPos = currentPos;
         }
 
-        // 2. 챔질 조건을 확인합니다: (입질이 왔고 AND 아직 전투 중이 아닐 때)
-        if (CurrentBobber != null && CurrentBobber.TryGetComponent<BobberController>(out var bobber) && bobber.HasFishOn && !IsFighting)
+        // 2. 챔질 조건을 확인합니다
+        if (CurrentBobber != null && CurrentBobber.TryGetComponent<BobberController>(out var bobber))
         {
-            // 3. 컨트롤러를 위로 빠르게 잡아챘는지 확인합니다.
-            if (_currentControllerVel.y > hookVelocityThreshold)
+            // 디버그: 입질 상태 및 물고기 오브젝트 상태 출력
+            Debug.Log($"[챔질 검사] HasFishOn: {bobber.HasFishOn}, IsFighting: {IsFighting}, HookedFish: {(bobber.HookedFish != null ? bobber.HookedFish.name : "null")}, 컨트롤러 속도Y: {_currentControllerVel.y}");
+
+            if (bobber.HasFishOn && !IsFighting)
             {
-                Debug.Log("Hook attempt successful!");
-                // 4. 조건이 맞으면 서버에 챔질을 시도했다고 알립니다.
-                // ▼▼▼ [수정된 부분] NetworkPrefabId 대신 bobber.HookedFish 자체를 전달합니다. ▼▼▼
-                if (bobber.HookedFish != null) // 물고기가 스폰되어 있어야만 시도
+                // 챔질 스냅 판정 (속도)
+                if (_currentControllerVel.y > hookVelocityThreshold)
                 {
-                    RPC_AttemptHook(bobber.HookedFish);
+                    Debug.Log($"[챔질 인식!] 컨트롤러Y 속도 = {_currentControllerVel.y} (임계치: {hookVelocityThreshold})");
+                    if (bobber.HookedFish != null)
+                    {
+                        Debug.Log("[챔질] RPC_AttemptHook 호출 (물고기 오브젝트 존재)");
+                        RPC_AttemptHook(bobber.HookedFish);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[챔질] 챔질시도 BUT 물고기 오브젝트가 null (bobber.HookedFish == null)");
+                    }
                 }
-                // ▲▲▲ [수정된 부분] ▲▲▲
+                else
+                {
+                    Debug.Log($"[챔질 미인식] 컨트롤러Y 속도 = {_currentControllerVel.y} (임계치: {hookVelocityThreshold})");
+                }
             }
         }
     }
 
-    #region Fusion 콜백 함수 (Spawned, Despawned, FixedUpdateNetwork, Render)
+    #region Fusion 콜백 함수
     public override void Spawned()
     {
         if (HasInputAuthority)
         {
             Local = this;
-            // 컨트롤러 위치 초기화
             if (_riggingManager.rightHandController != null)
                 _lastControllerPos = _riggingManager.rightHandController.position;
         }
@@ -145,7 +155,6 @@ public class PlayerFishingController : NetworkBehaviour
                 {
                     _fishJustBit = true;
                     SendHapticImpulse(vibrationAmplitude, vibrationDuration);
-                    // 입질 시 "HIT!" 메시지 표시 (InputAuthority에서만 RPC 호출)
                     if (Object.HasInputAuthority)
                     {
                         RPC_ShowHitMessage();
@@ -154,7 +163,6 @@ public class PlayerFishingController : NetworkBehaviour
                 else if (!bobber.HasFishOn && _fishJustBit)
                 {
                     _fishJustBit = false;
-                    // 물고기 놓쳤을 때 "HIT!" 메시지 비활성화 (모든 클라이언트)
                     if (hitText != null && hitText.gameObject.activeSelf)
                     {
                         hitText.gameObject.SetActive(false);
@@ -213,48 +221,112 @@ public class PlayerFishingController : NetworkBehaviour
         RPC_UpdateVisuals(isFishing, SpawnedRod);
     }
 
-    // ▼▼▼ [수정된 함수] 챔질 시도 RPC - NetworkObject를 인수로 받도록 변경 ▼▼▼
+    // ▼▼▼ 챔질 시도 RPC - Hook에 Fish(HEAD_end) 연결 ▼▼▼
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    private void RPC_AttemptHook(NetworkObject fishToHook) // NetworkObject를 직접 인수로 받습니다.
+    private void RPC_AttemptHook(NetworkObject fishToHook)
     {
-        // 이미 전투 중이거나, 물고기 오브젝트가 유효하지 않으면 리턴
-        if (IsFighting || fishToHook == null) return;
+        Debug.Log($"[RPC_AttemptHook] 호출. IsFighting: {IsFighting}, fishToHook: {(fishToHook != null ? fishToHook.name : "null")}");
 
-        // HookedFish 변수에 BobberController에서 받아온 물고기 오브젝트를 직접 할당합니다.
+        if (IsFighting || fishToHook == null)
+        {
+            Debug.LogWarning($"[RPC_AttemptHook] 실패 - IsFighting: {IsFighting}, fishToHook null? {fishToHook == null}");
+            return;
+        }
+
         HookedFish = fishToHook;
 
         if (HookedFish != null && HookedFish.TryGetComponent<FishData>(out var fishData))
         {
-            fishData.InitializeFish(); // 스폰된 물고기의 스탯(크기,무게 등) 결정
-            HookedFish.gameObject.SetActive(true); // 물고기를 활성화하여 보이게 합니다.
+            Debug.Log($"[RPC_AttemptHook] 물고기({HookedFish.name}) FishData 있음. InitializeFish() 호출");
+            fishData.InitializeFish();
+            HookedFish.gameObject.SetActive(true);
 
-            IsFighting = true; // 전투 상태로 전환
+            IsFighting = true;
 
-            // 찌의 입질 상태는 리셋
             if (CurrentBobber.TryGetComponent<BobberController>(out var bobber))
             {
                 bobber.HasFishOn = false;
-                bobber.HookedFish = null; // 찌에 연결된 물고기 참조도 끊어줍니다.
+                bobber.HookedFish = null;
             }
-
-            // 챔질 성공 시 찌에 연결된 조인트 제거 (물고기에게 컨트롤 넘기기 위함)
             if (CurrentBobber.TryGetComponent<ConfigurableJoint>(out var joint))
             {
                 Destroy(joint);
             }
 
-            RPC_ShowHitMessage(); // 모든 클라이언트에게 "HIT!" 메시지 표시 요청
+            AttachFishToHook();
+
+            RPC_ShowHitMessage();
             Debug.Log($"[Server] 챔질 성공! 물고기 {HookedFish.name}와 전투 시작.");
         }
         else if (HookedFish != null)
         {
-            // 스폰은 됐는데 FishData가 없는 등 예외상황 처리
+            Debug.LogWarning("[RPC_AttemptHook] FishData 없음, 또는 이상상황. Despawn 호출");
             Runner.Despawn(HookedFish);
             HookedFish = null;
         }
     }
-    // ▲▲▲ [수정된 함수] 챔질 시도 RPC ▲▲▲
 
+    /// <summary>
+    /// 챔질 성공 시, 바늘(Hook)에 Fish(HEAD_end)를 자동 연결
+    /// </summary>
+    private void AttachFishToHook()
+    {
+        // 1. 현재 RodLineController 찾기 (낚싯대에 존재)
+        var rodLine = SpawnedRod != null ? SpawnedRod.GetComponentInChildren<RodLineController>() : null;
+        if (rodLine == null)
+        {
+            Debug.LogWarning("[AttachFishToHook] RodLineController를 찾지 못함");
+            return;
+        }
+
+        // 2. RodLineController가 관리하는 spawnedHook(바늘) Transform 얻기
+        Transform hookTransform = rodLine.GetCurrentHookTransform();
+        if (hookTransform == null)
+        {
+            Debug.LogWarning("[AttachFishToHook] 바늘(Hook) 오브젝트를 찾지 못함");
+            return;
+        }
+
+        // 3. HookedFish의 Rigidbody 얻기
+        if (HookedFish != null && HookedFish.TryGetComponent<Rigidbody>(out var fishRb))
+        {
+            // 기존에 달려있던 FixedJoint 있으면 제거 (안정성)
+            var oldJoint = hookTransform.GetComponent<FixedJoint>();
+            if (oldJoint != null) Destroy(oldJoint);
+
+            // Hook(바늘)에 FixedJoint 추가 → 물고기 Rigidbody 연결
+            var fixedJoint = hookTransform.gameObject.AddComponent<FixedJoint>();
+            fixedJoint.connectedBody = fishRb;
+            fixedJoint.breakForce = Mathf.Infinity;
+
+            // 물고기 Rigidbody 활성화(중력 사용, 관성 허용)
+            fishRb.isKinematic = false;
+            fishRb.useGravity = true;
+
+            Debug.Log($"[AttachFishToHook] {HookedFish.name}의 Rigidbody가 바늘에 FixedJoint로 연결됨");
+        }
+        else
+        {
+            Debug.LogWarning("[AttachFishToHook] 물고기 Rigidbody를 찾지 못함");
+        }
+    }
+
+    /// <summary>
+    /// 하위 모든 오브젝트에서 name으로 찾기 (재귀)
+    /// </summary>
+    private Transform FindDeepChild(Transform parent, string name)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == name)
+                return child;
+            var result = FindDeepChild(child, name);
+            if (result != null)
+                return result;
+        }
+        return null;
+    }
+    // ▲▲▲ 챔질 성공 시 바늘-물고기 연결 ▲▲▲
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     private void RPC_ShowHitMessage()
@@ -272,7 +344,6 @@ public class PlayerFishingController : NetworkBehaviour
         yield return new WaitForSeconds(1.5f);
         hitText.gameObject.SetActive(false);
     }
-
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void RPC_CastBobber(Vector3 force)
