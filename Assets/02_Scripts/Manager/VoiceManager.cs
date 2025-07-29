@@ -19,18 +19,18 @@ public class VoiceManager : MonoBehaviour
     
     public void ConnectToVoiceRoom(string roomName)
     {
-        if (!VoiceConnection.Client.IsConnected)
-        {
-            VoiceConnection.ConnectUsingSettings();
-        }
+        VoiceConnection.ConnectUsingSettings();
 
-        if (!VoiceConnection.Client.InRoom && VoiceConnection.Client.IsConnected)
+        VoiceConnection.Client.StateChanged += (oldState, newState) =>
         {
-            VoiceConnection.Client.OpJoinOrCreateRoom(new EnterRoomParams
+            if (newState == ClientState.ConnectedToMaster)
             {
-                RoomName = roomName
-            });
-        }
+                VoiceConnection.Client.OpJoinOrCreateRoom(new EnterRoomParams
+                {
+                    RoomName = roomName
+                });
+            }
+        };
     }
     private void OnSpeakerLinked(Speaker speaker)
     {

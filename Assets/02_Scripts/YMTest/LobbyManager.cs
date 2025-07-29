@@ -79,6 +79,8 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
             PlayerDataManager.Instance.StartCoroutine(PlayerDataManager.Instance.WaitAndApplyInventory());
         }
+
+        GameManager.Instance.VoiceManager.ConnectToVoiceRoom(runner.SessionInfo.Name);
     }
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
@@ -140,7 +142,6 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     }
     public void OnConnectedToServer(NetworkRunner runner)
     {
-        GameManager.Instance.VoiceManager.ConnectToVoiceRoom(runner.SessionInfo.Name);
     }
 
     #region 사용하지 않는 콜백들
