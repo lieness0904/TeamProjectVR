@@ -42,6 +42,10 @@ public class CustomPlayer : NetworkBehaviour
 
             CustomizationDataStore.Clear();
         }
+        else
+        {
+            StartCoroutine(ApplyRoutine(CustomData));
+        }
 
         Debug.Log($"[CustomPlayer] Spawned 완료 - gender: {CustomData.gender} / body: {CustomData.body}");
     }
@@ -54,10 +58,23 @@ public class CustomPlayer : NetworkBehaviour
         {
             if (change == nameof(CustomData))
             {
-                Debug.Log("[CustomPlayer] CustomData 변경 감지됨 -> 적용 시작");
-                StartCoroutine(ApplyRoutine(CustomData));
+                if (IsValidCustomizationData(CustomData))
+                {
+                    Debug.Log("[CustomPlayer] CustomData 변경 감지됨 → 적용 시작");
+                    StartCoroutine(ApplyRoutine(CustomData));
+                }
+                else
+                {
+                    Debug.LogWarning("[CustomPlayer] CustomData 변경 감지됨 BUT 유효하지 않음 → 적용 생략");
+                }
             }
         }
+    }
+
+    private bool IsValidCustomizationData(CustomizationData data)
+    {
+        return !string.IsNullOrEmpty(data.body.Value)
+            && !string.IsNullOrEmpty(data.gender.Value);
     }
 
     public void ApplyCustomizationFromData(CustomizationData data)
