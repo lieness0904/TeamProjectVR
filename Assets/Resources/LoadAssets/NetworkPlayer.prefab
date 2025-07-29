@@ -2388,6 +2388,8 @@ MonoBehaviour:
   vibrationAmplitude: 0.7
   vibrationDuration: 1
   retrievalDistance: 3
+  bobberHangOffset: 1
+  bobberDampingSpeed: 10
   _IsFishing:
     _value: 0
   _CurrentBobber: {fileID: 0}
