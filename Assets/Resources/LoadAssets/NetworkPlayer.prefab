@@ -2388,7 +2388,7 @@ MonoBehaviour:
   vibrationAmplitude: 0.7
   vibrationDuration: 1
   retrievalDistance: 3
-  bobberHangOffset: 1
+  bobberHangOffset: 0.5
   bobberDampingSpeed: 10
   hookVelocityThreshold: 3
   hitText: {fileID: 0}

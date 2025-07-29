@@ -2160,6 +2160,9 @@ MonoBehaviour:
   - {fileID: 7138727490329174259}
   - {fileID: 1392197401163961730}
   - {fileID: 435465514485488261}
+  hookPrefab: {fileID: 7744451712469267691, guid: 542d0b7357f3d1040af34b60bb2b250d,
+    type: 3}
+  hookOffset: 0.15
 --- !u!114 &2430629476814956581
 MonoBehaviour:
   m_ObjectHideFlags: 0
