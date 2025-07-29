@@ -78,9 +78,10 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
             }
 
             PlayerDataManager.Instance.StartCoroutine(PlayerDataManager.Instance.WaitAndApplyInventory());
+
+            GameManager.Instance.VoiceManager.ConnectToVoiceRoom(runner.SessionInfo.Name);
         }
 
-        GameManager.Instance.VoiceManager.ConnectToVoiceRoom(runner.SessionInfo.Name);
     }
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
