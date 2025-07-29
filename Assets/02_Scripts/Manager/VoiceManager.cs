@@ -13,11 +13,10 @@ public class VoiceManager : MonoBehaviour
     {
         VoiceConnection = GetComponent<VoiceConnection>();
         recorder = GetComponent<Recorder>();
-    }
-    private void Start()
-    {
+
         VoiceConnection.SpeakerLinked += OnSpeakerLinked;
-    } 
+    }
+    
     public void ConnectToVoiceRoom(string roomName)
     {
         if (!VoiceConnection.Client.IsConnected)
