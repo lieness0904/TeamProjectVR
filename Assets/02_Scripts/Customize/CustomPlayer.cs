@@ -33,6 +33,8 @@ public class CustomPlayer : NetworkBehaviour
             if (Object.HasInputAuthority)
             {
                 ApplyCustomizationFromData(data);
+
+                RPC_SendCustomization(CustomizationDataConverter.ToJson(data));
             }
 
             if (Object.HasStateAuthority)
@@ -69,6 +71,12 @@ public class CustomPlayer : NetworkBehaviour
                 }
             }
         }
+    }
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    private void RPC_SendCustomization(string json)
+    {
+        var data = CustomizationDataConverter.FromJson(json);
+        CustomData = data;
     }
 
     private bool IsValidCustomizationData(CustomizationData data)

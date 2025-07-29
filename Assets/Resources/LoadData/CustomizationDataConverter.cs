@@ -41,6 +41,13 @@ public static class CustomizationDataConverter
         var dto = JsonUtility.FromJson<CustomizationDataDTO>(json);
         return FromDTO(dto);
     }
+
+    public static string ToJson(CustomizationData data)  
+    {
+        var dto = ToDTO(data);
+        return JsonUtility.ToJson(dto);
+    }
+
     private static string BuildPath(string gender, string name)
     {
         if (string.IsNullOrEmpty(name))
