@@ -23,7 +23,7 @@ public class VoiceManager : MonoBehaviour
 
         VoiceConnection.Client.StateChanged += (oldState, newState) =>
         {
-            if (newState == ClientState.ConnectedToMaster)
+            if (newState == ClientState.ConnectedToMasterServer)
             {
                 VoiceConnection.Client.OpJoinOrCreateRoom(new EnterRoomParams
                 {
