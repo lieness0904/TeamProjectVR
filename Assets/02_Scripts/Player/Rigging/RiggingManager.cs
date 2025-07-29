@@ -106,13 +106,14 @@ public class RiggingManager : NetworkBehaviour
         if (Runner.IsForward)
         {
             RPC_UpdateIK(hmd.position, hmd.rotation, leftPos, leftRot, rightPos, rightRot, leftGrip, rightGrip);
-        }
 
-        // 애니메이션 블렌드 계산
-        Vector3 velocity = (hmd.position - lastHmdPosition) / Runner.DeltaTime;
-        Vector3 localVelocity = xrOrigin.transform.InverseTransformDirection(velocity);
-        lastHmdPosition = hmd.position;
-        NetworkMoveBlend = new Vector2(localVelocity.x, localVelocity.z);
+            Vector3 velocity = (hmd.position - lastHmdPosition) / Runner.DeltaTime;
+            Vector3 localVelocity = xrOrigin.transform.InverseTransformDirection(velocity);
+            lastHmdPosition = hmd.position;
+
+            Vector2 moveBlend = new Vector2(localVelocity.x, localVelocity.z);
+            RPC_UpdateMoveBlend(moveBlend);
+        }
     }
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void RPC_UpdateIK(Vector3 headPos, Quaternion headRot, Vector3 leftPos, Quaternion leftRot,
@@ -191,6 +192,10 @@ public class RiggingManager : NetworkBehaviour
         animator.SetFloat("MoveX", smoothed.x);
         animator.SetFloat("MoveY", smoothed.y);
     }
-
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    private void RPC_UpdateMoveBlend(Vector2 blend)
+    {
+        NetworkMoveBlend = blend;
+    }
 }
 

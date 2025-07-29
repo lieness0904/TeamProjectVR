@@ -154,7 +154,7 @@ namespace Rukha93.ModularAnimeCharacter.Customization
         public void Equip(string cat, string path, CustomizationItemAsset item)
         {
             //if outfit, remove all othet pieces
-            if(cat.Equals("outfit"))
+            if (cat.Equals("outfit"))
             {
                 Unequip("top", false);
                 Unequip("bottom", false);
@@ -178,7 +178,7 @@ namespace Rukha93.ModularAnimeCharacter.Customization
             //instantiate new meshes, init properties, parent to character
             GameObject go = null;
             SkinnedMeshRenderer skinnedMesh = null;
-            foreach(var mesh in item.meshes)
+            foreach (var mesh in item.meshes)
             {
                 //instantiate new gameobject
                 go = new GameObject(mesh.name);
@@ -195,7 +195,7 @@ namespace Rukha93.ModularAnimeCharacter.Customization
             }
 
             //instantiate objects, parent to target bones
-            foreach(var obj in item.objects)
+            foreach (var obj in item.objects)
             {
                 go = Instantiate(obj.prefab, m_Character.GetBoneTransform(obj.targetBone));
                 equip.instantiatedObjects.Add(go);
@@ -330,7 +330,7 @@ namespace Rukha93.ModularAnimeCharacter.Customization
         #endregion
 
         #region UI CALLBACKS
-        
+
         private void OnSelectCategory(string cat)
         {
             if (string.Equals(m_UI.CurrentCategory, cat))
@@ -395,7 +395,6 @@ namespace Rukha93.ModularAnimeCharacter.Customization
             var result = new Dictionary<string, string>();
             string gender = null;
 
-            // gender 추출 (body path 기준으로 상위 폴더 확인)
             if (m_Equiped.TryGetValue("body", out var bodyItem))
             {
                 if (!string.IsNullOrEmpty(bodyItem.path))
@@ -412,14 +411,12 @@ namespace Rukha93.ModularAnimeCharacter.Customization
                 }
             }
 
-            // path 저장 (경로는 파일명만)
             foreach (var kvp in m_Equiped)
             {
                 if (string.IsNullOrEmpty(kvp.Value.path)) continue;
 
                 string[] tokens = kvp.Value.path.Split('/');
-                string filename = tokens[^1]; // Top.11, Bot.06 등
-
+                string filename = tokens[^1]; 
                 result[kvp.Key] = filename;
             }
 
@@ -428,27 +425,5 @@ namespace Rukha93.ModularAnimeCharacter.Customization
 
             return result;
         }
-
-        private string GetFullResourcePath(string gender, string filename)
-        {
-            if (string.IsNullOrEmpty(filename)) return "";
-
-            // 경로가 이미 완성된 형태면 그대로 사용
-            if (filename.StartsWith("Customization/"))
-                return filename;
-
-            string cleanName = Path.GetFileNameWithoutExtension(filename);
-
-            // Shared에 존재하는지 먼저 확인
-            string sharedPath = $"Customization/Shared/{cleanName}";
-            var sharedAsset = Resources.Load<CustomizationItemAsset>(sharedPath);
-            if (sharedAsset != null)
-                return sharedPath;
-
-            // 그렇지 않으면 성별 폴더에서 로드
-            string genderFolder = gender.ToUpper();
-            return $"Customization/{genderFolder}/{cleanName}";
-        }
-
     }
 }

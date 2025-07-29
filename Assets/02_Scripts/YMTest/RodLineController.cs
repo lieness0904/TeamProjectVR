@@ -1,6 +1,6 @@
 using UnityEngine;
 using Fusion;
-using System.Collections.Generic; // List를 사용하기 위해 필요합니다.
+using System.Collections.Generic;
 
 [RequireComponent(typeof(LineRenderer))]
 public class RodLineController : NetworkBehaviour
@@ -9,11 +9,11 @@ public class RodLineController : NetworkBehaviour
     [Tooltip("릴부터 시작해서 낚싯대 끝(RodTip)까지, 낚싯줄이 통과할 지점들을 순서대로 넣어주세요.")]
     public List<Transform> lineGuidePoints;
 
-    [Header("캐스팅 전 찌")]
-    [Tooltip("캐스팅 전, 낚싯줄 끝에 매달려 있을 가짜 찌(Bobber)입니다.")]
-    [SerializeField] private Transform precastBobber;
+    // ▼▼▼ [삭제된 변수] ▼▼▼
+    // [Tooltip("캐스팅 전, 낚싯줄 끝에 매달려 있을 가짜 찌(Bobber)입니다.")]
+    // [SerializeField] private Transform precastBobber;
+    // ▲▲▲ [삭제된 변수] ▲▲▲
 
-    // --- Private 변수 ---
     private LineRenderer _lineRenderer;
     private PlayerFishingController _playerFishingController;
 
@@ -42,34 +42,29 @@ public class RodLineController : NetworkBehaviour
         }
     }
 
-    // LateUpdate는 모든 물리/게임 로직이 끝난 후에 호출되어 시각적인 떨림을 방지합니다.
     void LateUpdate()
     {
         if (_playerFishingController == null) return;
 
-        if (precastBobber != null)
-        {
-            precastBobber.gameObject.SetActive(_playerFishingController.CurrentBobber == null);
-        }
+        // ▼▼▼ [수정된 로직] ▼▼▼
+        // 이제 '가짜 찌'를 확인하는 로직이 필요 없습니다.
+        // 항상 PlayerFishingController의 CurrentBobber를 최종 목적지로 삼습니다.
 
-        // 1. 실제 찌(CurrentBobber)가 있는지 확인하고, 없으면 가짜 찌(precastBobber)를 최종 목적지로 사용합니다.
-        Transform lineEndPoint = _playerFishingController.CurrentBobber != null
-                               ? _playerFishingController.CurrentBobber.transform
-                               : precastBobber;
+        Transform lineEndPoint = _playerFishingController.CurrentBobber?.transform;
 
+        // 1. CurrentBobber가 없으면(null이면) 낚싯줄을 그리지 않고 숨깁니다.
         if (lineEndPoint == null)
         {
             _lineRenderer.enabled = false;
             return;
         }
 
+        // 2. CurrentBobber가 있으면 낚싯줄을 활성화하고 그립니다.
         _lineRenderer.enabled = true;
 
-        // 2. Line Renderer가 그려야 할 점의 총개수를 계산합니다. (가이드 포인트 개수 + 끝점 1개)
         int totalPoints = lineGuidePoints.Count + 1;
         _lineRenderer.positionCount = totalPoints;
 
-        // 3. 가이드 포인트들을 순서대로 Line Renderer에 설정합니다.
         for (int i = 0; i < lineGuidePoints.Count; i++)
         {
             if (lineGuidePoints[i] != null)
@@ -78,7 +73,7 @@ public class RodLineController : NetworkBehaviour
             }
         }
 
-        // 4. 마지막 점을 최종 목적지(찌)의 위치로 설정합니다.
         _lineRenderer.SetPosition(totalPoints - 1, lineEndPoint.position);
+        // ▲▲▲ [수정된 로직] ▲▲▲
     }
 }
