@@ -84,29 +84,24 @@ public class PlayerFishingController : NetworkBehaviour
         // 2. 챔질 조건을 확인합니다
         if (CurrentBobber != null && CurrentBobber.TryGetComponent<BobberController>(out var bobber))
         {
-            // 디버그: 입질 상태 및 물고기 오브젝트 상태 출력
-            Debug.Log($"[챔질 검사] HasFishOn: {bobber.HasFishOn}, IsFighting: {IsFighting}, HookedFish: {(bobber.HookedFish != null ? bobber.HookedFish.name : "null")}, 컨트롤러 속도Y: {_currentControllerVel.y}");
+           
+            
 
             if (bobber.HasFishOn && !IsFighting)
             {
-                // 챔질 스냅 판정 (속도)
+                
                 if (_currentControllerVel.y > hookVelocityThreshold)
                 {
-                    Debug.Log($"[챔질 인식!] 컨트롤러Y 속도 = {_currentControllerVel.y} (임계치: {hookVelocityThreshold})");
+                    
                     if (bobber.HookedFish != null)
                     {
-                        Debug.Log("[챔질] RPC_AttemptHook 호출 (물고기 오브젝트 존재)");
+                        
                         RPC_AttemptHook(bobber.HookedFish);
                     }
-                    else
-                    {
-                        Debug.LogWarning("[챔질] 챔질시도 BUT 물고기 오브젝트가 null (bobber.HookedFish == null)");
-                    }
+                   
+                    
                 }
-                else
-                {
-                    Debug.Log($"[챔질 미인식] 컨트롤러Y 속도 = {_currentControllerVel.y} (임계치: {hookVelocityThreshold})");
-                }
+                
             }
         }
     }
