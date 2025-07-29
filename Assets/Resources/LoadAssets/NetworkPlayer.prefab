@@ -2390,9 +2390,14 @@ MonoBehaviour:
   retrievalDistance: 3
   bobberHangOffset: 1
   bobberDampingSpeed: 10
+  hookVelocityThreshold: 3
+  hitText: {fileID: 0}
   _IsFishing:
     _value: 0
   _CurrentBobber: {fileID: 0}
+  _IsFighting:
+    _value: 0
+  _HookedFish: {fileID: 0}
 --- !u!1 &769997040941160783
 GameObject:
   m_ObjectHideFlags: 0
