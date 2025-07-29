@@ -22,39 +22,48 @@ public class VoiceManager : MonoBehaviour
 
     public void ConnectToVoiceRoom(string roomName)
     {
+        Debug.Log($"[VoiceManager] 보이스 서버 연결 시도 - Room: {roomName}");
         currentRoomName = roomName;
 
-        // 이미 보이스 서버에 연결돼있으면 바로 방 입장
-        if (VoiceConnection.Client.IsConnected)
-        {
-            JoinVoiceRoom(roomName);
-            return;
-        }
-
-        // Photon Voice 서버 연결 시도
+        VoiceConnection.Client.StateChanged -= OnVoiceClientStateChanged;
         VoiceConnection.Client.StateChanged += OnVoiceClientStateChanged;
-        VoiceConnection.ConnectUsingSettings();
+
+        if (!VoiceConnection.Client.IsConnected)
+        {
+            VoiceConnection.Settings.FixedRegion = "hk"; 
+            VoiceConnection.ConnectUsingSettings();
+        }
+        else
+        {
+            JoinVoiceRoom(currentRoomName);
+        }
     }
 
     private void OnVoiceClientStateChanged(ClientState oldState, ClientState newState)
     {
         if (newState == ClientState.ConnectedToMasterServer)
         {
+            Debug.Log("[VoiceManager] 마스터 서버 연결됨 → 보이스 룸 입장 시도");
             JoinVoiceRoom(currentRoomName);
+        }
+        else if (newState == ClientState.Joined)
+        {
+            Debug.Log("[VoiceManager] 보이스 룸 입장 완료!");
         }
     }
 
- 
     private void JoinVoiceRoom(string roomName)
     {
+        if (string.IsNullOrEmpty(roomName))
+        {
+            Debug.LogError("[VoiceManager] 룸 이름이 비어있음! 보이스 룸 입장 불가");
+            return;
+        }
+
         if (!VoiceConnection.Client.InRoom)
         {
-            VoiceConnection.Client.OpJoinOrCreateRoom(new EnterRoomParams
-            {
-                RoomName = roomName
-            });
-
-            Debug.Log($"[VoiceManager] 보이스 룸 입장: {roomName}");
+            Debug.Log($"[VoiceManager] 보이스 룸 입장 시도: {roomName}");
+            VoiceConnection.Client.OpJoinOrCreateRoom(new EnterRoomParams { RoomName = roomName });
         }
     }
 
