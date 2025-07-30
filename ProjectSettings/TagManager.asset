@@ -7,16 +7,14 @@ TagManager:
   - SpawnPoint
   - CastingZone
   - LeftHandController
-
+  - Climbable
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Ground
+  - 
   - Water
   - UI
-  - FishingZone
-  - Climbable
   - 
   - 
   - 
@@ -41,6 +39,8 @@ TagManager:
   - 
   - 
   - 
+  - 
+  - Teleport
   m_SortingLayers:
   - name: Default
     uniqueID: 0
