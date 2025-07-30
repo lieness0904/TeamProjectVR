@@ -67050,6 +67050,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Curtains12_C1
       objectReference: {fileID: 0}
+    - target: {fileID: 3949616714025701821, guid: bf29d0b8a9339a94e8df359992d6ab49,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4432680943446313735, guid: bf29d0b8a9339a94e8df359992d6ab49,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -132972,17 +132977,27 @@ PrefabInstance:
     - target: {fileID: 8382760182312812847, guid: 8f92c88f27cf6dd459899dfebdad33a7,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.91371953
+      value: 0.30112192
+      objectReference: {fileID: 0}
+    - target: {fileID: 8382760182312812847, guid: 8f92c88f27cf6dd459899dfebdad33a7,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8382760182312812847, guid: 8f92c88f27cf6dd459899dfebdad33a7,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.4063455
+      value: -0.9535857
+      objectReference: {fileID: 0}
+    - target: {fileID: 8382760182312812847, guid: 8f92c88f27cf6dd459899dfebdad33a7,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8382760182312812847, guid: 8f92c88f27cf6dd459899dfebdad33a7,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: -47.951004
+      value: -144.95
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
