@@ -2390,11 +2390,18 @@ MonoBehaviour:
   vibrationAmplitude: 0.7
   vibrationDuration: 1
   retrievalDistance: 3
-  bobberHangOffset: 1
+  bobberHangOffset: 0.5
   bobberDampingSpeed: 10
+  hookVelocityThreshold: 3
+  hitText: {fileID: 0}
   _IsFishing:
     _value: 0
   _CurrentBobber: {fileID: 0}
+
+  _IsFighting:
+    _value: 0
+  _HookedFish: {fileID: 0}
+
 --- !u!82 &5478361849334808893
 AudioSource:
   m_ObjectHideFlags: 0
@@ -2509,6 +2516,7 @@ MonoBehaviour:
     Max: 1000
     SpeedUpPerc: 5
   restartOnDeviceChange: 1
+
 --- !u!1 &769997040941160783
 GameObject:
   m_ObjectHideFlags: 0
