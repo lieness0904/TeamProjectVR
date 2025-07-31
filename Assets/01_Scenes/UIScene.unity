@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -789,15 +789,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7610524e8b09ce146977ed78f80e1449, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fishInventory: {fileID: 1240933515}
-  treeInventory: {fileID: 73017277}
-  orangeInventory: {fileID: 575301672}
-  fishController: {fileID: 1240933517}
-  treeController: {fileID: 73017279}
-  orangeController: {fileID: 575301674}
-  fishButton: {fileID: 66203310}
-  treeButton: {fileID: 1665341406}
-  orangeButton: {fileID: 1923204894}
+  equipmentInventory: {fileID: 0}
+  consumableInventory: {fileID: 0}
+  commonInventory: {fileID: 0}
+  equipmentController: {fileID: 0}
+  consumableController: {fileID: 0}
+  commonController: {fileID: 0}
+  equipButton: {fileID: 0}
+  consumeButton: {fileID: 0}
+  commonButton: {fileID: 0}
   prevButton: {fileID: 1587996035}
   nextButton: {fileID: 1473495517}
   selectedColor: {r: 1, g: 0.5, b: 0, a: 1}

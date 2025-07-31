@@ -215,7 +215,7 @@ SpringJoint:
   m_Spring: 200
   m_Damper: 10
   m_MinDistance: 0
-  m_MaxDistance: 0.7
+  m_MaxDistance: 1
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity

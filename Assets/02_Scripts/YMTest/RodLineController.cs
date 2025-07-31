@@ -13,9 +13,9 @@ public class RodLineController : NetworkBehaviour
     [Tooltip("찌 하단에 생성할 바늘 프리팹(Hook)을 할당하세요.")]
     public GameObject hookPrefab;
     [Tooltip("찌 아래 바늘의 오프셋(찌 local축 기준, -Y가 아래입니다).")]
-    public float hookOffset = 0.15f; // 줄 최대 길이(찌-바늘 거리)와 일치하게 조절
+    public float hookOffset = 0.55f; // 줄 최대 길이(찌-바늘 거리)와 일치하게 조절
     [Tooltip("찌-바늘 최대 거리(SpringJoint maxDistance)")]
-    public float maxSpringDistance = 0.7f;
+    public float maxSpringDistance = 1.7f;
 
     private LineRenderer _lineRenderer;
     private PlayerFishingController _playerFishingController;
@@ -101,7 +101,7 @@ public class RodLineController : NetworkBehaviour
                 hookSpringJoint.connectedAnchor = Vector3.zero; // 찌의 중심
 
                 // Spring/Damper/거리 값 임시 (필요시 인스펙터에서 변경)
-                hookSpringJoint.spring = 200f;
+                hookSpringJoint.spring = 150f;
                 hookSpringJoint.damper = 10f;
                 hookSpringJoint.maxDistance = maxSpringDistance; // 줄 최대 거리와 맞춤
 

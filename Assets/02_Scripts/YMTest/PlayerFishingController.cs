@@ -45,7 +45,9 @@ public class PlayerFishingController : NetworkBehaviour
 
     [Networked] public NetworkBool IsFighting { get; set; }
     [Networked] public NetworkObject HookedFish { get; set; }
-
+    // --- MISS 로직을 위한 변수 ---
+    private bool _missWindowActive = false;
+    private float _missWindowEndTime = 0f;
     private RiggingManager _riggingManager;
     public static PlayerFishingController Local { get; private set; }
     private XRBaseController _rightHandXRController;
@@ -69,6 +71,7 @@ public class PlayerFishingController : NetworkBehaviour
         }
     }
 
+
     private void Update()
     {
         if (!HasInputAuthority) return;
@@ -81,7 +84,26 @@ public class PlayerFishingController : NetworkBehaviour
             _lastControllerPos = currentPos;
         }
 
-        // 2. 챔질 조건을 확인합니다
+        // 2. MISS 판정 로직 (입질 끝나고 2초 동안)
+        if (_missWindowActive && Time.time <= _missWindowEndTime)
+        {
+            if (CurrentBobber != null && CurrentBobber.TryGetComponent<BobberController>(out var missBobber))
+            {
+                if (!missBobber.HasFishOn && !IsFighting)
+                {
+                    if (_currentControllerVel.y > hookVelocityThreshold)
+                    {
+                        // MISS 표시 (찌 위에)
+                        missBobber.ShowBobberText("MISS", 1.2f);
+                        _missWindowActive = false; // MISS 윈도우 비활성화
+                    }
+                }
+            }
+        }
+        if (_missWindowActive && Time.time > _missWindowEndTime)
+            _missWindowActive = false; // 시간초과 시 자동 종료
+
+        // 3. 챔질(HIT) 판정 로직 (입질 왔을 때만)
         if (CurrentBobber != null && CurrentBobber.TryGetComponent<BobberController>(out var bobber))
         {
             if (bobber.HasFishOn && !IsFighting)
@@ -96,6 +118,7 @@ public class PlayerFishingController : NetworkBehaviour
             }
         }
     }
+
 
     #region Fusion 콜백 함수
     public override void Spawned()
@@ -148,7 +171,11 @@ public class PlayerFishingController : NetworkBehaviour
                 }
                 else if (!bobber.HasFishOn && _fishJustBit)
                 {
+                    // ▼▼▼ 진동(입질) 끝난 직후 MISS 윈도우 활성화 ▼▼▼
                     _fishJustBit = false;
+                    _missWindowActive = true;
+                    _missWindowEndTime = Time.time + 2.0f;  // 2초 동안 MISS 체크
+
                     if (hitText != null && hitText.gameObject.activeSelf)
                     {
                         hitText.gameObject.SetActive(false);
@@ -157,6 +184,7 @@ public class PlayerFishingController : NetworkBehaviour
             }
         }
     }
+
     #endregion
 
     #region 낚시 상태 및 RPC 함수
@@ -229,19 +257,24 @@ public class PlayerFishingController : NetworkBehaviour
 
             IsFighting = true;
 
-            if (CurrentBobber.TryGetComponent<BobberController>(out var bobber))
+            // ★ 찌의 BobberController에서 "HIT!" 메시지 표시
+            if (CurrentBobber != null && CurrentBobber.TryGetComponent<BobberController>(out var bobber))
             {
                 bobber.HasFishOn = false;
                 bobber.HookedFish = null;
+                bobber.ShowBobberText("HIT!", 1.5f); // << 이 부분이 추가됨
             }
-            if (CurrentBobber.TryGetComponent<ConfigurableJoint>(out var joint))
+
+            if (CurrentBobber != null && CurrentBobber.TryGetComponent<ConfigurableJoint>(out var joint))
             {
                 Destroy(joint);
             }
 
             AttachFishToHook();
 
+            // 기존 UI 메시지 (사용하지 않으면 삭제해도 됨)
             RPC_ShowHitMessage();
+
             Debug.Log($"[Server] 챔질 성공! 물고기 {HookedFish.name}와 전투 시작.");
         }
         else if (HookedFish != null)
@@ -251,6 +284,7 @@ public class PlayerFishingController : NetworkBehaviour
             HookedFish = null;
         }
     }
+
 
     /// <summary>
     /// 챔질 성공 시, 바늘(Hook)에 Fish(HEAD_end)를 자동 연결

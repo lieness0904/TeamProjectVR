@@ -2163,6 +2163,7 @@ MonoBehaviour:
   hookPrefab: {fileID: 7744451712469267691, guid: 542d0b7357f3d1040af34b60bb2b250d,
     type: 3}
   hookOffset: 0.15
+  maxSpringDistance: 1.7
 --- !u!114 &2430629476814956581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2202,8 +2203,8 @@ Transform:
   m_GameObject: {fileID: 8484274073315972687}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.193, y: 0.013, z: -0.451}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
+  m_LocalPosition: {x: 0.201, y: 0.013, z: -0.849}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4878510965187894965}
