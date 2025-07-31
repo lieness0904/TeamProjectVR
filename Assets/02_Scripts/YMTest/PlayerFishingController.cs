@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
 using System.Collections;
 using TMPro;
+using UnityEngine.UI; // 게이지 UI 연동을 위해 추가
 
 [RequireComponent(typeof(RiggingManager))]
 public class PlayerFishingController : NetworkBehaviour
@@ -38,6 +39,13 @@ public class PlayerFishingController : NetworkBehaviour
     [Tooltip("'HIT!' 메시지를 표시할 UI 텍스트")]
     [SerializeField] private TextMeshProUGUI hitText;
 
+    // 게이지 관련 변수
+    private float tensionGauge = 0f;          // 게이지(0~100)
+    private const float maxGauge = 100f;
+    private const float gaugeDecreasePerSec = 2f; // 1초에 자연 감소량(%)
+    private float reelDistanceAccumulator = 0f;   // 릴 감은 거리 누적(한 바퀴 처리용)
+    private bool isReeling = false;               // 릴 감기 중 여부
+
     [Networked] public NetworkBool IsFishing { get; set; }
     [Networked] private NetworkObject SpawnedRod { get; set; }
     [Networked] public NetworkObject CurrentBobber { get; private set; }
@@ -70,7 +78,6 @@ public class PlayerFishingController : NetworkBehaviour
             _rightHandXRController = _riggingManager.rightHandController.GetComponent<XRBaseController>();
         }
     }
-
 
     private void Update()
     {
@@ -117,8 +124,26 @@ public class PlayerFishingController : NetworkBehaviour
                 }
             }
         }
-    }
 
+        // ★★★ 게이지 자연 감소 처리 ★★★
+        if (!isReeling && IsFighting) // 전투 중, 릴을 감고 있지 않으면 자연감소
+        {
+            float prevGauge = tensionGauge;
+            tensionGauge = Mathf.Max(tensionGauge - gaugeDecreasePerSec * Time.deltaTime, 0f);
+
+            
+            if (Mathf.Abs(prevGauge - tensionGauge) > 0.01f)
+            {
+                UpdateGaugeUI();
+            }
+        }
+
+        // ★★★ 게이지 100% 이상이면 낚시 실패 처리 ★★★
+        if (tensionGauge >= maxGauge && IsFighting)
+        {
+            OnFishingFailed();
+        }
+    }
 
     #region Fusion 콜백 함수
     public override void Spawned()
@@ -231,6 +256,10 @@ public class PlayerFishingController : NetworkBehaviour
             IsFighting = false;
             _rodTip = null;
             _rodTipRb = null;
+
+            // 게이지 리셋
+            tensionGauge = 0f;
+            UpdateGaugeUI();
         }
         RPC_UpdateVisuals(isFishing, SpawnedRod);
     }
@@ -275,6 +304,10 @@ public class PlayerFishingController : NetworkBehaviour
             // 기존 UI 메시지 (사용하지 않으면 삭제해도 됨)
             RPC_ShowHitMessage();
 
+            // ★★★ 게이지도 전투 시작 시 0으로 리셋 ★★★
+            tensionGauge = 0f;
+            UpdateGaugeUI();
+
             Debug.Log($"[Server] 챔질 성공! 물고기 {HookedFish.name}와 전투 시작.");
         }
         else if (HookedFish != null)
@@ -285,13 +318,11 @@ public class PlayerFishingController : NetworkBehaviour
         }
     }
 
-
     /// <summary>
     /// 챔질 성공 시, 바늘(Hook)에 Fish(HEAD_end)를 자동 연결
     /// </summary>
     private void AttachFishToHook()
     {
-        // 1. RodLineController 찾기
         var rodLine = SpawnedRod != null ? SpawnedRod.GetComponentInChildren<RodLineController>() : null;
         if (rodLine == null)
         {
@@ -299,7 +330,6 @@ public class PlayerFishingController : NetworkBehaviour
             return;
         }
 
-        // 2. Hook(바늘) Transform 얻기
         Transform hookTransform = rodLine.GetCurrentHookTransform();
         if (hookTransform == null)
         {
@@ -307,7 +337,6 @@ public class PlayerFishingController : NetworkBehaviour
             return;
         }
 
-        // 3. 바늘 끝 "FishAttachPoint" 얻기
         Transform attachPoint = FindDeepChild(hookTransform, "FishAttachPoint");
         if (attachPoint == null)
         {
@@ -315,7 +344,6 @@ public class PlayerFishingController : NetworkBehaviour
             return;
         }
 
-        // 4. HEAD_end 얻기
         if (HookedFish != null)
         {
             var fishTransform = HookedFish.transform;
@@ -326,17 +354,12 @@ public class PlayerFishingController : NetworkBehaviour
                 return;
             }
 
-            // [1] 먼저 001(전체)을 바늘에 붙이기 (피벗이 중앙에 걸림)
             fishTransform.SetParent(attachPoint);
             fishTransform.localPosition = Vector3.zero;
-            // *** 챔질 시에는 회전 적용하지 않음 ***
-            // fishTransform.localRotation = Quaternion.Euler(-90, 0, 0); // 삭제!
 
-            // [2] 붙인 뒤 HEAD_end를 FishAttachPoint에 맞추는 위치 보정
             Vector3 offset = attachPoint.position - headEnd.position;
-            fishTransform.position += offset; // position은 world 좌표 기준
+            fishTransform.position += offset;
 
-            // 물리 엔진 영향 제거 (옵션)
             if (fishTransform.TryGetComponent<Rigidbody>(out var fishRb))
             {
                 fishRb.isKinematic = true;
@@ -351,9 +374,6 @@ public class PlayerFishingController : NetworkBehaviour
         }
     }
 
-    /// <summary>
-    /// 하위 모든 오브젝트에서 name으로 찾기 (재귀)
-    /// </summary>
     private Transform FindDeepChild(Transform parent, string name)
     {
         foreach (Transform child in parent)
@@ -413,20 +433,16 @@ public class PlayerFishingController : NetworkBehaviour
                 {
                     var fishTransform = HookedFish.transform;
                     Transform headEnd = FindDeepChild(fishTransform, "HEAD_end");
-                    // RodLineController에서 Hook의 FishAttachPoint 얻기
                     var rodLine = SpawnedRod != null ? SpawnedRod.GetComponentInChildren<RodLineController>()?.GetCurrentHookTransform() : null;
                     Transform attachPoint = rodLine != null ? FindDeepChild(rodLine, "FishAttachPoint") : null;
 
-                    // 플레이어 Transform(여기서는 MainCamera 기준)
                     Transform playerTr = Camera.main != null ? Camera.main.transform : null;
 
                     if (headEnd != null && attachPoint != null && playerTr != null)
                     {
-                        // 1. 입(HEAD_end) 위치를 FishAttachPoint에 고정
                         Vector3 offset = attachPoint.position - headEnd.position;
                         fishTransform.position += offset;
 
-                        // 2. 입(Pivot)은 고정된 채, 몸은 바늘 위치에서 플레이어 방향을 바라보게 회전
                         Vector3 toPlayer = playerTr.position - attachPoint.position;
                         if (toPlayer.sqrMagnitude > 0.0001f)
                         {
@@ -439,14 +455,17 @@ public class PlayerFishingController : NetworkBehaviour
                 {
                     AttachBobberWithJoint(CurrentBobber, _rodTipRb);
 
-                    // ★ 릴이 완전히 감겼을 때: -90도 회전 및 위치 보정 ★
+                    tensionGauge = 0f;
+                    reelDistanceAccumulator = 0f;
+                    isReeling = false;
+                    IsFighting = false;
+                    UpdateGaugeUI(true);
+
                     if (HookedFish != null)
                     {
                         var fishTransform = HookedFish.transform;
-                        // 1. -90도 회전
                         fishTransform.localRotation = Quaternion.Euler(-90, 0, 0);
 
-                        // 2. HEAD_end와 FishAttachPoint 위치 보정
                         Transform headEnd = FindDeepChild(fishTransform, "HEAD_end");
                         var rodLine = SpawnedRod != null ? SpawnedRod.GetComponentInChildren<RodLineController>()?.GetCurrentHookTransform() : null;
                         Transform attachPoint = rodLine != null ? FindDeepChild(rodLine, "FishAttachPoint") : null;
@@ -481,6 +500,98 @@ public class PlayerFishingController : NetworkBehaviour
         var limit = new SoftJointLimit();
         limit.limit = bobberHangOffset;
         joint.linearLimit = limit;
+    }
+    #endregion
+
+    #region 게이지(장력) 시스템 함수
+    // 릴을 감기 시작할 때 호출 (ReelController에서 호출)
+    public void StartReeling()
+    {
+        isReeling = true;
+       
+    }
+
+    // 릴 감기를 멈출 때 호출 (ReelController에서 호출)
+    public void StopReeling()
+    {
+        isReeling = false;
+       
+    }
+
+    // 릴을 감을 때마다 호출 (거리 단위: meter)
+    public void ReelInGauge(float reelAmount)
+    {
+        if (!IsFighting || HookedFish == null) return;
+
+        // 1. 감은 거리 누적
+        reelDistanceAccumulator += reelAmount;
+
+        // 2. 한 바퀴(1m) 이상 감았을 때 게이지 증가
+        while (reelDistanceAccumulator >= 1f)
+        {
+            float strength = 0f;
+            if (HookedFish != null && HookedFish.TryGetComponent<FishData>(out var fishData))
+                strength = fishData.strength;
+
+            // 게이지: 1% + 힘(strength) 만큼 상승
+            tensionGauge = Mathf.Min(tensionGauge + (1f + strength), maxGauge);
+            reelDistanceAccumulator -= 1f;
+            UpdateGaugeUI();
+        }
+    }
+
+    // 게이지 UI 연동 함수
+    private void UpdateGaugeUI(bool isInactive = false)
+    {
+        if (CurrentBobber != null)
+        {
+            var slider = CurrentBobber.GetComponentInChildren<Slider>();
+            if (slider != null)
+            {
+                if (isInactive)
+                {
+                    slider.gameObject.SetActive(false); // 게이지바 비활성화
+                    return;
+                }
+                slider.gameObject.SetActive(true); // 게이지바 활성화
+                float normalizedGauge = tensionGauge / 100f;
+                slider.value = normalizedGauge;
+
+                var fill = slider.fillRect.GetComponent<UnityEngine.UI.Image>();
+                if (fill != null)
+                {
+                    if (normalizedGauge <= 0.5f)
+                        fill.color = Color.green;
+                    else if (normalizedGauge <= 0.8f)
+                        fill.color = Color.yellow;
+                    else
+                        fill.color = Color.red;
+                }
+            }
+        }
+    }
+
+
+    // 낚시 실패 처리 (게이지 100% 이상)
+    private void OnFishingFailed()
+    {
+        Debug.Log("낚시 실패! 게이지 100% 초과, 낚시대 초기화.");
+
+        // 낚시대/찌/릴/물고기 제거 및 상태 리셋
+        if (SpawnedRod != null) Runner.Despawn(SpawnedRod);
+        if (CurrentBobber != null) Runner.Despawn(CurrentBobber);
+        if (HookedFish != null) Runner.Despawn(HookedFish);
+
+        SpawnedRod = null;
+        CurrentBobber = null;
+        HookedFish = null;
+        IsFighting = false;
+        tensionGauge = 0f;
+        reelDistanceAccumulator = 0f;
+        isReeling = false;
+        _rodTip = null;
+        _rodTipRb = null;
+        UpdateGaugeUI();
     }
     #endregion
 
@@ -519,11 +630,20 @@ public class PlayerFishingController : NetworkBehaviour
             _rightHandXRController.SendHapticImpulse(amplitude, duration);
         }
     }
+
+    // 릴 감기(거리만큼 감기) → 릴 감기 동작 시 StartReeling/StopReeling도 연동 필요!
     public void ReelIn(float reelAmount)
     {
         if (CurrentBobber == null || !HasInputAuthority) return;
+        StartReeling();
+        ReelInGauge(reelAmount); // ★ 게이지 증가 로직 추가
         RPC_ReelIn(reelAmount);
     }
+    public void EndReel()
+    {
+        StopReeling();
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (!HasInputAuthority) return;

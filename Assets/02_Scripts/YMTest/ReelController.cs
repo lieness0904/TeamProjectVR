@@ -49,31 +49,39 @@ public class ReelController : NetworkBehaviour
         // 릴이 잡혀있고, 컨트롤러가 할당되어 있다면
         if (_isGrabbed && _interactor != null)
         {
-            // 이전 프레임과 현재 프레임의 컨트롤러 위치 차이를 계산합니다.
             float distanceMoved = Vector3.Distance(_interactor.transform.position, _lastPosition);
 
-            // 계산된 이동 거리가 설정한 역치(threshold)보다 크면 '움직인 것'으로 간주합니다.
             if (distanceMoved > movementThreshold)
             {
-                // 1. 시각적 회전: 고정된 속도로 손잡이를 회전시킵니다.
+                // 시각적 회전
                 if (handleToRotate != null)
                 {
-                    // Time.deltaTime을 곱해줘서 프레임 속도와 관계없이 일정한 속도로 회전하게 합니다.
                     handleToRotate.Rotate(0, 0, fixedRotationSpeed * Time.deltaTime, Space.Self);
                 }
 
-                // 2. 기능적 릴링: _playerFishingController가 null이 아닌지 확인 후 ReelIn 호출
+                // --- 여기서 물고기 무게 반영 ---
+                float reelSpeed = fixedReelInSpeed; // 1초에 감기는 기본 거리(m)
+                if (_playerFishingController != null && _playerFishingController.HookedFish != null)
+                {
+                    var fishData = _playerFishingController.HookedFish.GetComponent<FishData>();
+                    if (fishData != null)
+                    {
+                        // 실제 감기 속도 = 기본값 - 무게 (최소 0)
+                        reelSpeed = Mathf.Max(fixedReelInSpeed - fishData.finalWeight, 0f);
+                    }
+                }
+
+                // 릴 감기
                 if (_playerFishingController != null)
                 {
-                    // PlayerFishingController의 ReelIn은 이동 '거리'를 받으므로, 속도에 시간을 곱해 전달합니다.
-                    _playerFishingController.ReelIn(fixedReelInSpeed * Time.deltaTime);
+                    _playerFishingController.ReelIn(reelSpeed * Time.deltaTime);
                 }
             }
 
-            // 다음 프레임 계산을 위해 현재 위치를 저장합니다.
             _lastPosition = _interactor.transform.position;
         }
     }
+
 
     public void OnGrab(SelectEnterEventArgs args)
     {
@@ -81,9 +89,16 @@ public class ReelController : NetworkBehaviour
         _interactor = args.interactorObject.transform.GetComponent<XRBaseInteractor>();
         if (_interactor != null)
         {
-            // 처음 잡았을 때의 위치를 초기 값으로 저장하여, 잡자마자 움직이는 것을 방지합니다.
             _lastPosition = _interactor.transform.position;
         }
+
+        // 릴 잡을 때 시작 신호 보내기
+        if (_playerFishingController != null)
+        {
+            _playerFishingController.StartReeling();
+            
+        }
+
         Debug.Log("릴을 잡았습니다.");
     }
 
@@ -91,6 +106,15 @@ public class ReelController : NetworkBehaviour
     {
         _isGrabbed = false;
         _interactor = null;
+
+        // 릴 놓을 때 릴링 종료 신호 보내기
+        if (_playerFishingController != null)
+        {
+            _playerFishingController.EndReel(); // 내부적으로 StopReeling() 호출
+            
+        }
+
         Debug.Log("릴을 놓았습니다.");
     }
+
 }
