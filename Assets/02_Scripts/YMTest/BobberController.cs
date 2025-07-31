@@ -1,5 +1,6 @@
 using Fusion;
 using UnityEngine;
+using TMPro;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(NetworkObject))]
@@ -19,6 +20,10 @@ public class BobberController : NetworkBehaviour
     [Tooltip("입질이 왔을 때 찌 색깔")]
     [SerializeField] private Color biteColor = Color.red;
 
+    [Header("UI 표시")]
+    [Tooltip("찌 위에 표시될 Text (World Space Canvas)")]
+    [SerializeField] private TextMeshProUGUI hitText;   // ★ 추가
+
     // --- 네트워크 동기화 변수 ---
     [Networked]
     public NetworkBool IsInFishingZone { get; set; }
@@ -26,15 +31,47 @@ public class BobberController : NetworkBehaviour
     [Networked]
     public NetworkBool HasFishOn { get; set; }
 
-    // ▼▼▼ [수정된 변수] 프리팹 ID 대신, 스폰된 물고기 오브젝트 자체를 저장합니다. ▼▼▼
     [Networked]
     public NetworkObject HookedFish { get; set; }
-    // ▲▲▲ [수정된 변수] ▲▲▲
 
     [Networked]
     private TickTimer BitingTimer { get; set; }
 
     private FishingZone currentZone;
+
+    // ★★★ MISS 처리를 위한 변수 추가 ★★★
+    public float biteEndTime = -100f;
+
+    // [HasFishOn]이 false로 변경될 때 꼭 이 함수로! (직접 = false 하지 마세요)
+    public void SetHasFishOn(bool value)
+    {
+        if (HasFishOn && !value)
+            biteEndTime = Time.time;
+        HasFishOn = value;
+    }
+    // 입질 끝난 뒤 일정시간(MISS 윈도우) 체크
+    public bool IsMissWindow(float window = 2f)
+    {
+        return (Time.time - biteEndTime) < window;
+    }
+
+    // 찌 위에 HIT/MISS 텍스트 띄우기 (플레이어에서 호출)
+    public void ShowBobberText(string message, float duration)
+    {
+        if (hitText != null)
+        {
+            StopAllCoroutines();
+            StartCoroutine(ShowTextRoutine(message, duration));
+        }
+    }
+
+    private System.Collections.IEnumerator ShowTextRoutine(string message, float duration)
+    {
+        hitText.gameObject.SetActive(true);
+        hitText.text = message;
+        yield return new WaitForSeconds(duration);
+        hitText.gameObject.SetActive(false);
+    }
 
     public override void Render()
     {
@@ -56,29 +93,20 @@ public class BobberController : NetworkBehaviour
 
         if (BitingTimer.Expired(Runner))
         {
-            // ▼▼▼ [완전히 변경된 로직] 입질 시 물고기를 즉시 스폰하고 비활성화합니다. ▼▼▼
+            // ▼▼▼ 입질 시 물고기를 즉시 스폰하고 비활성화 ▼▼▼
             if (currentZone != null && currentZone.availableFishPrefabs.Count > 0)
             {
-                // 1. 낚을 수 있는 물고기 목록에서 랜덤으로 프리팹 선택
                 int randomIndex = Random.Range(0, currentZone.availableFishPrefabs.Count);
                 GameObject fishPrefab = currentZone.availableFishPrefabs[randomIndex];
-
-                // 2. 선택된 프리팹을 즉시 스폰
                 HookedFish = Runner.Spawn(fishPrefab, transform.position, Quaternion.identity, Object.InputAuthority);
 
-                // 3. 스폰된 물고기가 있고, 성공적으로 초기화되면
                 if (HookedFish != null)
                 {
-                    // 4. 즉시 비활성화하여 숨겨둠 (챔질 성공 시 활성화할 예정)
                     HookedFish.gameObject.SetActive(false);
-
-                    // 5. 입질 상태를 true로 변경
-                    HasFishOn = true;
+                    SetHasFishOn(true); // 꼭 SetHasFishOn 사용!
                     Debug.Log($"[Server] 입질 감지! 물고기 {fishPrefab.name} 스폰 및 비활성화.");
                 }
             }
-            // ▲▲▲ [완전히 변경된 로직] ▲▲▲
-
             BitingTimer = default;
         }
     }
@@ -103,17 +131,14 @@ public class BobberController : NetworkBehaviour
             if (HasStateAuthority)
             {
                 IsInFishingZone = false;
-                HasFishOn = false;
+                SetHasFishOn(false); // 꼭 SetHasFishOn 사용!
                 BitingTimer = default;
 
-                // ▼▼▼ [추가된 로직] 챔질하지 않고 존을 벗어날 경우, 숨겨둔 물고기를 파괴하여 정리합니다. ▼▼▼
                 if (HookedFish != null)
                 {
                     Runner.Despawn(HookedFish);
                     HookedFish = null;
                 }
-                // ▲▲▲ [추가된 로직] ▲▲▲
-
                 Debug.Log("[Server] 찌가 피싱존을 벗어남.");
             }
         }
