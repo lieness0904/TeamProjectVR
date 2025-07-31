@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 681969165}
-  m_IndirectSpecularColor: {r: 0.6453991, g: 0.877905, b: 1.0491812, a: 1}
+  m_IndirectSpecularColor: {r: 0.37413082, g: 0.74439585, b: 1.1114018, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -4754,6 +4754,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   availableFishPrefabs:
   - {fileID: 8153765304729817725, guid: 2f6d2ad40714cdd43b03d3743b2613fc, type: 3}
+  - {fileID: 8153765304729817725, guid: 43fd621a107e17a4ebbcf3c56670c3d6, type: 3}
+  - {fileID: 8153765304729817725, guid: 0afc3efa5cb3a984995dc98ff24d2045, type: 3}
 --- !u!1001 &548674584
 PrefabInstance:
   m_ObjectHideFlags: 0

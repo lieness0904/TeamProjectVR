@@ -84,24 +84,15 @@ public class PlayerFishingController : NetworkBehaviour
         // 2. 챔질 조건을 확인합니다
         if (CurrentBobber != null && CurrentBobber.TryGetComponent<BobberController>(out var bobber))
         {
-           
-            
-
             if (bobber.HasFishOn && !IsFighting)
             {
-                
                 if (_currentControllerVel.y > hookVelocityThreshold)
                 {
-                    
                     if (bobber.HookedFish != null)
                     {
-                        
                         RPC_AttemptHook(bobber.HookedFish);
                     }
-                   
-                    
                 }
-                
             }
         }
     }
@@ -266,7 +257,7 @@ public class PlayerFishingController : NetworkBehaviour
     /// </summary>
     private void AttachFishToHook()
     {
-        // 1. 현재 RodLineController 찾기 (낚싯대에 존재)
+        // 1. RodLineController 찾기
         var rodLine = SpawnedRod != null ? SpawnedRod.GetComponentInChildren<RodLineController>() : null;
         if (rodLine == null)
         {
@@ -274,7 +265,7 @@ public class PlayerFishingController : NetworkBehaviour
             return;
         }
 
-        // 2. RodLineController가 관리하는 spawnedHook(바늘) Transform 얻기
+        // 2. Hook(바늘) Transform 얻기
         Transform hookTransform = rodLine.GetCurrentHookTransform();
         if (hookTransform == null)
         {
@@ -282,27 +273,47 @@ public class PlayerFishingController : NetworkBehaviour
             return;
         }
 
-        // 3. HookedFish의 Rigidbody 얻기
-        if (HookedFish != null && HookedFish.TryGetComponent<Rigidbody>(out var fishRb))
+        // 3. 바늘 끝 "FishAttachPoint" 얻기
+        Transform attachPoint = FindDeepChild(hookTransform, "FishAttachPoint");
+        if (attachPoint == null)
         {
-            // 기존에 달려있던 FixedJoint 있으면 제거 (안정성)
-            var oldJoint = hookTransform.GetComponent<FixedJoint>();
-            if (oldJoint != null) Destroy(oldJoint);
+            Debug.LogWarning("[AttachFishToHook] FishAttachPoint를 찾지 못함. 프리팹 구조를 확인하세요.");
+            return;
+        }
 
-            // Hook(바늘)에 FixedJoint 추가 → 물고기 Rigidbody 연결
-            var fixedJoint = hookTransform.gameObject.AddComponent<FixedJoint>();
-            fixedJoint.connectedBody = fishRb;
-            fixedJoint.breakForce = Mathf.Infinity;
+        // 4. HEAD_end 얻기
+        if (HookedFish != null)
+        {
+            var fishTransform = HookedFish.transform;
+            Transform headEnd = FindDeepChild(fishTransform, "HEAD_end");
+            if (headEnd == null)
+            {
+                Debug.LogWarning("[AttachFishToHook] HEAD_end 오브젝트를 찾지 못함");
+                return;
+            }
 
-            // 물고기 Rigidbody 활성화(중력 사용, 관성 허용)
-            fishRb.isKinematic = false;
-            fishRb.useGravity = true;
+            // [1] 먼저 001(전체)을 바늘에 붙이기 (피벗이 중앙에 걸림)
+            fishTransform.SetParent(attachPoint);
+            fishTransform.localPosition = Vector3.zero;
+            // *** 챔질 시에는 회전 적용하지 않음 ***
+            // fishTransform.localRotation = Quaternion.Euler(-90, 0, 0); // 삭제!
 
-            Debug.Log($"[AttachFishToHook] {HookedFish.name}의 Rigidbody가 바늘에 FixedJoint로 연결됨");
+            // [2] 붙인 뒤 HEAD_end를 FishAttachPoint에 맞추는 위치 보정
+            Vector3 offset = attachPoint.position - headEnd.position;
+            fishTransform.position += offset; // position은 world 좌표 기준
+
+            // 물리 엔진 영향 제거 (옵션)
+            if (fishTransform.TryGetComponent<Rigidbody>(out var fishRb))
+            {
+                fishRb.isKinematic = true;
+                fishRb.useGravity = false;
+            }
+
+            Debug.Log("[AttachFishToHook] 001이 FishAttachPoint에 연결되고, HEAD_end가 바늘 위치에 정확히 이동됨");
         }
         else
         {
-            Debug.LogWarning("[AttachFishToHook] 물고기 Rigidbody를 찾지 못함");
+            Debug.LogWarning("[AttachFishToHook] HookedFish 오브젝트를 찾지 못함");
         }
     }
 
@@ -362,13 +373,63 @@ public class PlayerFishingController : NetworkBehaviour
             {
                 Vector3 newPosition = Vector3.MoveTowards(bobberRigidbody.position, _rodTip.position, reelAmount);
                 bobberRigidbody.MovePosition(newPosition);
+
+                // ★ 릴 감기 중, 입 위치 고정 & 플레이어를 바라보는 회전 적용 ★
+                if (HookedFish != null)
+                {
+                    var fishTransform = HookedFish.transform;
+                    Transform headEnd = FindDeepChild(fishTransform, "HEAD_end");
+                    // RodLineController에서 Hook의 FishAttachPoint 얻기
+                    var rodLine = SpawnedRod != null ? SpawnedRod.GetComponentInChildren<RodLineController>()?.GetCurrentHookTransform() : null;
+                    Transform attachPoint = rodLine != null ? FindDeepChild(rodLine, "FishAttachPoint") : null;
+
+                    // 플레이어 Transform(여기서는 MainCamera 기준)
+                    Transform playerTr = Camera.main != null ? Camera.main.transform : null;
+
+                    if (headEnd != null && attachPoint != null && playerTr != null)
+                    {
+                        // 1. 입(HEAD_end) 위치를 FishAttachPoint에 고정
+                        Vector3 offset = attachPoint.position - headEnd.position;
+                        fishTransform.position += offset;
+
+                        // 2. 입(Pivot)은 고정된 채, 몸은 바늘 위치에서 플레이어 방향을 바라보게 회전
+                        Vector3 toPlayer = playerTr.position - attachPoint.position;
+                        if (toPlayer.sqrMagnitude > 0.0001f)
+                        {
+                            fishTransform.rotation = Quaternion.LookRotation(toPlayer, Vector3.up);
+                        }
+                    }
+                }
+
                 if (Vector3.Distance(bobberRigidbody.position, _rodTip.position) < retrievalDistance)
                 {
                     AttachBobberWithJoint(CurrentBobber, _rodTipRb);
+
+                    // ★ 릴이 완전히 감겼을 때: -90도 회전 및 위치 보정 ★
+                    if (HookedFish != null)
+                    {
+                        var fishTransform = HookedFish.transform;
+                        // 1. -90도 회전
+                        fishTransform.localRotation = Quaternion.Euler(-90, 0, 0);
+
+                        // 2. HEAD_end와 FishAttachPoint 위치 보정
+                        Transform headEnd = FindDeepChild(fishTransform, "HEAD_end");
+                        var rodLine = SpawnedRod != null ? SpawnedRod.GetComponentInChildren<RodLineController>()?.GetCurrentHookTransform() : null;
+                        Transform attachPoint = rodLine != null ? FindDeepChild(rodLine, "FishAttachPoint") : null;
+
+                        if (headEnd != null && attachPoint != null)
+                        {
+                            Vector3 offset = attachPoint.position - headEnd.position;
+                            fishTransform.position += offset;
+                        }
+                    }
                 }
             }
         }
     }
+
+
+
 
     private void AttachBobberWithJoint(NetworkObject bobber, Rigidbody rodTipRb)
     {
