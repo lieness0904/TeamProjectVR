@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.8146288, g: 1.108942, b: 1.3299595, a: 1}
+  m_IndirectSpecularColor: {r: 0.63585234, g: 1.2422347, b: 1.8430924, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -38367,6 +38367,41 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ShopDol
+      objectReference: {fileID: 0}
+    - target: {fileID: 1090339076802144531, guid: 34ccaf3160ce04d40b978d13258143b0,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1090339076802144531, guid: 34ccaf3160ce04d40b978d13258143b0,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5114183361392405970, guid: 34ccaf3160ce04d40b978d13258143b0,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5114183361392405970, guid: 34ccaf3160ce04d40b978d13258143b0,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7057193320937647118, guid: 34ccaf3160ce04d40b978d13258143b0,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7057193320937647118, guid: 34ccaf3160ce04d40b978d13258143b0,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7057193320937647118, guid: 34ccaf3160ce04d40b978d13258143b0,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7286192505440692820, guid: 34ccaf3160ce04d40b978d13258143b0,
         type: 3}
