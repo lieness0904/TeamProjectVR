@@ -4754,8 +4754,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   availableFishPrefabs:
   - {fileID: 8153765304729817725, guid: 2f6d2ad40714cdd43b03d3743b2613fc, type: 3}
-  - {fileID: 8153765304729817725, guid: 43fd621a107e17a4ebbcf3c56670c3d6, type: 3}
-  - {fileID: 8153765304729817725, guid: 0afc3efa5cb3a984995dc98ff24d2045, type: 3}
+  - {fileID: 8773852499652873929, guid: aa2b0575ca76b6a40987d74ad3ad043a, type: 3}
+  - {fileID: 6462540141853006550, guid: 8c3b0debe4ee82c4b8d96c5634a6fd98, type: 3}
 --- !u!1001 &548674584
 PrefabInstance:
   m_ObjectHideFlags: 0
