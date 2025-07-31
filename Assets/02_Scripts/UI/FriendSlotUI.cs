@@ -13,8 +13,8 @@ public class FriendSlotUI : MonoBehaviour
 
     public void Setup(string playerId, int points, System.Action onCall, System.Action onTeleport)
     {
-        playerIdText.text = playerId;
-        pointText.text = $"{points} 포인트";
+        playerIdText.text = "[접속중] " + playerId;
+        pointText.text = $"[포인트] : {points}";
         callButton.onClick.AddListener(() => onCall.Invoke());
         teleportButton.onClick.AddListener(() => onTeleport.Invoke());
     }

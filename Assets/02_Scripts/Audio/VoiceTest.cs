@@ -39,7 +39,7 @@ public class VoiceTest : MonoBehaviour
         if (isTestMode)
         {
             recorder.TransmitEnabled = false;
-            recorder.StopRecordingWhenPaused = true; // 녹음 중지
+            recorder.StopRecordingWhenPaused = true; 
             Debug.Log("[Voice] 테스트 음성 중단");
             isTestMode = false;
         }
@@ -55,7 +55,7 @@ public class VoiceTest : MonoBehaviour
             recorder.SourceType = Recorder.InputSourceType.AudioClip;
             recorder.AudioClip = clip;
             recorder.LoopAudioClip = true;
-            recorder.RestartRecording(); // 설정 반영
+            recorder.RestartRecording(); 
             recorder.TransmitEnabled = true;
 
             Debug.Log("[Voice] 테스트 음성 송신 시작");
@@ -69,15 +69,15 @@ public class VoiceTest : MonoBehaviour
         if (isMicMode)
         {
             recorder.TransmitEnabled = false;
-            recorder.StopRecordingWhenPaused = true; // 녹음 중지
+            recorder.StopRecordingWhenPaused = true; 
             Debug.Log("[Voice] 마이크 송신 중단");
             isMicMode = false;
         }
         else
         {
             recorder.SourceType = Recorder.InputSourceType.Microphone;
-            recorder.MicrophoneType = Recorder.MicType.Unity; // 또는 .Photon 가능
-            recorder.RestartRecording(); // 설정 반영
+            recorder.MicrophoneType = Recorder.MicType.Unity; 
+            recorder.RestartRecording(); 
             recorder.TransmitEnabled = true;
 
             Debug.Log("[Voice] 마이크 송신 시작");
