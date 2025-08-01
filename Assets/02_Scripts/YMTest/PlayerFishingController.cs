@@ -40,6 +40,10 @@ public class PlayerFishingController : NetworkBehaviour
     [Header("게이지 설정")]
     [SerializeField] private float gaugeDecreasePerSec = 50f; // 초당 자연 감소량
 
+    [Header("잡은 물고기 설정")]
+    [Tooltip("잡은 후 보여줄 때 물고기가 천천히 회전하는 속도")]
+    [SerializeField] private float caughtFishRotationSpeed = 50f;
+
     [Header("게이지 진동 설정")]
     [Tooltip("왼손 컨트롤러의 진동 세기 (낮음)")]
     [Range(0, 1)] public float lowTensionVibeAmplitude = 0.2f;
@@ -179,6 +183,12 @@ public class PlayerFishingController : NetworkBehaviour
         }
         // 전투가 종료되면 HIT/MISS를 표시하는 다른 로직들이 텍스트를 비활성화하므로
         // 여기서 별도로 비활성화 코드를 넣을 필요는 없습니다.
+        if (HasInputAuthority && HookedFish != null && !IsFighting)
+        {
+            // 전투가 끝났지만 아직 물고기가 남아있는 상태(10초 대기)일 때
+            // 물고기의 Y축(Vector3.up)을 기준으로 회전시킴
+            HookedFish.transform.Rotate(Vector3.up, caughtFishRotationSpeed * Time.deltaTime, Space.World);
+        }
     }
 
     private void HandleReelingHaptics()
