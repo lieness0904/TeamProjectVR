@@ -2391,9 +2391,9 @@ MonoBehaviour:
   vibrationDuration: 1
   retrievalDistance: 3
   bobberHangOffset: 0.5
-  bobberDampingSpeed: 10
-  hookVelocityThreshold: 3
+  hookVelocityThreshold: 2
   hitText: {fileID: 0}
+  gaugeDecreasePerSec: 50
   _IsFishing:
     _value: 0
   _CurrentBobber: {fileID: 0}

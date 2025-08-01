@@ -25,6 +25,12 @@ public class FishData : MonoBehaviour
     [Tooltip("물고기 크기의 최대 배율 (예: 1.25 = 125%)")]
     public float maxSizeMultiplier = 1.25f;
 
+    [Tooltip("이 물고기가 등장할 확률 가중치 (높을수록 잘 나옴, 1~100)")]
+    [Range(1, 100)]
+    public int appearanceWeight = 50;
+
+
+
     // --- 생성된 개체의 최종 정보 (코드를 통해 계산됨) ---
     // [HideInInspector]를 사용해 인스펙터 창에서는 보이지 않게 처리합니다.
     [HideInInspector] public float finalSizeMultiplier;
