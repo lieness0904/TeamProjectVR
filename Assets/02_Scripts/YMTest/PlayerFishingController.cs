@@ -63,6 +63,11 @@ public class PlayerFishingController : NetworkBehaviour
     [Networked] public NetworkBool IsFighting { get; set; }
     [Networked] public NetworkObject HookedFish { get; set; }
 
+    // --- [추가] 물고기 도망 상태 관련 변수 ---
+    [Networked] private Vector3 FleeDirection { get; set; }
+    [Networked] private TickTimer FleeStateTimer { get; set; }
+    [Networked] private NetworkBool IsCurrentlyFleeing { get; set; }
+
     // --- 로컬 변수 (클라이언트측에서만 사용) ---
     private bool _missWindowActive = false;
     private float _missWindowEndTime = 0f;
@@ -150,8 +155,30 @@ public class PlayerFishingController : NetworkBehaviour
                 }
             }
         }
-        // 4. [추가] 릴링 진동 처리 함수 호출
+
+        // 4. 릴링 진동 처리 함수 호출
         HandleReelingHaptics();
+
+        // 5. [추가] 전투 중 찌와의 남은 거리 표시
+        if (IsFighting)
+        {
+            if (hitText != null && _rodTip != null && CurrentBobber != null)
+            {
+                // "HIT!" 메시지 코루틴이 끝난 후 비활성화 되었을 수 있으므로 다시 활성화
+                if (!hitText.gameObject.activeSelf)
+                {
+                    hitText.gameObject.SetActive(true);
+                }
+
+                // 낚싯대 끝과 찌 사이의 거리를 계산
+                float distance = Vector3.Distance(_rodTip.position, CurrentBobber.transform.position);
+
+                // 텍스트 내용 업데이트 (소수점 한 자리까지 "F1" 포맷으로)
+                hitText.text = $"{distance:F1}m";
+            }
+        }
+        // 전투가 종료되면 HIT/MISS를 표시하는 다른 로직들이 텍스트를 비활성화하므로
+        // 여기서 별도로 비활성화 코드를 넣을 필요는 없습니다.
     }
 
     private void HandleReelingHaptics()
@@ -228,10 +255,46 @@ public class PlayerFishingController : NetworkBehaviour
                     }
                     tensionGauge = Mathf.Min(tensionGauge + increasePerSecond * Runner.DeltaTime, maxGauge);
                 }
-                else
+                else // isReeling이 false일 때
                 {
-                    // 릴 놓고 있으면: 1초당 설정된 값만큼 게이지 자연 감소
+                    // 1. 게이지는 항상 자연 감소
                     tensionGauge = Mathf.Max(tensionGauge - gaugeDecreasePerSec * Runner.DeltaTime, 0f);
+
+                    // 2. [교체] 물고기 도망 상태 머신 로직
+                    if (FleeStateTimer.Expired(Runner))
+                    {
+                        // 타이머 만료 시, '도망'/'휴식' 상태를 전환
+                        IsCurrentlyFleeing = !IsCurrentlyFleeing;
+
+                        if (IsCurrentlyFleeing)
+                        {
+                            // '도망' 상태로 전환: 3~6초 타이머 설정 및 새 방향 계산
+                            FleeStateTimer = TickTimer.CreateFromSeconds(Runner, Random.Range(3f, 6f));
+
+                            Vector3 awayDirection = (CurrentBobber.transform.position - transform.position);
+                            awayDirection.y = 0;
+                            Quaternion randomRotation = Quaternion.Euler(0, Random.Range(-45f, 45f), 0);
+                            FleeDirection = randomRotation * awayDirection.normalized;
+                        }
+                        else
+                        {
+                            // '휴식' 상태로 전환: 3초 타이머 설정
+                            FleeStateTimer = TickTimer.CreateFromSeconds(Runner, 3f);
+                        }
+                    }
+
+                    // '도망' 상태일 때만 실제로 물고기를 움직임
+                    if (IsCurrentlyFleeing)
+                    {
+                        if (CurrentBobber != null && HookedFish != null && HookedFish.TryGetComponent<FishData>(out var fishData))
+                        {
+                            if (CurrentBobber.TryGetComponent<Rigidbody>(out var bobberRigidbody))
+                            {
+                                float distance = fishData.strength * Runner.DeltaTime;
+                                bobberRigidbody.MovePosition(bobberRigidbody.position + FleeDirection * distance);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -247,7 +310,7 @@ public class PlayerFishingController : NetworkBehaviour
         {
             if (CastingCooldown.ExpiredOrNotRunning(Runner))
             {
-                if (!IsFighting && CurrentBobber != null && CurrentBobber.GetComponent<ConfigurableJoint>() != null)
+                if (!IsFighting && HookedFish == null && CurrentBobber != null && CurrentBobber.GetComponent<ConfigurableJoint>() != null)
                 {
                     RPC_CastBobber(castingHandler.LastCastVelocity);
                 }
@@ -352,6 +415,16 @@ public class PlayerFishingController : NetworkBehaviour
             AttachFishToHook();
             RPC_ShowHitMessage();
             tensionGauge = 0f;
+
+            // --- [추가] 물고기 도망 상태 초기화 ---
+            IsCurrentlyFleeing = true; // 처음엔 무조건 도망가는 상태로 시작
+            FleeStateTimer = TickTimer.CreateFromSeconds(Runner, Random.Range(3f, 6f));
+
+            // 초기 도망 방향 설정 (플레이어 반대편을 기준으로 랜덤 각도)
+            Vector3 awayDirection = (CurrentBobber.transform.position - transform.position);
+            awayDirection.y = 0;
+            Quaternion randomRotation = Quaternion.Euler(0, Random.Range(-45f, 45f), 0);
+            FleeDirection = randomRotation * awayDirection.normalized;
         }
         else if (HookedFish != null)
         {
@@ -586,6 +659,8 @@ public class PlayerFishingController : NetworkBehaviour
         HookedFish = null;
         IsFighting = false;
         tensionGauge = 0f;
+        IsCurrentlyFleeing = false;
+        FleeStateTimer = default;
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]

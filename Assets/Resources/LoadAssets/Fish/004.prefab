@@ -700,7 +700,7 @@ MonoBehaviour:
   fishID: 103
   fishName: "\uC544\uC2F8\uAC00\uC624\uB9AC"
   baseWeight: 3
-  strength: 10
+  strength: 2
   basePrice: 2500
   minSizeMultiplier: 0.75
   maxSizeMultiplier: 1.25
