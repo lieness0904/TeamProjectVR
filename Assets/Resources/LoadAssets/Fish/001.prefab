@@ -303,7 +303,7 @@ MonoBehaviour:
   fishName: "\uC8FC\uB204"
   baseWeight: 1.5
   strength: 1
-  basePrice: 100
+  basePrice: 500
   minSizeMultiplier: 0.75
   maxSizeMultiplier: 1.25
   appearanceWeight: 14

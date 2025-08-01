@@ -2394,6 +2394,10 @@ MonoBehaviour:
   hookVelocityThreshold: 2
   hitText: {fileID: 0}
   gaugeDecreasePerSec: 50
+  lowTensionVibeAmplitude: 0.2
+  midTensionVibeAmplitude: 0.4
+  highTensionVibeAmplitude: 0.7
+  vibeDuration: 0.1
   _IsFishing:
     _value: 0
   _CurrentBobber: {fileID: 0}
