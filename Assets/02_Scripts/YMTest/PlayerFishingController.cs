@@ -156,31 +156,42 @@ public class PlayerFishingController : NetworkBehaviour
 
     private void HandleReelingHaptics()
     {
-        // 릴링 중이 아니거나, 싸우는 중이 아니거나, 왼손 컨트롤러가 없으면 실행 안함
-        if (!IsFighting || !isReeling || _leftHandXRController == null) return;
+        if (!IsFighting || !isReeling) return;
 
-        float normalizedGauge = tensionGauge / maxGauge; // 게이지를 0~1 사이 값으로 정규화
-        _hapticTimer -= Time.deltaTime; // 타이머 감소
+        float normalizedGauge = tensionGauge / maxGauge;
+        _hapticTimer -= Time.deltaTime;
 
-        if (normalizedGauge >= 0.8f) // 80% 이상: 연속 진동 (매 프레임 진동 발생)
+        if (normalizedGauge >= 0.8f) // 80% 이상
         {
-            _leftHandXRController.SendHapticImpulse(highTensionVibeAmplitude, vibeDuration);
+            SendDualHapticImpulse(highTensionVibeAmplitude, vibeDuration);
         }
-        else if (normalizedGauge >= 0.5f) // 50% 이상: 0.5초 간격 진동
+        else if (normalizedGauge >= 0.5f) // 50% 이상
         {
             if (_hapticTimer <= 0f)
             {
-                _leftHandXRController.SendHapticImpulse(midTensionVibeAmplitude, vibeDuration);
-                _hapticTimer = 0.5f; // 타이머 리셋
+                SendDualHapticImpulse(midTensionVibeAmplitude, vibeDuration);
+                _hapticTimer = 0.5f;
             }
         }
-        else // 50% 미만: 1초 간격 진동
+        else // 50% 미만
         {
             if (_hapticTimer <= 0f)
             {
-                _leftHandXRController.SendHapticImpulse(lowTensionVibeAmplitude, vibeDuration);
-                _hapticTimer = 1.0f; // 타이머 리셋
+                SendDualHapticImpulse(lowTensionVibeAmplitude, vibeDuration);
+                _hapticTimer = 1.0f;
             }
+        }
+    }
+
+    private void SendDualHapticImpulse(float amplitude, float duration)
+    {
+        if (_leftHandXRController != null)
+        {
+            _leftHandXRController.SendHapticImpulse(amplitude, duration);
+        }
+        if (_rightHandXRController != null)
+        {
+            _rightHandXRController.SendHapticImpulse(amplitude, duration);
         }
     }
     #region Fusion 콜백 함수
