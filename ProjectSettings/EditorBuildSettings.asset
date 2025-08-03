@@ -8,21 +8,21 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/01_Scenes/TitleScene.unity
     guid: 5caddd89eda94f545b8149356fade58f
-  - enabled: 1
+  - enabled: 0
     path: Assets/01_Scenes/Lobby.unity
     guid: 1ba08b8b10a98d94f99966e39630f35c
-  - enabled: 1
+  - enabled: 0
     path: Assets/01_Scenes/MainGameScene.unity
     guid: 6985f1fcde8637049ad2027e8e7b6e32
   - enabled: 1
-    path: Assets/01_Scenes/FishingScene.unity
-    guid: 7cc2f77d2d0eebf4fb591865383a30a6
-  - enabled: 1
-    path: Assets/01_Scenes/HouseScene.unity
-    guid: c9adc2e89cb38ad4e90e56634f7a925a
-  - enabled: 1
     path: Assets/01_Scenes/HomeScene.unity
     guid: d9c5b8e795d4f054d98dd86a92a0e776
+  - enabled: 1
+    path: Assets/01_Scenes/FishingScene.unity
+    guid: 7cc2f77d2d0eebf4fb591865383a30a6
+  - enabled: 0
+    path: Assets/01_Scenes/HouseScene.unity
+    guid: c9adc2e89cb38ad4e90e56634f7a925a
   - enabled: 1
     path: Assets/01_Scenes/FarmScene.unity
     guid: b799bb92b0a44034b85ebf42a6420d36
