@@ -306,7 +306,7 @@ MonoBehaviour:
   basePrice: 500
   minSizeMultiplier: 0.75
   maxSizeMultiplier: 1.25
-  appearanceWeight: 14
+  appearanceWeight: 25
   finalSizeMultiplier: 0
   finalWeight: 0
   finalPrice: 0

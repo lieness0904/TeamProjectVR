@@ -185,9 +185,15 @@ public class PlayerFishingController : NetworkBehaviour
         // 여기서 별도로 비활성화 코드를 넣을 필요는 없습니다.
         if (HasInputAuthority && HookedFish != null && !IsFighting)
         {
-            // 전투가 끝났지만 아직 물고기가 남아있는 상태(10초 대기)일 때
-            // 물고기의 Y축(Vector3.up)을 기준으로 회전시킴
-            HookedFish.transform.Rotate(Vector3.up, caughtFishRotationSpeed * Time.deltaTime, Space.World);
+            // --- [새로운 코드] ---
+            var rodLine = SpawnedRod?.GetComponentInChildren<RodLineController>();
+            var hookTransform = rodLine?.GetCurrentHookTransform();
+
+            if (hookTransform != null)
+            {
+                hookTransform.Rotate(Vector3.up, caughtFishRotationSpeed * Time.deltaTime, Space.World);
+            }
+            // --- [여기까지] ---
         }
     }
 
@@ -298,10 +304,33 @@ public class PlayerFishingController : NetworkBehaviour
                     {
                         if (CurrentBobber != null && HookedFish != null && HookedFish.TryGetComponent<FishData>(out var fishData))
                         {
+                            // --- 최종 수정 코드 ---
+                            // 1. 찌와 바늘의 이동 거리 계산
+                            float bobberDistance = fishData.strength * Runner.DeltaTime;
+                            float hookDistance = bobberDistance * 2f;
+
+                            // 2. 찌(Bobber) 이동
                             if (CurrentBobber.TryGetComponent<Rigidbody>(out var bobberRigidbody))
                             {
-                                float distance = fishData.strength * Runner.DeltaTime;
-                                bobberRigidbody.MovePosition(bobberRigidbody.position + FleeDirection * distance);
+                                bobberRigidbody.MovePosition(bobberRigidbody.position + FleeDirection * bobberDistance);
+                            }
+
+                            // 바늘(Hook)의 참조를 가져옴
+                            var rodLine = SpawnedRod?.GetComponentInChildren<RodLineController>();
+                            var hookTransform = rodLine?.GetCurrentHookTransform();
+
+                            // 바늘의 Rigidbody를 한 번만 찾아서 이동과 회전을 모두 처리
+                            if (hookTransform != null && hookTransform.TryGetComponent<Rigidbody>(out var hookRigidbody))
+                            {
+                                // 3. 바늘(Hook) 이동
+                                hookRigidbody.MovePosition(hookRigidbody.position + FleeDirection * hookDistance);
+
+                                // 4. 바늘(Hook) 회전
+                                if (FleeDirection.sqrMagnitude > 0.01f)
+                                {
+                                    Quaternion targetRotation = Quaternion.LookRotation(FleeDirection);
+                                    hookRigidbody.MoveRotation(Quaternion.Slerp(hookRigidbody.rotation, targetRotation, Runner.DeltaTime * 5f));
+                                }
                             }
                         }
                     }
@@ -522,22 +551,31 @@ public class PlayerFishingController : NetworkBehaviour
 
                 if (HookedFish != null && IsFighting)
                 {
+                    // --- 최종 수정 코드 블록 ---
+                    var rodLine = SpawnedRod?.GetComponentInChildren<RodLineController>();
+                    var hookTransform = rodLine?.GetCurrentHookTransform();
                     var fishTransform = HookedFish.transform;
-                    Transform headEnd = FindDeepChild(fishTransform, "HEAD_end");
-                    var rodLine = SpawnedRod?.GetComponentInChildren<RodLineController>()?.GetCurrentHookTransform();
-                    Transform attachPoint = (rodLine != null) ? FindDeepChild(rodLine, "FishAttachPoint") : null;
                     Transform playerTr = Camera.main?.transform;
 
-                    if (headEnd != null && attachPoint != null && playerTr != null)
+                    // 1. 바늘 회전 로직: 물고기 대신 바늘이 플레이어를 바라보게 합니다.
+                    if (hookTransform != null && playerTr != null)
+                    {
+                        Vector3 toPlayer = playerTr.position - hookTransform.position;
+                        if (toPlayer.sqrMagnitude > 0.0001f)
+                        {
+                            hookTransform.rotation = Quaternion.LookRotation(toPlayer, Vector3.up);
+                        }
+                    }
+
+                    // 2. 물고기 위치 보정 로직 (기존과 거의 동일)
+                    Transform headEnd = FindDeepChild(fishTransform, "HEAD_end");
+                    Transform attachPoint = (hookTransform != null) ? FindDeepChild(hookTransform, "FishAttachPoint") : null;
+                    if (headEnd != null && attachPoint != null)
                     {
                         Vector3 offset = attachPoint.position - headEnd.position;
                         fishTransform.position += offset;
-                        Vector3 toPlayer = playerTr.position - attachPoint.position;
-                        if (toPlayer.sqrMagnitude > 0.0001f)
-                        {
-                            fishTransform.rotation = Quaternion.LookRotation(toPlayer, Vector3.up);
-                        }
                     }
+                    // --- 여기까지 ---
                 }
 
                 if (Vector3.Distance(bobberRigidbody.position, _rodTip.position) < retrievalDistance)
@@ -546,6 +584,17 @@ public class PlayerFishingController : NetworkBehaviour
                     if (IsFighting)
                     {
                         Debug.Log("낚시 성공! 물고기가 매달려 있습니다. 10초 후 사라집니다.");
+                        // 찌에 있는 UI 컨트롤러를 찾습니다.
+                        var caughtFishUI = CurrentBobber.GetComponent<CaughtFishUI>();
+                        // 잡힌 물고기의 데이터를 가져옵니다.
+                        var fishData = HookedFish.GetComponent<FishData>();
+
+                        // 두 컴포넌트가 모두 존재하면, UI를 표시하라는 명령을 내립니다.
+                        if (caughtFishUI != null && fishData != null)
+                        {
+                            // 10초 동안 UI를 표시합니다. (물고기가 사라지는 시간과 동일하게)
+                            caughtFishUI.ShowFishInfo(fishData, 10f);
+                        }
                         IsFighting = false;
                         tensionGauge = 0f;
 
