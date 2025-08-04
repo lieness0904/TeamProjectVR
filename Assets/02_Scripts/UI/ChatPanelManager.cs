@@ -36,14 +36,22 @@ public class ChatPanelManager : MonoBehaviour
     public void OpenChatPanel()
     {
         chatPanel.SetActive(true);
+        StartCoroutine(InitializeChatPanel());
+    }
 
-        // 강제로 레이아웃 갱신 (가끔 초기 렌더링 오류 방지용)
+    private IEnumerator InitializeChatPanel()
+    {
+        // Runner 준비될 때까지 대기
+        yield return new WaitUntil(() => FusionManager.Instance.Runner != null);
+
+        // PlayerData가 최소 1명이라도 준비될 때까지 대기
+        yield return new WaitUntil(() => FindObjectsOfType<PlayerData>().Any());
+
         LayoutRebuilder.ForceRebuildLayoutImmediate(chatPanel.GetComponent<RectTransform>());
 
-        RefreshFriendList();             
+        RefreshFriendList();
         rankingManager.LoadRankings();
-
-        ShowTab(true); // 디폴트: 접속 패널
+        ShowTab(true); // 기본: 접속 패널
     }
 
     private void ShowTab(bool showFriends)
@@ -77,25 +85,35 @@ public class ChatPanelManager : MonoBehaviour
             return;
         }
 
+        // 본인부터 표시
+        var myPlayer = FindObjectsOfType<PlayerData>()
+            .FirstOrDefault(p => p.Object.HasInputAuthority);
+        if (myPlayer != null)
+        {
+            AddFriendSlot(myPlayer.UserId, myPlayer.Points);
+        }
+
+        // 나머지 플레이어 표시
         foreach (var playerRef in runner.ActivePlayers)
         {
             var playerObj = runner.GetPlayerObject(playerRef);
             if (playerObj == null) continue;
 
             var playerData = playerObj.GetComponent<PlayerData>();
-            if (playerData != null && !string.IsNullOrEmpty(playerData.UserId))
+            if (playerData != null && !string.IsNullOrEmpty(playerData.UserId) && !onlineFriends.Contains(playerData.UserId))
             {
-                string userId = playerData.UserId;
-                int points = playerData.Points;
-                onlineFriends.Add(userId);
-
-                GameObject slot = Instantiate(friendSlotPrefab, friendListParent);
-                FriendSlotUI ui = slot.GetComponent<FriendSlotUI>();
-                if (ui != null)
-                {
-                    ui.Setup(userId, points, () => StartVoiceCall(userId), () => TeleportToPlayer(userId));
-                }
+                AddFriendSlot(playerData.UserId, playerData.Points);
             }
+        }
+    }
+    private void AddFriendSlot(string userId, int points)
+    {
+        onlineFriends.Add(userId);
+        GameObject slot = Instantiate(friendSlotPrefab, friendListParent);
+        FriendSlotUI ui = slot.GetComponent<FriendSlotUI>();
+        if (ui != null)
+        {
+            ui.Setup(userId, points, () => StartVoiceCall(userId), () => TeleportToPlayer(userId));
         }
     }
 

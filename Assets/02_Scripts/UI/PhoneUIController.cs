@@ -17,6 +17,7 @@ public class PhoneUIController : MonoBehaviour
     public GameObject chatPanel;
     public GameObject settingPanel;
     public GameObject inventoryPanel;
+    public GameObject exitPanel;
 
     [Header("Optional")]
     public InventoryManager inventoryManager;
@@ -24,8 +25,10 @@ public class PhoneUIController : MonoBehaviour
     [Header("Input")]
     public InputActionReference togglePhoneUIAction; // 메뉴버튼 연결용 (menuButton)
 
-    [Header("Customize")]
-    public Button customizeButton;
+    [Header("Exit UI")]
+    public Button exitButton;   
+    public Button yesExitButton;
+    public Button noExitButton;
 
     private void OnEnable()
     {
@@ -94,30 +97,29 @@ public class PhoneUIController : MonoBehaviour
         chatPanel.SetActive(false);
         settingPanel.SetActive(false);
         inventoryPanel.SetActive(false);
+        exitPanel.SetActive(false);
     }
 
-    public void OpenCustomization()
+    public void OpenExitPanel()
     {
-        // 현재 씬이 HouseScene일 때만 커스터마이징 진입 허용
-        if (SceneManager.GetActiveScene().name == "HouseScene")
-        {
-            StartCoroutine(EnterCustomizationRoutine());
-        }
-        else
-        {
-            Debug.LogWarning("현재 씬에서는 커스터마이징을 열 수 없습니다.");
-        }
+        ResetPanels();
+        exitPanel.SetActive(true);
     }
 
-    private IEnumerator EnterCustomizationRoutine()
+    public void CloseExitPanel()
     {
-        var runner = FindObjectOfType<NetworkRunner>();
-        if (runner != null && runner.IsRunning)
-        {
-            Debug.Log("세션 종료 중...");
-            yield return runner.Shutdown();
-        }
-
-        SceneManager.LoadScene("CustomizationScene", LoadSceneMode.Single);
+        exitPanel.SetActive(false);
+        menuPanel.SetActive(true);
     }
+
+    public void ConfirmExit()
+    {
+        Debug.Log("게임 종료 중...");
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
 }
