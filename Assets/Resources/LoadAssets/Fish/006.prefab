@@ -83,12 +83,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fishID: 105
   fishName: "\uB3C4\uBBF8\uB3C4\uBBF8\uB3C4\uB808\uBBF8"
-  baseWeight: 2.2
-  strength: 1.5
+  baseWeight: 0.7
+  strength: 2
   basePrice: 2200
   minSizeMultiplier: 0.75
   maxSizeMultiplier: 1.25
-  appearanceWeight: 10
+  appearanceWeight: 25
   finalSizeMultiplier: 0
   finalWeight: 0
   finalPrice: 0

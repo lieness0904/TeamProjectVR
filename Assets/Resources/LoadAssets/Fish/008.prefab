@@ -30,8 +30,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0.126, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 267808610516808226}
   - {fileID: 536490441116366228}
@@ -51,9 +51,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fishID: 107
   fishName: "\uB364\uBCF4"
-  baseWeight: 0.8
-  strength: 1
-  basePrice: 300
+  baseWeight: 0.08
+  strength: 0.5
+  basePrice: 200
   minSizeMultiplier: 0.75
   maxSizeMultiplier: 1.25
   appearanceWeight: 25
