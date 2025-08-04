@@ -1,75 +1,43 @@
 using Fusion;
 using UnityEngine;
 using TMPro;
-using System.Collections.Generic; // List<T>를 사용하기 위해 추가
+using System.Collections;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(NetworkObject))]
 public class BobberController : NetworkBehaviour
 {
     [Header("입질 설정")]
-    [Tooltip("입질이 오기까지 최소 대기 시간")]
     [SerializeField] private float minWaitTime = 5f;
-    [Tooltip("입질이 오기까지 최대 대기 시간")]
     [SerializeField] private float maxWaitTime = 15f;
 
     [Header("시각 효과")]
-    [Tooltip("찌의 색깔을 바꿀 MeshRenderer")]
     [SerializeField] private MeshRenderer bobberRenderer;
-    [Tooltip("평상시 찌 색깔")]
     [SerializeField] private Color defaultColor = Color.white;
-    [Tooltip("입질이 왔을 때 찌 색깔")]
     [SerializeField] private Color biteColor = Color.red;
 
+    [Tooltip("입질이 지속되는 시간입니다. 이 시간 안에 챔질해야 합니다.")]
+    [SerializeField] private float biteDuration = 0.5f; // 2.5초의 챔질 시간
+
     [Header("UI 표시")]
-    [Tooltip("찌 위에 표시될 Text (World Space Canvas)")]
+    [Tooltip("'HIT!' 메시지를 표시할 UI")]
     [SerializeField] private TextMeshProUGUI hitText;
+    [Tooltip("MISS, 실패 등 다른 메시지를 표시할 UI")]
+    [SerializeField] private TextMeshProUGUI messageText;
 
-    // --- 네트워크 동기화 변수 ---
-    [Networked]
-    public NetworkBool IsInFishingZone { get; set; }
+    [Networked] public NetworkBool IsInFishingZone { get; set; }
+    [Networked] public NetworkBool HasFishOn { get; set; }
+    [Networked] public NetworkObject HookedFish { get; set; }
+    [Networked] private TickTimer BitingTimer { get; set; }
+    [Networked] private TickTimer BiteActiveTimer { get; set; }
 
-    [Networked]
-    public NetworkBool HasFishOn { get; set; }
-
-    [Networked]
-    public NetworkObject HookedFish { get; set; }
-
-    [Networked]
-    private TickTimer BitingTimer { get; set; }
 
     private FishingZone currentZone;
 
-    // MISS 처리를 위한 변수
-    public float biteEndTime = -100f;
-
-    public void SetHasFishOn(bool value)
+    public override void Spawned()
     {
-        if (HasFishOn && !value)
-            biteEndTime = Time.time;
-        HasFishOn = value;
-    }
-
-    public bool IsMissWindow(float window = 2f)
-    {
-        return (Time.time - biteEndTime) < window;
-    }
-
-    public void ShowBobberText(string message, float duration)
-    {
-        if (hitText != null)
-        {
-            StopAllCoroutines();
-            StartCoroutine(ShowTextRoutine(message, duration));
-        }
-    }
-
-    private System.Collections.IEnumerator ShowTextRoutine(string message, float duration)
-    {
-        hitText.gameObject.SetActive(true);
-        hitText.text = message;
-        yield return new WaitForSeconds(duration);
-        hitText.gameObject.SetActive(false);
+        // 시작할 때 모든 텍스트를 숨깁니다.
+        HideAllTexts();
     }
 
     public override void Render()
@@ -84,6 +52,19 @@ public class BobberController : NetworkBehaviour
     {
         if (!HasStateAuthority) return;
 
+        if (HasFishOn && BiteActiveTimer.Expired(Runner))
+        {
+            HasFishOn = false; // 입질 상태를 종료합니다.
+            BiteActiveTimer = default; // 타이머를 리셋합니다.
+
+            // 챔질하지 않아 놓친 물고기를 디스폰시킵니다.
+            if (HookedFish != null)
+            {
+                Runner.Despawn(HookedFish);
+                HookedFish = null;
+            }
+        }
+
         if (IsInFishingZone && !HasFishOn && !BitingTimer.IsRunning)
         {
             float waitTime = Random.Range(minWaitTime, maxWaitTime);
@@ -94,17 +75,15 @@ public class BobberController : NetworkBehaviour
         {
             if (currentZone != null && currentZone.availableFishPrefabs.Count > 0)
             {
-                // --- [수정됨] 가중치에 따라 물고기를 선택하는 새 함수 호출 ---
                 GameObject fishPrefab = SelectFishByWeight(currentZone.availableFishPrefabs);
-
                 if (fishPrefab != null)
                 {
                     HookedFish = Runner.Spawn(fishPrefab, transform.position, Quaternion.identity, Object.InputAuthority);
-
                     if (HookedFish != null)
                     {
                         HookedFish.gameObject.SetActive(false);
-                        SetHasFishOn(true);
+                        HasFishOn = true;
+                        BiteActiveTimer = TickTimer.CreateFromSeconds(Runner, biteDuration);                        
                         Debug.Log($"[Server] 입질 감지! 물고기 {fishPrefab.name} 스폰 및 비활성화.");
                     }
                 }
@@ -113,13 +92,69 @@ public class BobberController : NetworkBehaviour
         }
     }
 
-    // --- [새로 추가된 함수] 확률 가중치에 따라 물고기를 선택 ---
-    private GameObject SelectFishByWeight(List<GameObject> fishPrefabs)
-    {
-        if (fishPrefabs == null || fishPrefabs.Count == 0) return null;
+    // --- [새로운 공개 함수들] ---
 
+    public void ShowHitText()
+    {
+        StartCoroutine(ShowTextRoutine(hitText, "HIT!", 1.5f));
+    }
+
+    public void ShowMessageText(string message, float duration)
+    {
+        StartCoroutine(ShowTextRoutine(messageText, message, duration));
+    }
+
+    public void UpdateDistanceText(string text)
+    {
+        if (hitText == null) return;
+        if (!hitText.gameObject.activeSelf) hitText.gameObject.SetActive(true);
+        if (messageText != null && messageText.gameObject.activeSelf) messageText.gameObject.SetActive(false); // 다른 메시지는 숨김
+        hitText.text = text;
+    }
+
+    public void HideAllTexts()
+    {
+        if (hitText != null) hitText.gameObject.SetActive(false);
+        if (messageText != null) messageText.gameObject.SetActive(false);
+    }
+
+    // --- [RPC 수정] ---
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPC_ShowMessage(string message, float duration, NetworkBool destroyAfter)
+    {
+        ShowMessageText(message, duration);
+        // 이 RPC를 호출한 서버(호스트)만 아래 코드를 실행하여, 일정 시간 후 스스로를 파괴합니다.
+        if (HasStateAuthority && destroyAfter)
+        {
+            StartCoroutine(DelayedDespawnRoutine(duration));
+        }
+    }
+
+    private IEnumerator DelayedDespawnRoutine(float delay)
+    {
+        // 메시지가 보이는 시간 + 0.1초 여유를 두고 파괴
+        yield return new WaitForSeconds(delay + 0.1f);
+        if (Runner != null && Object != null && Object.IsValid)
+        {
+            Runner.Despawn(Object);
+        }
+    }
+
+    private IEnumerator ShowTextRoutine(TextMeshProUGUI textUI, string message, float duration)
+    {
+        if (textUI == null) yield break;
+        textUI.gameObject.SetActive(true);
+        textUI.text = message;
+        yield return new WaitForSeconds(duration);
+        textUI.gameObject.SetActive(false);
+    }
+
+    // --- 기존 로직들 ---
+    private GameObject SelectFishByWeight(System.Collections.Generic.List<GameObject> fishPrefabs)
+    {
+        // ... (내용 변경 없음)
+        if (fishPrefabs == null || fishPrefabs.Count == 0) return null;
         int totalWeight = 0;
-        // 1. 모든 물고기의 확률 가중치를 더해 총합을 구합니다.
         foreach (var prefab in fishPrefabs)
         {
             if (prefab.TryGetComponent<FishData>(out var fishData))
@@ -127,50 +162,25 @@ public class BobberController : NetworkBehaviour
                 totalWeight += fishData.appearanceWeight;
             }
         }
-
-        // 모든 가중치가 0인 경우 등 예외 처리
-        if (totalWeight <= 0)
-        {
-            // 가중치 계산이 불가능하면 기존처럼 완전 랜덤으로 하나를 선택
-            Debug.LogWarning("모든 물고기의 appearanceWeight가 0이라 일반 랜덤으로 전환합니다.");
-            return fishPrefabs[Random.Range(0, fishPrefabs.Count)];
-        }
-
-        // 2. 0부터 가중치 총합 사이의 랜덤한 숫자를 뽑습니다.
+        if (totalWeight <= 0) return fishPrefabs[Random.Range(0, fishPrefabs.Count)];
         int randomPoint = Random.Range(0, totalWeight);
-
-        // 3. 물고기 목록을 순회하며 랜덤 숫자가 어느 물고기의 구간에 속하는지 찾습니다.
         foreach (var prefab in fishPrefabs)
         {
             if (prefab.TryGetComponent<FishData>(out var fishData))
             {
-                if (randomPoint < fishData.appearanceWeight)
-                {
-                    // 현재 물고기 구간에 당첨!
-                    return prefab;
-                }
-                else
-                {
-                    // 당첨되지 않았으면, 현재 물고기의 가중치만큼 랜덤 숫자를 줄여 다음 구간과 비교합니다.
-                    randomPoint -= fishData.appearanceWeight;
-                }
+                if (randomPoint < fishData.appearanceWeight) return prefab;
+                else randomPoint -= fishData.appearanceWeight;
             }
         }
-
-        // 혹시 모를 오류 발생 시 마지막 물고기를 반환합니다.
         return fishPrefabs[fishPrefabs.Count - 1];
     }
-
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<FishingZone>(out var zone))
         {
             currentZone = zone;
-            if (HasStateAuthority)
-            {
-                IsInFishingZone = true;
-            }
+            if (HasStateAuthority) IsInFishingZone = true;
         }
     }
 
@@ -178,21 +188,19 @@ public class BobberController : NetworkBehaviour
     {
         if (other.TryGetComponent<FishingZone>(out var zone))
         {
-            if (zone == currentZone) // 벗어난 구역이 현재 구역과 같을 때만 처리
+            if (zone == currentZone)
             {
                 currentZone = null;
                 if (HasStateAuthority)
                 {
                     IsInFishingZone = false;
-                    SetHasFishOn(false);
+                    HasFishOn = false;
                     BitingTimer = default;
-
                     if (HookedFish != null)
                     {
                         Runner.Despawn(HookedFish);
                         HookedFish = null;
                     }
-                    Debug.Log("[Server] 찌가 피싱존을 벗어남.");
                 }
             }
         }

@@ -2531,9 +2531,11 @@ MonoBehaviour:
   retrievalDistance: 3
   bobberHangOffset: 0.5
   hookVelocityThreshold: 2
-  hitText: {fileID: 0}
   gaugeDecreasePerSec: 50
   caughtFishRotationSpeed: 50
+
+  maxFishDistance: 55
+
   lowTensionVibeAmplitude: 0.2
   midTensionVibeAmplitude: 0.4
   highTensionVibeAmplitude: 0.7
