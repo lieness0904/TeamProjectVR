@@ -41,14 +41,17 @@ public class ChatPanelManager : MonoBehaviour
 
     private IEnumerator InitializeChatPanel()
     {
-        yield return null; // 1프레임 대기 (UI와 Runner 동기화 대기)
+        // Runner 준비될 때까지 대기
+        yield return new WaitUntil(() => FusionManager.Instance.Runner != null);
+
+        // PlayerData가 최소 1명이라도 준비될 때까지 대기
+        yield return new WaitUntil(() => FindObjectsOfType<PlayerData>().Any());
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(chatPanel.GetComponent<RectTransform>());
 
         RefreshFriendList();
         rankingManager.LoadRankings();
-
-        ShowTab(true); // 디폴트: 접속 패널
+        ShowTab(true); // 기본: 접속 패널
     }
 
     private void ShowTab(bool showFriends)

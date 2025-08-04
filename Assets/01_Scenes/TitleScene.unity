@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641263, b: 0.57481724, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028356, g: 0.2257137, b: 0.3069222, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -620,8 +620,8 @@ MonoBehaviour:
   bgmSource: {fileID: 1505227808}
   sfxSource: {fileID: 2109276397}
   mainMixer: {fileID: 24100000, guid: 7a9da8a81ef873b4bb844223e3e67981, type: 2}
-  houseBGM: {fileID: 8300000, guid: 9cfdae9b077f3294b8932762117f9b29, type: 3}
-  titleBGM: {fileID: 8300000, guid: 9cfdae9b077f3294b8932762117f9b29, type: 3}
+  houseBGM: {fileID: 8300000, guid: 4d6a623cf7fd20e4da21c3de92189e41, type: 3}
+  titleBGM: {fileID: 8300000, guid: 4d6a623cf7fd20e4da21c3de92189e41, type: 3}
   fishingBGM: {fileID: 8300000, guid: 43b532e43edff9948b826000b3414cab, type: 3}
   mountainBGM: {fileID: 8300000, guid: dc2ec5d6aa117094c8a0e4ffc4ae8bc3, type: 3}
   farmBGM: {fileID: 8300000, guid: dc2ec5d6aa117094c8a0e4ffc4ae8bc3, type: 3}
