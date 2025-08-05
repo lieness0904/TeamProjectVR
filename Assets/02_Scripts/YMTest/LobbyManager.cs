@@ -3,11 +3,10 @@ using Fusion;
 using Fusion.Sockets;
 using System.Collections.Generic;
 using System;
-using UnityEngine.SceneManagement;
 using System.Linq;
 using TMPro;
 using System.Collections;
-using UnityEditor;
+using System.Threading.Tasks;
 
 public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -19,6 +18,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     private Dictionary<PlayerRef, NetworkObject> spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
     private NetworkRunner runner;
 
+    private string currentSessionName = "Jeju_Home"; // 현재 세션명 추적
 
     private void Awake()
     {
@@ -31,24 +31,69 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-    private void Start()
+    private async void Start()
     {
-        StartGame();
+        await StartGame(currentSessionName); // 기본 홈 세션 시작
     }
 
-    private async void StartGame()
+    /// <summary>
+    /// 세션 시작 (없으면 생성, 있으면 참가)
+    /// </summary>
+    private async Task StartGame(string sessionName)
     {
-        runner = gameObject.AddComponent<NetworkRunner>();
-        runner.AddCallbacks(this);
-
-        await runner.StartGame(new StartGameArgs()
+        if (runner == null)
         {
-            GameMode = GameMode.AutoHostOrClient,
+            runner = gameObject.AddComponent<NetworkRunner>();
+            runner.AddCallbacks(this);
+        }
 
-            SessionName = "Jeju_Lobby11111",
-            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
+        var sessions = await runner.SessionInfoAsync();
+        var targetSession = sessions.FirstOrDefault(s => s.Name == sessionName);
 
-        });
+        if (targetSession != null)
+        {
+            Debug.Log($"[LobbyManager] 세션 {sessionName} 입장 (Client)");
+            await runner.StartGame(new StartGameArgs()
+            {
+                GameMode = GameMode.Client,
+                SessionName = sessionName,
+                SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
+            });
+        }
+        else
+        {
+            Debug.Log($"[LobbyManager] 세션 {sessionName} 없음, 생성 (Host)");
+            await runner.StartGame(new StartGameArgs()
+            {
+                GameMode = GameMode.Host,
+                SessionName = sessionName,
+                SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
+            });
+        }
+
+        currentSessionName = sessionName;
+    }
+
+    /// <summary>
+    /// 씬 이동 및 세션 전환
+    /// </summary>
+    public async void MoveToScene(string sceneType)
+    {
+        string sessionName = $"Jeju_{sceneType}";
+        Debug.Log($"[LobbyManager] {sceneType} 씬으로 이동 시도 (세션: {sessionName})");
+
+        if (runner.IsServer && runner.ActivePlayers.Count() > 1)
+        {
+            Debug.Log("[LobbyManager] 호스트 마이그레이션 시작");
+            await runner.Shutdown(); // 현재 방 폭파
+        }
+        else
+        {
+            Debug.Log("[LobbyManager] 클라이언트이거나 혼자 있는 호스트, 기존 세션 종료 후 새 세션 시작");
+            await runner.Shutdown();
+        }
+
+        await StartGame(sessionName); // 새 씬에서 새 방 시작
     }
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
@@ -114,6 +159,13 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
             spawnedCharacters.Remove(player);
             Debug.Log($"OnPlayerLeft: Player {player.PlayerId} left. Despawned character.");
         }
+
+        // 플레이어가 나가고 방에 아무도 없으면 방 폭파
+        if (runner.IsServer && !runner.ActivePlayers.Any())
+        {
+            Debug.Log("[LobbyManager] 방에 플레이어 없음 → 세션 종료");
+            runner.Shutdown();
+        }
     }
 
     public void OnSceneLoadDone(NetworkRunner runner)
@@ -147,11 +199,30 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         spawnedCharacters.Clear();
     }
-    public void OnConnectedToServer(NetworkRunner runner)
+
+    public async void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
     {
+        Debug.Log("[LobbyManager] 호스트 마이그레이션 발생 → 새로운 호스트로 승격");
+
+        // 새로운 호스트로 게임 세션을 다시 시작
+        await runner.StartGame(new StartGameArgs()
+        {
+            GameMode = hostMigrationToken.GameMode,        // 마이그레이션된 게임 모드
+            SessionName = runner.SessionInfo.Name,         // 기존 세션 이름 유지
+            SceneManager = runner.GetComponent<NetworkSceneManagerDefault>()
+        });
+
+        foreach (var player in runner.ActivePlayers)
+        {
+            if (!spawnedCharacters.ContainsKey(player))
+            {
+                SpawnPlayerForServer(runner, player);
+            }
+        }
     }
 
     #region 사용하지 않는 콜백들
+    public void OnConnectedToServer(NetworkRunner runner) { }
     public void OnInput(NetworkRunner runner, NetworkInput input) { }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
@@ -161,7 +232,6 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
-    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
