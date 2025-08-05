@@ -18,7 +18,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     private Dictionary<PlayerRef, NetworkObject> spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
     private NetworkRunner runner;
 
-    private string currentSessionName = "Jeju_Home"; // 현재 세션명 추적
+    private List<SessionInfo> currentSessions = new();
 
     private void Awake()
     {
@@ -33,26 +33,28 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     }
     private async void Start()
     {
-        await StartGame(currentSessionName); // 기본 홈 세션 시작
+        runner = gameObject.AddComponent<NetworkRunner>();
+        runner.AddCallbacks(this);
+
+        await runner.JoinSessionLobby(SessionLobby.ClientServer); // 기본 홈 세션 시작
+    }
+
+    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
+    {
+        currentSessions = sessionList;
+        Debug.Log($"세션 갱신됨: {currentSessions.Count}개");
     }
 
     /// <summary>
     /// 세션 시작 (없으면 생성, 있으면 참가)
     /// </summary>
-    private async Task StartGame(string sessionName)
+    public async Task TryJoinOrCreate(string sessionName)
     {
-        if (runner == null)
-        {
-            runner = gameObject.AddComponent<NetworkRunner>();
-            runner.AddCallbacks(this);
-        }
-
-        var sessions = await runner.SessionInfoAsync();
-        var targetSession = sessions.FirstOrDefault(s => s.Name == sessionName);
+        var targetSession = currentSessions.FirstOrDefault(s => s.Name == sessionName);
 
         if (targetSession != null)
         {
-            Debug.Log($"[LobbyManager] 세션 {sessionName} 입장 (Client)");
+            Debug.Log($"세션 {sessionName} 입장 (Client)");
             await runner.StartGame(new StartGameArgs()
             {
                 GameMode = GameMode.Client,
@@ -62,7 +64,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         }
         else
         {
-            Debug.Log($"[LobbyManager] 세션 {sessionName} 없음, 생성 (Host)");
+            Debug.Log($"세션 {sessionName} 없음, 생성 (Host)");
             await runner.StartGame(new StartGameArgs()
             {
                 GameMode = GameMode.Host,
@@ -70,8 +72,6 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
                 SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
             });
         }
-
-        currentSessionName = sessionName;
     }
 
     /// <summary>
@@ -82,18 +82,8 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         string sessionName = $"Jeju_{sceneType}";
         Debug.Log($"[LobbyManager] {sceneType} 씬으로 이동 시도 (세션: {sessionName})");
 
-        if (runner.IsServer && runner.ActivePlayers.Count() > 1)
-        {
-            Debug.Log("[LobbyManager] 호스트 마이그레이션 시작");
-            await runner.Shutdown(); // 현재 방 폭파
-        }
-        else
-        {
-            Debug.Log("[LobbyManager] 클라이언트이거나 혼자 있는 호스트, 기존 세션 종료 후 새 세션 시작");
-            await runner.Shutdown();
-        }
-
-        await StartGame(sessionName); // 새 씬에서 새 방 시작
+        await runner.Shutdown(); // 현재 방 폭파
+        await TryJoinOrCreate(sessionName);
     }
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
@@ -230,7 +220,6 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
-    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
