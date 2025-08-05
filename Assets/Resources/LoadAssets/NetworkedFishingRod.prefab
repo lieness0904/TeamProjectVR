@@ -2186,7 +2186,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6716751119803011009}
-  - component: {fileID: 3067778412857271323}
+  - component: {fileID: 8275321165252677534}
   m_Layer: 0
   m_Name: 'SnapPoint '
   m_TagString: Untagged
@@ -2203,14 +2203,14 @@ Transform:
   m_GameObject: {fileID: 8484274073315972687}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.201, y: 0.013, z: -0.849}
-  m_LocalScale: {x: 2, y: 2, z: 2}
-  m_ConstrainProportionsScale: 1
+  m_LocalPosition: {x: 1, y: 0.05, z: -0.5}
+  m_LocalScale: {x: 4.15, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4878510965187894965}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!136 &3067778412857271323
-CapsuleCollider:
+--- !u!65 &8275321165252677534
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2227,10 +2227,8 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 1
-  m_Direction: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8554658914311637851
 GameObject:

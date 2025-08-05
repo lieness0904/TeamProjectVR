@@ -17,11 +17,8 @@ TagManager:
   - UI
   - Fish
   - Hook
-
   - FishOutline
-
-  - Climb
-
+  - Wall
   - 
   - 
   - 
@@ -44,7 +41,6 @@ TagManager:
   - 
   - 
   - 
-  - Teleport
   m_SortingLayers:
   - name: Default
     uniqueID: 0
