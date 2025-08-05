@@ -25,6 +25,14 @@ public class BobberController : NetworkBehaviour
     [Tooltip("MISS, 실패 등 다른 메시지를 표시할 UI")]
     [SerializeField] private TextMeshProUGUI messageText;
 
+    [Header("사운드")]
+    [Tooltip("물이 튀는 '퐁당' 사운드")]
+    [SerializeField] private AudioClip splashSound;
+
+    [Tooltip("'HIT' 시 재생될 사운드")] // <-- 이 줄을 추가하세요
+    [SerializeField] private AudioClip hitSound;
+    private AudioSource audioSource;
+
     [Networked] public NetworkBool IsInFishingZone { get; set; }
     [Networked] public NetworkBool HasFishOn { get; set; }
     [Networked] public NetworkObject HookedFish { get; set; }
@@ -38,6 +46,14 @@ public class BobberController : NetworkBehaviour
     {
         // 시작할 때 모든 텍스트를 숨깁니다.
         HideAllTexts();
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        // 3D 사운드로 설정하여 찌의 위치에서 소리가 나게 합니다.
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 1.0f;
     }
 
     public override void Render()
@@ -94,8 +110,16 @@ public class BobberController : NetworkBehaviour
 
     // --- [새로운 공개 함수들] ---
 
-    public void ShowHitText()
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPC_ShowHitText()
     {
+        // 모든 클라이언트에서 'HIT' 사운드를 재생합니다.
+        if (audioSource != null && hitSound != null)
+        {
+            audioSource.PlayOneShot(hitSound, 5.0f);
+        }
+
+        // 모든 클라이언트에서 'HIT' 텍스트를 보여줍니다.
         StartCoroutine(ShowTextRoutine(hitText, "HIT!", 1.5f));
     }
 
@@ -179,6 +203,11 @@ public class BobberController : NetworkBehaviour
     {
         if (other.TryGetComponent<FishingZone>(out var zone))
         {
+            if (audioSource != null && splashSound != null)
+            {
+                audioSource.PlayOneShot(splashSound, 5f);
+            }
+
             currentZone = zone;
             if (HasStateAuthority) IsInFishingZone = true;
         }

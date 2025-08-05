@@ -293,6 +293,8 @@ MonoBehaviour:
   biteDuration: 0.5
   hitText: {fileID: 736931703349427721}
   messageText: {fileID: 6657806414896392144}
+  splashSound: {fileID: 8300000, guid: 760fbb06631a96847bbecec9f7c3aef4, type: 3}
+  hitSound: {fileID: 8300000, guid: c4faae79a1b185c428cacd649b4e55e2, type: 3}
   _IsInFishingZone:
     _value: 0
   _HasFishOn:

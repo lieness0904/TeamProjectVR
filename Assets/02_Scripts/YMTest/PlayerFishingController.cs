@@ -44,6 +44,16 @@ public class PlayerFishingController : NetworkBehaviour
     [Tooltip("물고기가 이 거리 이상 멀어지면 낚시에 실패합니다.")]
     [SerializeField] private float maxFishDistance = 30f;
 
+    [Header("사운드 설정")]
+    [Tooltip("캐스팅 시 재생할 사운드")]
+    public AudioClip castingSound;
+    [Tooltip("릴링 사운드 (게이지 낮음)")]
+    public AudioClip reelingSoundLow;
+    [Tooltip("릴링 사운드 (게이지 중간)")]
+    public AudioClip reelingSoundMid;
+    [Tooltip("릴링 사운드 (게이지 높음)")]
+    public AudioClip reelingSoundHigh;
+
     [Header("게이지 진동 설정")]
     [Tooltip("왼손 컨트롤러의 진동 세기 (낮음)")]
     [Range(0, 1)] public float lowTensionVibeAmplitude = 0.2f;
@@ -86,6 +96,8 @@ public class PlayerFishingController : NetworkBehaviour
     private Vector3 _currentControllerVel;
     private XRBaseController _leftHandXRController;
     private float _hapticTimer = 0f;
+    private AudioSource sfxAudioSource; // 캐스팅 같은 단발성 효과음 용
+    private AudioSource reelingAudioSource; // 릴링 같이 반복되는 소리 용
 
     #endregion
 
@@ -107,6 +119,32 @@ public class PlayerFishingController : NetworkBehaviour
                 Debug.LogWarning("RiggingManager에 leftHandController가 연결되지 않아 릴링 진동이 작동하지 않을 수 있습니다.");
             }
         }
+
+        
+        InitializeAudioSources();
+    }
+
+   
+    private void InitializeAudioSources()
+    {
+        // AudioSource가 2개 필요하므로, 기존 AudioSource들을 모두 가져옵니다.
+        AudioSource[] sources = GetComponents<AudioSource>();
+
+        // 단발 효과음용 AudioSource 설정
+        if (sources.Length > 0)
+            sfxAudioSource = sources[0];
+        else
+            sfxAudioSource = gameObject.AddComponent<AudioSource>();
+        sfxAudioSource.playOnAwake = false;
+        sfxAudioSource.loop = false;
+
+        // 릴링 사운드용 AudioSource 설정
+        if (sources.Length > 1)
+            reelingAudioSource = sources[1];
+        else
+            reelingAudioSource = gameObject.AddComponent<AudioSource>();
+        reelingAudioSource.playOnAwake = false;
+        reelingAudioSource.loop = true; // 릴링 사운드는 반복 재생되어야 합니다.
     }
 
     private void Update()
@@ -167,6 +205,7 @@ public class PlayerFishingController : NetworkBehaviour
 
         // 4. 릴링 진동 처리 함수 호출
         HandleReelingHaptics();
+        HandleReelingSounds();
 
         // 5. 전투 중 찌와의 남은 거리 표시
         if (IsFighting && DistanceDisplayDelayTimer.ExpiredOrNotRunning(Runner))
@@ -214,6 +253,51 @@ public class PlayerFishingController : NetworkBehaviour
             {
                 SendDualHapticImpulse(lowTensionVibeAmplitude, vibeDuration);
                 _hapticTimer = 1.0f;
+            }
+        }
+    }
+    // --- [이 함수 전체를 클래스 내부에 추가하세요] ---
+    private void HandleReelingSounds()
+    {
+        // 입력 권한이 없거나, AudioSource가 준비 안됐으면 실행하지 않음
+        if (!HasInputAuthority || reelingAudioSource == null) return;
+
+        // 전투 중이고 릴을 감고 있을 때만 소리 재생
+        if (IsFighting && isReeling)
+        {
+            float normalizedGauge = tensionGauge / maxGauge;
+            AudioClip clipToPlay = null;
+
+            // 게이지 상태에 따라 재생할 클립 결정
+            if (normalizedGauge >= 0.8f)
+            {
+                clipToPlay = reelingSoundHigh;
+            }
+            else if (normalizedGauge >= 0.5f)
+            {
+                clipToPlay = reelingSoundMid;
+            }
+            else
+            {
+                clipToPlay = reelingSoundLow;
+            }
+
+            // 현재 재생중인 클립과 다르거나, 재생이 멈춰있으면 새로 재생
+            if (reelingAudioSource.clip != clipToPlay || !reelingAudioSource.isPlaying)
+            {
+                reelingAudioSource.clip = clipToPlay;
+                if (clipToPlay != null) // 재생할 클립이 있을 때만 Play
+                {
+                    reelingAudioSource.Play();
+                }
+            }
+        }
+        else
+        {
+            // 전투 중이 아니거나 릴을 감지 않으면 소리를 끔
+            if (reelingAudioSource.isPlaying)
+            {
+                reelingAudioSource.Stop();
             }
         }
     }
@@ -318,6 +402,10 @@ public class PlayerFishingController : NetworkBehaviour
             {
                 if (!IsFighting && HookedFish == null && CurrentBobber != null && CurrentBobber.GetComponent<ConfigurableJoint>() != null)
                 {
+                    if (sfxAudioSource != null && castingSound != null)
+                    {
+                        sfxAudioSource.PlayOneShot(castingSound);
+                    }
                     RPC_CastBobber(castingHandler.LastCastVelocity);
                 }
             }
@@ -380,6 +468,11 @@ public class PlayerFishingController : NetworkBehaviour
         }
         else
         {
+            if (reelingAudioSource != null && reelingAudioSource.isPlaying)
+            {
+                reelingAudioSource.Stop();
+            }
+            if (SpawnedRod != null) Runner.Despawn(SpawnedRod);
             if (SpawnedRod != null) Runner.Despawn(SpawnedRod);
             if (CurrentBobber != null) Runner.Despawn(CurrentBobber);
             if (HookedFish != null) Runner.Despawn(HookedFish);
@@ -414,7 +507,7 @@ public class PlayerFishingController : NetworkBehaviour
             {
                 bobber.HasFishOn = false;
                 bobber.HookedFish = null;
-                bobber.ShowHitText();
+                bobber.RPC_ShowHitText();
             }
             if (CurrentBobber != null && CurrentBobber.TryGetComponent<ConfigurableJoint>(out var joint)) Destroy(joint);
             AttachFishToHook();
