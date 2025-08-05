@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 {
-    private static LobbyManager Instance;
+    public static LobbyManager Instance;
 
     [Header("Player Prefab")]
     [SerializeField] private NetworkObject playerPrefab;
 
     private Dictionary<PlayerRef, NetworkObject> spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
-    private NetworkRunner runner;
+    public NetworkRunner runner;
 
     private List<SessionInfo> currentSessions = new();
 
