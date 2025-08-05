@@ -48,11 +48,11 @@ public class AudioManager : MonoBehaviour
         {
             case "TitleScene":
                 bgmSource.clip = titleBGM;
-                bgmSource.volume = 0.5f;
+                bgmSource.volume = 0.2f;
                 break;
             case "HouseScene":
                 bgmSource.clip = houseBGM;
-                bgmSource.volume = 0.5f;
+                bgmSource.volume = 0.2f;
                 break;
             case "FishingScene":
                 bgmSource.clip = fishingBGM; 
