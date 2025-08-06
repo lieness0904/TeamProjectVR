@@ -52,6 +52,11 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         var targetSession = currentSessions.FirstOrDefault(s => s.Name == sessionName);
 
+        // 기존 SceneManager 제거 후 재생성
+        var sceneManager = GetComponent<NetworkSceneManagerDefault>();
+        if (sceneManager == null)
+            sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
+
         if (targetSession != null)
         {
             Debug.Log($"세션 {sessionName} 입장 (Client)");
@@ -82,11 +87,13 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         string sessionName = $"Jeju_{sceneType}";
         Debug.Log($"[LobbyManager] {sceneType} 씬으로 이동 시도 (세션: {sessionName})");
 
-        await runner.Shutdown();
+        // Runner 완전 종료
+        await runner.Shutdown(true);
+        Destroy(runner);
 
-        var sceneManager = GetComponent<NetworkSceneManagerDefault>();
-        if (sceneManager != null)
-            Destroy(sceneManager);
+        // Runner 새로 생성
+        runner = gameObject.AddComponent<NetworkRunner>();
+        runner.AddCallbacks(this);
 
         await TryJoinOrCreate(sessionName);
 
@@ -100,7 +107,15 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"[OnPlayerJoined] Player {player.PlayerId} joined. IsServer={runner.IsServer}, Local={runner.LocalPlayer}");
-        
+
+        if (runner.IsServer)
+        {
+            // 서버가 플레이어 직접 스폰
+            if (!spawnedCharacters.ContainsKey(player))
+                SpawnPlayerForServer(runner, player);
+        }
+
+        // 로컬 플레이어는 UI 세팅
         if (player == runner.LocalPlayer)
         {
             StartCoroutine(WaitForPlayerObject(runner, player));
