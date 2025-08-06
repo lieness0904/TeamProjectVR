@@ -7,6 +7,7 @@ using System.Linq;
 using TMPro;
 using System.Collections;
 using System.Threading.Tasks;
+using UnityEngine.SceneManagement;
 
 public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -50,6 +51,13 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     /// </summary>
     public async Task TryJoinOrCreate(string sessionName)
     {
+        // 로비 연결 대기
+        while (!runner.IsCloudReady)
+        {
+            Debug.Log("로비 연결 대기 중...");
+            await Task.Yield();
+        }
+
         var targetSession = currentSessions.FirstOrDefault(s => s.Name == sessionName);
 
         // 기존 SceneManager 제거 후 재생성
@@ -59,22 +67,33 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
         if (targetSession != null)
         {
-            Debug.Log($"세션 {sessionName} 입장 (Client)");
-            await runner.StartGame(new StartGameArgs()
+            Debug.Log($"세션 {sessionName} 참가");
+            await runner.StartGame(new StartGameArgs
             {
                 GameMode = GameMode.Client,
                 SessionName = sessionName,
-                SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
+                SceneManager = sceneManager
             });
         }
         else
         {
-            Debug.Log($"세션 {sessionName} 없음, 생성 (Host)");
-            await runner.StartGame(new StartGameArgs()
+            Debug.Log($"세션 {sessionName} 없음, 호스트 생성");
+
+            // sessionName을 씬 이름으로 변환
+            string sceneName = "HomeScene"; // 예시: Jeju_Home이면 HomeScene
+            int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/01_Scenes/{sceneName}.unity");
+            if (sceneIndex < 0)
+            {
+                Debug.LogError($"{sceneName} 씬이 빌드 세팅에 없음!");
+                return;
+            }
+
+            await runner.StartGame(new StartGameArgs
             {
                 GameMode = GameMode.Host,
                 SessionName = sessionName,
-                SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
+                SceneManager = sceneManager,
+                Scene = SceneRef.FromIndex(sceneIndex)
             });
         }
     }
@@ -107,15 +126,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"[OnPlayerJoined] Player {player.PlayerId} joined. IsServer={runner.IsServer}, Local={runner.LocalPlayer}");
-
-        if (runner.IsServer)
-        {
-            // 서버가 플레이어 직접 스폰
-            if (!spawnedCharacters.ContainsKey(player))
-                SpawnPlayerForServer(runner, player);
-        }
-
-        // 로컬 플레이어는 UI 세팅
+        
         if (player == runner.LocalPlayer)
         {
             StartCoroutine(WaitForPlayerObject(runner, player));

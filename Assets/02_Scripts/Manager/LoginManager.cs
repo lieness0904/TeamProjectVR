@@ -119,10 +119,6 @@ public class LoginManager : MonoBehaviour
 
                     // 네트워크 세션 참가
                     await LobbyManager.Instance.TryJoinOrCreate("Jeju_Home");
-
-                    // 세션 조인 후 씬 이동
-                    var sceneRef = SceneRef.FromIndex(1); // Jeju_Home 빌드 인덱스
-                    await LobbyManager.Instance.runner.LoadScene(sceneRef);
                 }
                 else
                 {
