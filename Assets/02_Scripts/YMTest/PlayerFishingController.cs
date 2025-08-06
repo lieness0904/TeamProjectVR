@@ -54,6 +54,9 @@ public class PlayerFishingController : NetworkBehaviour
     [Tooltip("릴링 사운드 (게이지 높음)")]
     public AudioClip reelingSoundHigh;
 
+    [Tooltip("낚싯줄이 끊어질 때 재생할 사운드")]
+    public AudioClip lineSnapSound;
+
     [Header("게이지 진동 설정")]
     [Tooltip("왼손 컨트롤러의 진동 세기 (낮음)")]
     [Range(0, 1)] public float lowTensionVibeAmplitude = 0.2f;
@@ -727,11 +730,17 @@ public class PlayerFishingController : NetworkBehaviour
     }
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    
     private void RPC_OnFishingFailed()
     {
+        // 실패 효과 재생 RPC를 호출하여 클라이언트에서 사운드를 재생하도록 합니다.
+        RPC_PlayFailureEffects();
+
         if (CurrentBobber != null && CurrentBobber.TryGetComponent<BobberController>(out var bobber))
         {
-            bobber.RPC_ShowMessage("줄이 끊어졌습니다.", 2f, true);
+            // 이제 찌(Bobber)가 스스로 파괴되도록 만들 필요가 없으므로 마지막 파라미터를 false로 바꿉니다.
+            // 아래에서 플레이어가 직접 모든 것을 정리하기 때문입니다.
+            bobber.RPC_ShowMessage("줄이 끊어졌습니다.", 2f, false);
         }
         if (HookedFish != null)
         {
@@ -742,6 +751,9 @@ public class PlayerFishingController : NetworkBehaviour
 
         if (SpawnedRod != null) Runner.Despawn(SpawnedRod);
         if (HookedFish != null) Runner.Despawn(HookedFish);
+        // 참고: CurrentBobber도 여기서 함께 Despawn 처리하는 것이 좋습니다.
+        if (CurrentBobber != null) Runner.Despawn(CurrentBobber);
+
 
         SpawnedRod = null;
         CurrentBobber = null;
@@ -752,6 +764,15 @@ public class PlayerFishingController : NetworkBehaviour
         FleeStateTimer = default;
     }
 
+    [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority)]
+    private void RPC_PlayFailureEffects()
+    {
+        // 로컬 플레이어에게만 실패 사운드를 재생합니다.
+        if (sfxAudioSource != null && lineSnapSound != null)
+        {
+            sfxAudioSource.PlayOneShot(lineSnapSound);
+        }
+    }
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     private void RPC_UpdateVisuals(NetworkBool isFishing, NetworkObject rod)
     {

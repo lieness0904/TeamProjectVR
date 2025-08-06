@@ -287,7 +287,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minWaitTime: 5
   maxWaitTime: 15
-  bobberRenderer: {fileID: 2294761450386999055}
+  bobberRenderer: {fileID: 0}
   defaultColor: {r: 1, g: 1, b: 1, a: 1}
   biteColor: {r: 1, g: 0, b: 0, a: 1}
   biteDuration: 0.5
