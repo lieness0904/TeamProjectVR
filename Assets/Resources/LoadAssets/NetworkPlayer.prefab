@@ -2539,6 +2539,7 @@ MonoBehaviour:
   reelingSoundMid: {fileID: 8300000, guid: 82fda253e1563834bb9520479e1cc179, type: 3}
   reelingSoundHigh: {fileID: 8300000, guid: 4b46902a29845fb45862f39878e707ee, type: 3}
   lineSnapSound: {fileID: 8300000, guid: 4e0201b499338f247b1b891f52832b87, type: 3}
+  retrievalSound: {fileID: 8300000, guid: 760fbb06631a96847bbecec9f7c3aef4, type: 3}
   lowTensionVibeAmplitude: 0.2
   midTensionVibeAmplitude: 0.4
   highTensionVibeAmplitude: 0.7

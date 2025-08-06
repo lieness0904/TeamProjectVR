@@ -57,6 +57,9 @@ public class PlayerFishingController : NetworkBehaviour
     [Tooltip("낚싯줄이 끊어질 때 재생할 사운드")]
     public AudioClip lineSnapSound;
 
+    [Tooltip("찌를 회수했을 때 재생할 사운드")] 
+    public AudioClip retrievalSound;            
+
     [Header("게이지 진동 설정")]
     [Tooltip("왼손 컨트롤러의 진동 세기 (낮음)")]
     [Range(0, 1)] public float lowTensionVibeAmplitude = 0.2f;
@@ -611,6 +614,7 @@ public class PlayerFishingController : NetworkBehaviour
                 }
                 if (Vector3.Distance(bobberRigidbody.position, _rodTip.position) < retrievalDistance)
                 {
+                    RPC_PlayRetrievalSound();
                     AttachBobberWithJoint(CurrentBobber, _rodTipRb);
                     if (IsFighting)
                     {
@@ -730,7 +734,7 @@ public class PlayerFishingController : NetworkBehaviour
     }
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    
+
     private void RPC_OnFishingFailed()
     {
         // 실패 효과 재생 RPC를 호출하여 클라이언트에서 사운드를 재생하도록 합니다.
@@ -738,9 +742,8 @@ public class PlayerFishingController : NetworkBehaviour
 
         if (CurrentBobber != null && CurrentBobber.TryGetComponent<BobberController>(out var bobber))
         {
-            // 이제 찌(Bobber)가 스스로 파괴되도록 만들 필요가 없으므로 마지막 파라미터를 false로 바꿉니다.
-            // 아래에서 플레이어가 직접 모든 것을 정리하기 때문입니다.
-            bobber.RPC_ShowMessage("줄이 끊어졌습니다.", 2f, false);
+            // 찌가 메시지를 표시한 후 스스로 파괴되도록 마지막 인자를 'true'로 다시 변경합니다.
+            bobber.RPC_ShowMessage("줄이 끊어졌습니다.", 2f, true);
         }
         if (HookedFish != null)
         {
@@ -749,14 +752,12 @@ public class PlayerFishingController : NetworkBehaviour
         }
         Debug.Log($"낚시 실패! 게이지 100% 초과. 플레이어: {Object.InputAuthority}");
 
+        // 낚싯대와 물고기만 파괴하고, 찌(CurrentBobber)는 스스로 파괴되도록 남겨둡니다.
         if (SpawnedRod != null) Runner.Despawn(SpawnedRod);
         if (HookedFish != null) Runner.Despawn(HookedFish);
-        // 참고: CurrentBobber도 여기서 함께 Despawn 처리하는 것이 좋습니다.
-        if (CurrentBobber != null) Runner.Despawn(CurrentBobber);
-
 
         SpawnedRod = null;
-        CurrentBobber = null;
+        CurrentBobber = null; // 참조는 제거하여 새로운 낚시를 준비합니다.
         HookedFish = null;
         IsFighting = false;
         tensionGauge = 0f;
@@ -773,6 +774,16 @@ public class PlayerFishingController : NetworkBehaviour
             sfxAudioSource.PlayOneShot(lineSnapSound);
         }
     }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority)]
+    private void RPC_PlayRetrievalSound()
+    {
+        if (sfxAudioSource != null && retrievalSound != null)
+        {
+            sfxAudioSource.PlayOneShot(retrievalSound);
+        }
+    }
+
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     private void RPC_UpdateVisuals(NetworkBool isFishing, NetworkObject rod)
     {
