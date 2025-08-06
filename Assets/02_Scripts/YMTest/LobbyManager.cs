@@ -82,18 +82,19 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         string sessionName = $"Jeju_{sceneType}";
         Debug.Log($"[LobbyManager] {sceneType} 씬으로 이동 시도 (세션: {sessionName})");
 
-        await runner.Shutdown(); // 현재 방 폭파
+        await runner.Shutdown();
+
+        // 기존 SceneManager 제거
+        var sceneManager = GetComponent<NetworkSceneManagerDefault>();
+        if (sceneManager != null)
+            Destroy(sceneManager);
+
         await TryJoinOrCreate(sessionName);
     }
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"[OnPlayerJoined] Player {player.PlayerId} joined. IsServer={runner.IsServer}, Local={runner.LocalPlayer}");
-
-        if (runner.IsServer)
-        {
-            SpawnPlayerForServer(runner, player);
-        }
 
         if (player == runner.LocalPlayer)
         {
@@ -160,33 +161,23 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSceneLoadDone(NetworkRunner runner)
     {
-        if (!runner.IsServer) return;
-
+        if (!runner.IsServer) return; // 서버만 스폰
         foreach (var player in runner.ActivePlayers)
         {
             if (!spawnedCharacters.ContainsKey(player))
             {
-                Vector3 basePos = Vector3.zero;
-                var spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
-                if (spawnPoints != null && spawnPoints.Length > 0)
-                {
-                    var spawnObj = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)];
-                    basePos = spawnObj.transform.position;
-                }
-
-                float offsetX = UnityEngine.Random.Range(-0.5f, 0.5f);
-                float offsetZ = UnityEngine.Random.Range(-0.5f, 0.5f);
-                Vector3 spawnPos = basePos + new Vector3(offsetX, 0f, offsetZ);
-
-                var playerObj = runner.Spawn(playerPrefab, spawnPos, Quaternion.identity, player);
-                spawnedCharacters[player] = playerObj;
-                runner.SetPlayerObject(player, playerObj);
+                SpawnPlayerForServer(runner, player);
             }
         }
     }
 
     public void OnSceneLoadStart(NetworkRunner runner)
     {
+        foreach (var obj in spawnedCharacters.Values)
+        {
+            if (obj != null)
+                runner.Despawn(obj);
+        }
         spawnedCharacters.Clear();
     }
 
