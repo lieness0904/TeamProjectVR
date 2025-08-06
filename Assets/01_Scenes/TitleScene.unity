@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028356, g: 0.2257137, b: 0.3069222, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2490,6 +2490,7 @@ GameObject:
   - component: {fileID: 7958359857571255684}
   - component: {fileID: 5616962877109613985}
   - component: {fileID: 8261268678096169455}
+  - component: {fileID: 8392059843689459913}
   m_Layer: 0
   m_Name: Left Controller
   m_TagString: Untagged
@@ -7642,6 +7643,7 @@ GameObject:
   - component: {fileID: 6985512730053121289}
   - component: {fileID: 6185602063793932789}
   - component: {fileID: 1647827511473454518}
+  - component: {fileID: 7712721185408557700}
   m_Layer: 0
   m_Name: Right Controller
   m_TagString: Untagged
@@ -7649,6 +7651,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &7712721185408557700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7712721185408557699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41f9a36541c1e2e44a17828288f22e69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rayInteractor: {fileID: 7720726851308160436}
 --- !u!114 &7720726851308160436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8627,6 +8642,19 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &8392059843689459913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 830130065547695715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41f9a36541c1e2e44a17828288f22e69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rayInteractor: {fileID: 8856682186726408470}
 --- !u!4 &8401675983027492535
 Transform:
   m_ObjectHideFlags: 0
