@@ -2130,6 +2130,7 @@ GameObject:
   - component: {fileID: 5906618414608869536}
   - component: {fileID: 5478361849334808893}
   - component: {fileID: 801435519028041206}
+  - component: {fileID: 6631849431229126687}
   m_Layer: 0
   m_Name: NetworkPlayer
   m_TagString: Player
@@ -2658,6 +2659,20 @@ MonoBehaviour:
     Max: 1000
     SpeedUpPerc: 5
   restartOnDeviceChange: 1
+--- !u!114 &6631849431229126687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763074577358944841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb33c6c8f85b7be4485b3606e18401b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xrOrigin: {fileID: 5442783378356437880}
+  networkPlayer: {fileID: 4097064386834629628}
 --- !u!1 &769997040941160783
 GameObject:
   m_ObjectHideFlags: 0
@@ -12341,6 +12356,7 @@ GameObject:
   - component: {fileID: 6939421325689394132}
   - component: {fileID: 5301539068555691973}
   - component: {fileID: 7848863229862798129}
+  - component: {fileID: 2225439670493053899}
   m_Layer: 2
   m_Name: XR Origin (Action-based)
   m_TagString: Untagged
@@ -12438,6 +12454,26 @@ MonoBehaviour:
   m_AimAssistRequiredSpeed: 0.25
   m_AimAssistPercent: 0.8
   m_AimAssistMaxSpeedPercent: 10
+--- !u!114 &2225439670493053899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3666787266190310598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 496880615cd240be960d436c1c8ae570, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_System: {fileID: 0}
+  m_ClimbSettings:
+    m_UseConstant: 1
+    m_ConstantValue:
+      m_AllowFreeXMovement: 1
+      m_AllowFreeYMovement: 1
+      m_AllowFreeZMovement: 1
+    m_Variable: {fileID: 0}
 --- !u!1 &3668792838176651784
 GameObject:
   m_ObjectHideFlags: 0
@@ -26066,12 +26102,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
-  m_WarningMessage: "\nBinding warning: Some generic clip(s) animate transforms that
-    are already bound by a Humanoid avatar. These transforms can only be changed
-    by Humanoid clips.\n\tTransform 'CC_BaseRing1.R'\n\tTransform 'CC_BaseMid2.L'\n\tTransform
-    'CC_BaseThumb2.R'\n\tTransform 'CC_BaseMid1.L'\n\tTransform 'CC_BaseThumb1.L'\n\tTransform
-    'CC_BaseForearm.L'\n\tTransform 'CC_BaseHand.L'\n\tTransform 'CC_BaseMid1.R'\n\tTransform
-    'CC_BaseMid2.R'\n\tTransform 'CC_BaseThumb2.L'\n\tand more ..."
+  m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
@@ -30117,6 +30148,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5765344242803818289}
   - component: {fileID: 4825718269504086446}
+  - component: {fileID: 667065941051141661}
   m_Layer: 2
   m_Name: Climb
   m_TagString: Untagged
@@ -30159,6 +30191,19 @@ MonoBehaviour:
       m_AllowFreeYMovement: 1
       m_AllowFreeZMovement: 1
     m_Variable: {fileID: 0}
+--- !u!114 &667065941051141661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7848228084121866867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08665868aa5b7a24d9deb447e65c4dd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characterController: {fileID: 825498535684447473}
 --- !u!1 &7872151457315727751
 GameObject:
   m_ObjectHideFlags: 0

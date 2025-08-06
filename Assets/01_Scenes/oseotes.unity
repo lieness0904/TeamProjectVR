@@ -2596,7 +2596,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   teleportLayer:
     serializedVersion: 2
-    m_Bits: 2147483648
+    m_Bits: 0
   teleportPoint: {fileID: 267240094}
   controller: {fileID: 846418635}
   moveProvider: {fileID: 1051449316}
