@@ -103,45 +103,48 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     /// </summary>
     public async Task MoveToScene(string sceneType)
     {
+        if (!runner.IsServer) return;
+
         string sessionName = $"Jeju_{sceneType}";
         Debug.Log($"[LobbyManager] {sceneType} 씬으로 이동 시도 (세션: {sessionName})");
 
-        if (runner.IsServer)
+        // 클라이언트 전부에게 씬 이동 명령 보내기
+        RPC_MoveAllClients(sceneType);
+
+        // 호스트 이동 처리
+        await runner.Shutdown(false);
+        runner = gameObject.AddComponent<NetworkRunner>();
+        runner.AddCallbacks(this);
+
+        int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/01_Scenes/{sceneType}.unity");
+        await runner.StartGame(new StartGameArgs
         {
-            Debug.Log("[LobbyManager] 호스트가 새로운 씬으로 이동합니다.");
+            GameMode = GameMode.Host,
+            SessionName = sessionName,
+            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
+            Scene = SceneRef.FromIndex(sceneIndex)
+        });
+    }
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_MoveAllClients(string sceneType)
+    {
+        if (runner.IsServer) return; // 서버는 따로 처리하니까 무시
+        _ = MoveClientToScene(sceneType);
+    }
+    private async Task MoveClientToScene(string sceneType)
+    {
+        string sessionName = $"Jeju_{sceneType}";
 
-            // 현재 세션 종료 (호스트 나감 → 남은 클라 중 하나가 호스트 승계)
-            await runner.Shutdown(false);
+        await runner.Shutdown(true);
+        runner = gameObject.AddComponent<NetworkRunner>();
+        runner.AddCallbacks(this);
 
-            // 새로운 Runner 생성 → 새로운 씬 호스트 시작
-            runner = gameObject.AddComponent<NetworkRunner>();
-            runner.AddCallbacks(this);
-
-            int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/01_Scenes/{sceneType}.unity");
-            if (sceneIndex < 0)
-            {
-                Debug.LogError($"{sceneType} 씬을 찾을 수 없습니다!");
-                return;
-            }
-
-            await runner.StartGame(new StartGameArgs
-            {
-                GameMode = GameMode.Host,
-                SessionName = sessionName,
-                SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
-                Scene = SceneRef.FromIndex(sceneIndex)
-            });
-        }
-        else
+        await runner.StartGame(new StartGameArgs
         {
-            // 클라이언트는 단순히 Runner 종료 후 새로운 세션 참가
-            await runner.Shutdown(true);
-
-            runner = gameObject.AddComponent<NetworkRunner>();
-            runner.AddCallbacks(this);
-
-            await TryJoinOrCreate(sessionName);
-        }
+            GameMode = GameMode.Client,
+            SessionName = sessionName,
+            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
+        });
     }
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
