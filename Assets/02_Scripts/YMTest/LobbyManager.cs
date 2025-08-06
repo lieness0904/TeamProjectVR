@@ -82,22 +82,19 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         string sessionName = $"Jeju_{sceneType}";
         Debug.Log($"[LobbyManager] {sceneType} 씬으로 이동 시도 (세션: {sessionName})");
 
-        // 기존 Runner 종료
-        if (runner != null)
-        {
-            await runner.Shutdown();
-            Destroy(runner);
-            runner = null;
-        }
+        await runner.Shutdown();
 
         var sceneManager = GetComponent<NetworkSceneManagerDefault>();
         if (sceneManager != null)
             Destroy(sceneManager);
 
-        runner = gameObject.AddComponent<NetworkRunner>();
-        runner.AddCallbacks(this);
-
         await TryJoinOrCreate(sessionName);
+
+        if (runner.IsServer)
+        {
+            // 서버만 씬 로드
+            await runner.LoadScene(sceneType);
+        }
     }
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
