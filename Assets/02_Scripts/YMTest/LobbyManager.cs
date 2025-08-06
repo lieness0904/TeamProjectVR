@@ -126,7 +126,12 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"[OnPlayerJoined] Player {player.PlayerId} joined. IsServer={runner.IsServer}, Local={runner.LocalPlayer}");
-        
+
+        if (runner.IsServer && !spawnedCharacters.ContainsKey(player))
+        {
+            SpawnPlayerForServer(runner, player);
+        }
+
         if (player == runner.LocalPlayer)
         {
             StartCoroutine(WaitForPlayerObject(runner, player));
