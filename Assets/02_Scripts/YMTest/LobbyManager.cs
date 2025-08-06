@@ -77,17 +77,25 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     /// <summary>
     /// 씬 이동 및 세션 전환
     /// </summary>
-    public async void MoveToScene(string sceneType)
+    public async Task MoveToScene(string sceneType)
     {
         string sessionName = $"Jeju_{sceneType}";
         Debug.Log($"[LobbyManager] {sceneType} 씬으로 이동 시도 (세션: {sessionName})");
 
-        await runner.Shutdown();
+        // 기존 Runner 종료
+        if (runner != null)
+        {
+            await runner.Shutdown();
+            Destroy(runner);
+            runner = null;
+        }
 
-        // 기존 SceneManager 제거
         var sceneManager = GetComponent<NetworkSceneManagerDefault>();
         if (sceneManager != null)
             Destroy(sceneManager);
+
+        runner = gameObject.AddComponent<NetworkRunner>();
+        runner.AddCallbacks(this);
 
         await TryJoinOrCreate(sessionName);
     }
@@ -95,7 +103,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"[OnPlayerJoined] Player {player.PlayerId} joined. IsServer={runner.IsServer}, Local={runner.LocalPlayer}");
-
+        
         if (player == runner.LocalPlayer)
         {
             StartCoroutine(WaitForPlayerObject(runner, player));
