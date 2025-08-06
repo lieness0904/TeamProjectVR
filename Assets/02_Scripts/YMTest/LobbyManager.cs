@@ -108,14 +108,12 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
         if (runner.IsServer)
         {
-            // 1) 현재 세션에서 호스트 마이그레이션 스냅샷 생성
-            await runner.PushHostMigrationSnapshot();
-            Debug.Log("[LobbyManager] 호스트 마이그레이션 스냅샷 생성 완료");
+            Debug.Log("[LobbyManager] 호스트가 새로운 씬으로 이동합니다.");
 
-            // 2) Runner 종료
+            // 현재 세션 종료 (호스트 나감 → 남은 클라 중 하나가 호스트 승계)
             await runner.Shutdown(false);
 
-            // 3) 새로운 Runner 생성 → 새로운 세션 호스트 시작
+            // 새로운 Runner 생성 → 새로운 씬 호스트 시작
             runner = gameObject.AddComponent<NetworkRunner>();
             runner.AddCallbacks(this);
 
@@ -125,6 +123,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
                 Debug.LogError($"{sceneType} 씬을 찾을 수 없습니다!");
                 return;
             }
+
             await runner.StartGame(new StartGameArgs
             {
                 GameMode = GameMode.Host,
@@ -137,8 +136,10 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             // 클라이언트는 단순히 Runner 종료 후 새로운 세션 참가
             await runner.Shutdown(true);
+
             runner = gameObject.AddComponent<NetworkRunner>();
             runner.AddCallbacks(this);
+
             await TryJoinOrCreate(sessionName);
         }
     }
@@ -230,27 +231,39 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSceneLoadStart(NetworkRunner runner)
     {
+
+        Debug.Log("[OnSceneLoadStart] 씬 로드 시작");
+
+        // 현재 플레이어만 despawn (전체 despawn X)
+        if (spawnedCharacters.TryGetValue(runner.LocalPlayer, out var myPlayer))
+        {
+            runner.Despawn(myPlayer);
+            spawnedCharacters.Remove(runner.LocalPlayer);
+        }
+    }
+
+    public async void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
+    {
+        Debug.Log("[LobbyManager] 호스트 마이그레이션 발생 → 새로운 호스트로 승계");
+
+        // 기존 플레이어 오브젝트 정리
         foreach (var obj in spawnedCharacters.Values)
         {
             if (obj != null)
                 runner.Despawn(obj);
         }
         spawnedCharacters.Clear();
-    }
 
-    public async void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
-    {
-        Debug.Log("[LobbyManager] 호스트 마이그레이션 발생 → 새로운 호스트로 승격");
-
-        // 새로운 호스트로 게임 세션을 다시 시작
-        await runner.StartGame(new StartGameArgs()
+        // 새로운 호스트로 세션 재시작
+        await runner.StartGame(new StartGameArgs
         {
-            GameMode = hostMigrationToken.GameMode,        // 마이그레이션된 게임 모드
-            SessionName = runner.SessionInfo.Name,         // 기존 세션 이름 유지
+            GameMode = hostMigrationToken.GameMode,
+            SessionName = runner.SessionInfo.Name,
             SceneManager = runner.GetComponent<NetworkSceneManagerDefault>(),
-            HostMigrationToken = hostMigrationToken
+            HostMigrationToken = hostMigrationToken // 핵심 부분
         });
 
+        // 호스트 승계 후 플레이어 재스폰
         foreach (var player in runner.ActivePlayers)
         {
             if (!spawnedCharacters.ContainsKey(player))
@@ -258,6 +271,8 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
                 SpawnPlayerForServer(runner, player);
             }
         }
+
+        Debug.Log("[LobbyManager] 호스트 승계 완료");
     }
 
     #region 사용하지 않는 콜백들
