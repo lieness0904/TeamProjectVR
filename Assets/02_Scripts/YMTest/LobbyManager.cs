@@ -121,6 +121,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         float offsetZ = UnityEngine.Random.Range(-1.5f, 1.5f);
         Vector3 spawnPos = basePos + new Vector3(offsetX, 0f, offsetZ);
 
+        Debug.Log($"[SpawnPlayerForServer] {player} 스폰 시도");
         var playerObj = runner.Spawn(playerPrefab, spawnPos, Quaternion.identity, player);
         spawnedCharacters[player] = playerObj;
         runner.SetPlayerObject(player, playerObj);
@@ -169,7 +170,10 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSceneLoadDone(NetworkRunner runner)
     {
-        if (!runner.IsServer) return; // 서버만 스폰
+        if (!runner.IsServer) return;
+
+        Debug.Log("[OnSceneLoadDone] 서버가 씬 로드를 완료했습니다. 플레이어 스폰 시작");
+
         foreach (var player in runner.ActivePlayers)
         {
             if (!spawnedCharacters.ContainsKey(player))
