@@ -106,20 +106,40 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         string sessionName = $"Jeju_{sceneType}";
         Debug.Log($"[LobbyManager] {sceneType} 씬으로 이동 시도 (세션: {sessionName})");
 
-        // Runner 완전 종료
-        await runner.Shutdown(true);
-        Destroy(runner);
-
-        // Runner 새로 생성
-        runner = gameObject.AddComponent<NetworkRunner>();
-        runner.AddCallbacks(this);
-
-        await TryJoinOrCreate(sessionName);
-
         if (runner.IsServer)
         {
-            // 서버만 씬 로드
-            await runner.LoadScene(sceneType);
+            // 1) 현재 세션에서 호스트 마이그레이션 스냅샷 생성
+            await runner.PushHostMigrationSnapshot();
+            Debug.Log("[LobbyManager] 호스트 마이그레이션 스냅샷 생성 완료");
+
+            // 2) Runner 종료
+            await runner.Shutdown(false);
+
+            // 3) 새로운 Runner 생성 → 새로운 세션 호스트 시작
+            runner = gameObject.AddComponent<NetworkRunner>();
+            runner.AddCallbacks(this);
+
+            int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/01_Scenes/{sceneType}.unity");
+            if (sceneIndex < 0)
+            {
+                Debug.LogError($"{sceneType} 씬을 찾을 수 없습니다!");
+                return;
+            }
+            await runner.StartGame(new StartGameArgs
+            {
+                GameMode = GameMode.Host,
+                SessionName = sessionName,
+                SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
+                Scene = SceneRef.FromIndex(sceneIndex)
+            });
+        }
+        else
+        {
+            // 클라이언트는 단순히 Runner 종료 후 새로운 세션 참가
+            await runner.Shutdown(true);
+            runner = gameObject.AddComponent<NetworkRunner>();
+            runner.AddCallbacks(this);
+            await TryJoinOrCreate(sessionName);
         }
     }
 
@@ -180,12 +200,9 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (spawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
         {
-            if (runner.IsServer)
-            {
-                runner.Despawn(networkObject);
-            }
+            runner.Despawn(networkObject);
             spawnedCharacters.Remove(player);
-            Debug.Log($"OnPlayerLeft: Player {player.PlayerId} left. Despawned character.");
+            Debug.Log($"[OnPlayerLeft] {player} removed");
         }
 
         // 플레이어가 나가고 방에 아무도 없으면 방 폭파
@@ -230,7 +247,8 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             GameMode = hostMigrationToken.GameMode,        // 마이그레이션된 게임 모드
             SessionName = runner.SessionInfo.Name,         // 기존 세션 이름 유지
-            SceneManager = runner.GetComponent<NetworkSceneManagerDefault>()
+            SceneManager = runner.GetComponent<NetworkSceneManagerDefault>(),
+            HostMigrationToken = hostMigrationToken
         });
 
         foreach (var player in runner.ActivePlayers)
