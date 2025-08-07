@@ -20,6 +20,8 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     public NetworkRunner runner;
 
     private List<SessionInfo> currentSessions = new();
+    [SerializeField] private GameObject loadingUIObject;
+    private LoadingScreenController lsc;
 
     private void Awake()
     {
@@ -31,6 +33,9 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        if (loadingUIObject != null)
+            lsc = loadingUIObject.GetComponent<LoadingScreenController>();
     }
     private async void Start()
     {
@@ -219,6 +224,9 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSceneLoadDone(NetworkRunner runner)
     {
+        if (lsc != null)
+            lsc.HideLoading();
+
         if (!runner.IsServer) return;
 
         Debug.Log("[OnSceneLoadDone] 서버가 씬 로드를 완료했습니다. 플레이어 스폰 시작");
@@ -231,7 +239,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
             }
         }
     }
-
+    
     public void OnSceneLoadStart(NetworkRunner runner)
     {
 
@@ -243,6 +251,10 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
             runner.Despawn(myPlayer);
             spawnedCharacters.Remove(runner.LocalPlayer);
         }
+        if (lsc != null)
+            lsc.ShowLoading();
+        spawnedCharacters.Clear();
+
     }
 
     public async void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)

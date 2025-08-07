@@ -505,7 +505,22 @@ PrefabInstance:
     - target: {fileID: 5625388211035456241, guid: afc5f0d3fac66e945a5b1a443bc917a3,
         type: 3}
       propertyPath: m_Name
-      value: TFP_Beech_Tree_02D Variant
+      value: Orange_Tree
+      objectReference: {fileID: 0}
+    - target: {fileID: 5625388211035954897, guid: afc5f0d3fac66e945a5b1a443bc917a3,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5625388211035954897, guid: afc5f0d3fac66e945a5b1a443bc917a3,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5625388211035954897, guid: afc5f0d3fac66e945a5b1a443bc917a3,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 5625388211035954897, guid: afc5f0d3fac66e945a5b1a443bc917a3,
         type: 3}
@@ -556,6 +571,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5625388211035954897, guid: afc5f0d3fac66e945a5b1a443bc917a3,
+        type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
