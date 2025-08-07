@@ -19,6 +19,8 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
     private Dictionary<PlayerRef, NetworkObject> spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
     private NetworkRunner runner;
 
+    [SerializeField] private GameObject loadingUIObject;
+    private LoadingScreenController lsc;
 
     private void Awake()
     {
@@ -30,6 +32,9 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        if (loadingUIObject != null)
+            lsc = loadingUIObject.GetComponent<LoadingScreenController>();
     }
     private void Start()
     {
@@ -118,6 +123,9 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSceneLoadDone(NetworkRunner runner)
     {
+        if (lsc != null)
+            lsc.HideLoading();
+
         if (!runner.IsServer) return;
 
         foreach (var player in runner.ActivePlayers)
@@ -142,9 +150,11 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
             }
         }
     }
-
+    
     public void OnSceneLoadStart(NetworkRunner runner)
     {
+        if (lsc != null)
+            lsc.ShowLoading();
         spawnedCharacters.Clear();
     }
     public void OnConnectedToServer(NetworkRunner runner)

@@ -23,30 +23,30 @@ public class ClimbController : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        if (climbProvider == null || characterController == null)
-            return;
-
-        bool isClimbing = climbProvider.locomotionPhase == LocomotionPhase.Started ||
-                          climbProvider.locomotionPhase == LocomotionPhase.Moving;
-
-        if (isClimbing && characterController.enabled)
-        {
-            characterController.enabled = false;
-            //Debug.Log("[ClimbController] 클라이밍 시작 - CharacterController 비활성화");
-        }
-        else if (!isClimbing && !characterController.enabled)
-        {
-            characterController.enabled = true;
-            //Debug.Log("[ClimbController] 클라이밍 종료 - CharacterController 활성화");
-        }
-
-        // 상태 변화 추적
-        if (climbProvider.locomotionPhase != lastPhase)
-        {
-            Debug.Log($"[ClimbController] 상태 변화: {lastPhase} → {climbProvider.locomotionPhase}");
-            lastPhase = climbProvider.locomotionPhase;
-        }
-    }
+    // void Update()
+    // {
+    //     if (climbProvider == null || characterController == null)
+    //         return;
+    // 
+    //     bool isClimbing = climbProvider.locomotionPhase == LocomotionPhase.Started ||
+    //                       climbProvider.locomotionPhase == LocomotionPhase.Moving;
+    // 
+    //     if (isClimbing && characterController.enabled)
+    //     {
+    //         characterController.enabled = false;
+    //         //Debug.Log("[ClimbController] 클라이밍 시작 - CharacterController 비활성화");
+    //     }
+    //     else if (!isClimbing && !characterController.enabled)
+    //     {
+    //         characterController.enabled = true;
+    //         //Debug.Log("[ClimbController] 클라이밍 종료 - CharacterController 활성화");
+    //     }
+    // 
+    //     // 상태 변화 추적
+    //     if (climbProvider.locomotionPhase != lastPhase)
+    //     {
+    //         Debug.Log($"[ClimbController] 상태 변화: {lastPhase} → {climbProvider.locomotionPhase}");
+    //         lastPhase = climbProvider.locomotionPhase;
+    //     }
+    // }
 }
