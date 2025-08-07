@@ -2528,7 +2528,8 @@ MonoBehaviour:
   castingHandler: {fileID: 3152192115052407573}
   vibrationAmplitude: 0.7
   vibrationDuration: 1
-  retrievalDistance: 3
+  retrievalDistance: 5
+  fixedReelInSpeed: 5
   bobberHangOffset: 0.2
   hookVelocityThreshold: 2
   gaugeDecreasePerSec: 50
@@ -2544,6 +2545,8 @@ MonoBehaviour:
   midTensionVibeAmplitude: 0.4
   highTensionVibeAmplitude: 0.7
   vibeDuration: 0.1
+  _IsReeling:
+    _value: 0
   _IsFishing:
     _value: 0
   _CurrentBobber: {fileID: 0}
