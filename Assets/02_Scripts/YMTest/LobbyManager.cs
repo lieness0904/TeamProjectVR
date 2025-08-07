@@ -263,7 +263,7 @@ public class LobbyManager : MonoBehaviour, INetworkRunnerCallbacks
             GameMode = hostMigrationToken.GameMode,
             SessionName = runner.SessionInfo.Name,
             SceneManager = runner.GetComponent<NetworkSceneManagerDefault>(),
-            HostMigrationToken = hostMigrationToken // 핵심 부분
+            HostMigrationToken = hostMigrationToken 
         });
 
         // 호스트 승계 후 플레이어 재스폰
