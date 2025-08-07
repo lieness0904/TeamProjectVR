@@ -4,6 +4,8 @@ using UnityEngine.Networking;
 using System.Collections;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Threading.Tasks;
+using Fusion;
 
 public class LoginManager : MonoBehaviour
 {
@@ -44,7 +46,7 @@ public class LoginManager : MonoBehaviour
     }
 
 
-    public void OnLoginButtonClick()
+    public async void OnLoginButtonClick()
     {
         if (isLoggingIn) return; // 중복 방지
         isLoggingIn = true;
@@ -60,10 +62,11 @@ public class LoginManager : MonoBehaviour
         }
 
         statusText.text = "로그인 중...";
-        StartCoroutine(LoginRequest(userId, password));
+        await LoginRequest(userId, password);
+        isLoggingIn = false;
     }
 
-    IEnumerator LoginRequest(string userId, string password)
+    private async Task LoginRequest(string userId, string password)
     {
         WWWForm form = new WWWForm();
         form.AddField("action", "login");
@@ -72,7 +75,11 @@ public class LoginManager : MonoBehaviour
 
         using (UnityWebRequest www = UnityWebRequest.Post(scriptURL, form))
         {
-            yield return www.SendWebRequest();
+            var operation = www.SendWebRequest();
+            while (!operation.isDone)
+            {
+                await Task.Yield(); // 한 프레임씩 대기
+            }
 
             if (www.result == UnityWebRequest.Result.Success)
             {
@@ -97,17 +104,21 @@ public class LoginManager : MonoBehaviour
                         Debug.LogWarning("서버에서 인벤토리 데이터가 비어 있음 (신규 유저 또는 초기 상태)");
                     }
 
-                    // 외형 불러오기
+                    // 커스터마이징 로드
+                    var customizationLoaded = new TaskCompletionSource<bool>();
                     CustomizationDataLoader.LoadCustomizationFromSheet(userId, data =>
                     {
                         PlayerDataManager.Instance.CustomizationData = data;
                         var dto = CustomizationDataConverter.ToDTO(data);
                         CustomizationDataStore.LatestDataJson = JsonUtility.ToJson(dto);
                         Debug.Log("커스터마이징 데이터 로드 완료");
+                        customizationLoaded.SetResult(true);
                     });
 
-                    yield return new WaitForSeconds(1);
-                    SceneManager.LoadScene("HomeScene");
+                    await customizationLoaded.Task;
+
+                    // 네트워크 세션 참가
+                    await LobbyManager.Instance.TryJoinOrCreate("Jeju_Home");
                 }
                 else
                 {
@@ -120,9 +131,8 @@ public class LoginManager : MonoBehaviour
                 Debug.LogError("Web Request Error: " + www.error);
             }
         }
-
-        isLoggingIn = false;
     }
+
 
     private void OnDestroy()
     {
