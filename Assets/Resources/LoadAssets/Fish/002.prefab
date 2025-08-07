@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.029999992, y: 0.029999996, z: 0.029999996}
+  m_LocalScale: {x: 0.015, y: 0.015, z: 0.015}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 7547356375518126465}
@@ -174,7 +174,7 @@ Transform:
   m_GameObject: {fileID: 964020260208967104}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.000355, y: 0.001655, z: -0}
+  m_LocalPosition: {x: -0.000114, y: 0.000571, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -320,7 +320,6 @@ GameObject:
   - component: {fileID: 5237966021770627942}
   - component: {fileID: 5365439373849029572}
   - component: {fileID: 2965351417774279262}
-  - component: {fileID: 2758221720724051789}
   m_Layer: 6
   m_Name: 002
   m_TagString: Untagged
@@ -359,7 +358,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fishID: 101
   fishName: "\uC625\uB3D4"
-  baseWeight: 0.08
+  baseWeight: 0.2
   strength: 0.5
   basePrice: 200
   minSizeMultiplier: 0.75
@@ -435,17 +434,3 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!114 &2758221720724051789
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5388382239877438521}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1541381998, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Guid:
-    RawGuidValue: 8834400b1262ff44da3d799840a10e95

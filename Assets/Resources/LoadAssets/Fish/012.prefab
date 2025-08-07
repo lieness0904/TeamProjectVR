@@ -28,8 +28,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.04, y: 0.06, z: 0.04}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.025, y: 0.040625002, z: 0.025}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 7391805752891990605}
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 90}
@@ -199,12 +199,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fishID: 110
+  weightExponent: 1.5
   fishName: "\uAD11\uC5B4"
-  baseWeight: 0.08
-  strength: 0.5
+  baseWeight: 1.2
+  strength: 3
   basePrice: 200
   minSizeMultiplier: 0.75
-  maxSizeMultiplier: 1.25
+  maxSizeMultiplier: 3
   appearanceWeight: 5
   finalSizeMultiplier: 0
   finalWeight: 0
@@ -332,7 +333,7 @@ Transform:
   m_GameObject: {fileID: 5647508178760435804}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 0.00194, z: -0.000169}
+  m_LocalPosition: {x: -0.00001, y: 0.00104, z: -0.00017}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

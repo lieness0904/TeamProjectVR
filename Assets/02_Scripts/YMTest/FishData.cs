@@ -6,6 +6,11 @@ public class FishData : MonoBehaviour
     [Tooltip("물고기의 고유 ID (나중에 데이터 저장용)")]
     public int fishID;
 
+    [Header("크기 랜덤 설정")]
+    [Tooltip("무게 계산에 사용될 지수입니다. 2로 설정하면 제곱, 3으로 설정하면 세제곱으로 계산되어 무게 변화가 훨씬 커집니다.")]
+    public float weightExponent = 2f; // 기본값은 제곱(2)으로 설정
+
+
     [Tooltip("물고기 이름")]
     public string fishName;
 
@@ -49,7 +54,7 @@ public class FishData : MonoBehaviour
         transform.localScale *= finalSizeMultiplier;
 
         // 3. 최종 무게와 가격을 계산합니다.
-        finalWeight = baseWeight * finalSizeMultiplier;
+        finalWeight = baseWeight * Mathf.Pow(finalSizeMultiplier, weightExponent);
         finalPrice = (int)(basePrice * finalSizeMultiplier);
     }
 }

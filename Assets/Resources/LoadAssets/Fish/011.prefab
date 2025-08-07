@@ -114,8 +114,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fishID: 109
   fishName: "\uBCF4\uB9AC\uBA78"
-  baseWeight: 0.08
-  strength: 0.5
+  baseWeight: 0.2
+  strength: 0.2
   basePrice: 200
   minSizeMultiplier: 0.75
   maxSizeMultiplier: 1.25
@@ -311,7 +311,7 @@ Transform:
   m_GameObject: {fileID: 6011739017189992591}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.000038, y: 0.000684, z: -0}
+  m_LocalPosition: {x: -0.000004, y: 0.000662, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -345,7 +345,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.4, y: 1.4, z: 1.4}
+  m_LocalScale: {x: 1.4999999, y: 1.4999999, z: 1.4999999}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 5077894024591105152}

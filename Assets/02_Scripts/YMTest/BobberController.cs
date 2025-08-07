@@ -17,7 +17,7 @@ public class BobberController : NetworkBehaviour
     [SerializeField] private Color biteColor = Color.red;
 
     [Tooltip("입질이 지속되는 시간입니다. 이 시간 안에 챔질해야 합니다.")]
-    [SerializeField] private float biteDuration = 0.5f; // 2.5초의 챔질 시간
+    [SerializeField] public float biteDuration = 0.5f; // 2.5초의 챔질 시간
 
     [Header("UI 표시")]
     [Tooltip("'HIT!' 메시지를 표시할 UI")]
@@ -37,7 +37,7 @@ public class BobberController : NetworkBehaviour
     [Networked] public NetworkBool HasFishOn { get; set; }
     [Networked] public NetworkObject HookedFish { get; set; }
     [Networked] private TickTimer BitingTimer { get; set; }
-    [Networked] private TickTimer BiteActiveTimer { get; set; }
+    [Networked] public TickTimer BiteActiveTimer { get; set; }
 
 
     private FishingZone currentZone;
@@ -111,7 +111,7 @@ public class BobberController : NetworkBehaviour
     // --- [새로운 공개 함수들] ---
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_ShowHitText()
+    public void RPC_ShowHookResultMessage(string message, float duration)
     {
         // 모든 클라이언트에서 'HIT' 사운드를 재생합니다.
         if (audioSource != null && hitSound != null)
@@ -119,8 +119,8 @@ public class BobberController : NetworkBehaviour
             audioSource.PlayOneShot(hitSound, 5.0f);
         }
 
-        // 모든 클라이언트에서 'HIT' 텍스트를 보여줍니다.
-        StartCoroutine(ShowTextRoutine(hitText, "HIT!", 1.5f));
+        // 전달받은 메시지를 UI에 보여줍니다.
+        StartCoroutine(ShowTextRoutine(hitText, message, duration));
     }
 
     public void ShowMessageText(string message, float duration)

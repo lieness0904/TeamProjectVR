@@ -336,7 +336,8 @@ public class PlayerFishingController : NetworkBehaviour
         {
             if (IsFighting)
             {
-                if (isReeling)
+                // [수정 1] 물고기가 기절 상태가 아닐 때만 게이지가 오르도록 'IsCurrentlyFleeing' 조건을 추가합니다.
+                if (isReeling && IsCurrentlyFleeing)
                 {
                     float increasePerSecond = 10f;
                     if (HookedFish != null && HookedFish.TryGetComponent<FishData>(out var fishData))
@@ -345,9 +346,10 @@ public class PlayerFishingController : NetworkBehaviour
                     }
                     tensionGauge = Mathf.Min(tensionGauge + increasePerSecond * Runner.DeltaTime, maxGauge);
                 }
-                else
+                else // 릴을 감지 않거나, 물고기가 기절 상태일 때
                 {
                     tensionGauge = Mathf.Max(tensionGauge - gaugeDecreasePerSec * Runner.DeltaTime, 0f);
+
                     if (FleeStateTimer.Expired(Runner))
                     {
                         IsCurrentlyFleeing = !IsCurrentlyFleeing;
@@ -361,9 +363,11 @@ public class PlayerFishingController : NetworkBehaviour
                         }
                         else
                         {
-                            FleeStateTimer = TickTimer.CreateFromSeconds(Runner, 3f);
+                            // [수정 2] 기절 시간을 3~5초 사이의 랜덤 값으로 변경합니다.
+                            FleeStateTimer = TickTimer.CreateFromSeconds(Runner, Random.Range(3f, 5f));
                         }
                     }
+
                     if (IsCurrentlyFleeing)
                     {
                         if (CurrentBobber != null && HookedFish != null && HookedFish.TryGetComponent<FishData>(out var fishData))
@@ -493,10 +497,24 @@ public class PlayerFishingController : NetworkBehaviour
         RPC_UpdateVisuals(isFishing, SpawnedRod);
     }
 
+    
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void RPC_AttemptHook(NetworkObject fishToHook)
     {
         if (IsFighting || fishToHook == null) return;
+
+        BobberController bobber = null;
+        if (CurrentBobber != null)
+        {
+            CurrentBobber.TryGetComponent(out bobber);
+        }
+
+        // 찌를 찾지 못했거나, 입질 타이머가 돌고 있지 않으면 함수 종료 (비정상적인 호출 방지)
+        if (bobber == null || !bobber.BiteActiveTimer.IsRunning) return;
+
+        // --- [새로운 로직] 챔질 타이밍 계산 ---
+        float reactionTime = bobber.biteDuration - (bobber.BiteActiveTimer.RemainingTime(Runner) ?? bobber.biteDuration);
+
         HookedFish = fishToHook;
         if (HookedFish != null && HookedFish.TryGetComponent<FishData>(out var fishData))
         {
@@ -504,26 +522,55 @@ public class PlayerFishingController : NetworkBehaviour
             HookedFish.gameObject.SetActive(true);
             IsFighting = true;
             DistanceDisplayDelayTimer = TickTimer.CreateFromSeconds(Runner, 1.5f);
+
             if (HookedFish != null)
             {
                 int outlineLayer = LayerMask.NameToLayer("FishOutline");
                 SetLayerRecursively(HookedFish.gameObject, outlineLayer);
             }
-            if (CurrentBobber != null && CurrentBobber.TryGetComponent<BobberController>(out var bobber))
+
+            // --- [수정된 로직] 챔질 메시지 및 보상 처리 ---
+            if (reactionTime <= 0.2f)
             {
-                bobber.HasFishOn = false;
-                bobber.HookedFish = null;
-                bobber.RPC_ShowHitText();
+                // PERFECT!
+                bobber.RPC_ShowHookResultMessage("PERFECT!", 1.5f);
+                // 즉시 기절 상태로 만듦
+                IsCurrentlyFleeing = false;
+                // 기절 시간은 절반 (1.5 ~ 2.5초)
+                FleeStateTimer = TickTimer.CreateFromSeconds(Runner, Random.Range(1.5f, 2.5f));
             }
-            if (CurrentBobber != null && CurrentBobber.TryGetComponent<ConfigurableJoint>(out var joint)) Destroy(joint);
+            else if (reactionTime <= 0.3f)
+            {
+                // GREAT!
+                bobber.RPC_ShowHookResultMessage("GREAT!", 1.5f);
+                // 일반적인 전투 시작 (도망가는 상태)
+                IsCurrentlyFleeing = true;
+                FleeStateTimer = TickTimer.CreateFromSeconds(Runner, Random.Range(3f, 6f));
+                Vector3 awayDirection = (CurrentBobber.transform.position - transform.position);
+                awayDirection.y = 0;
+                Quaternion randomRotation = Quaternion.Euler(0, Random.Range(-45f, 45f), 0);
+                FleeDirection = randomRotation * awayDirection.normalized;
+            }
+            else
+            {
+                // HIT!
+                bobber.RPC_ShowHookResultMessage("HIT!", 1.5f);
+                // 일반적인 전투 시작 (도망가는 상태)
+                IsCurrentlyFleeing = true;
+                FleeStateTimer = TickTimer.CreateFromSeconds(Runner, Random.Range(3f, 6f));
+                Vector3 awayDirection = (CurrentBobber.transform.position - transform.position);
+                awayDirection.y = 0;
+                Quaternion randomRotation = Quaternion.Euler(0, Random.Range(-45f, 45f), 0);
+                FleeDirection = randomRotation * awayDirection.normalized;
+            }
+
+            // 찌의 상태를 정리합니다.
+            bobber.HasFishOn = false;
+            bobber.HookedFish = null;
+
+            if (CurrentBobber.TryGetComponent<ConfigurableJoint>(out var joint)) Destroy(joint);
             AttachFishToHook();
             tensionGauge = 0f;
-            IsCurrentlyFleeing = true;
-            FleeStateTimer = TickTimer.CreateFromSeconds(Runner, Random.Range(3f, 6f));
-            Vector3 awayDirection = (CurrentBobber.transform.position - transform.position);
-            awayDirection.y = 0;
-            Quaternion randomRotation = Quaternion.Euler(0, Random.Range(-45f, 45f), 0);
-            FleeDirection = randomRotation * awayDirection.normalized;
         }
         else if (HookedFish != null)
         {

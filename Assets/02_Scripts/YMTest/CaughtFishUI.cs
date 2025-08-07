@@ -56,7 +56,7 @@ public class CaughtFishUI : MonoBehaviour
 
         // 전달받은 fishData를 사용해 각 UI 텍스트를 설정합니다.
         if(fishNameText != null) fishNameText.text = fishData.fishName;
-        if (fishWeightText != null) fishWeightText.text = $"무게: {fishData.finalWeight * 10f:F2} kg"; // 소수점 2자리까지 표시
+        if (fishWeightText != null) fishWeightText.text = $"무게: {fishData.finalWeight * 1f:F2} kg"; // 소수점 2자리까지 표시
         if (fishPriceText != null) fishPriceText.text = $"가격: {fishData.finalPrice} G";
 
         // TODO: 물고기 이미지가 있다면 여기서 설정합니다.

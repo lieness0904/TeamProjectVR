@@ -67,7 +67,7 @@ public class ReelController : NetworkBehaviour
                     if (fishData != null)
                     {
                         // 실제 감기 속도 = 기본값 - 무게 (최소 0)
-                        reelSpeed = Mathf.Max(fixedReelInSpeed - fishData.finalWeight, 0f);
+                        reelSpeed = Mathf.Max(fixedReelInSpeed - (fishData.finalWeight * (2f / 3f)), 0f);
                     }
                 }
 
