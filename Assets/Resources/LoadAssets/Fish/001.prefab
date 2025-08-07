@@ -89,7 +89,7 @@ Transform:
   m_GameObject: {fileID: 927862394692598432}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 0.0012822106, z: 0}
+  m_LocalPosition: {x: -0.0000765, y: 0.00055, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -127,7 +127,7 @@ Transform:
   - {fileID: 8773988161764974004}
   m_Father: {fileID: 2350256673100018109}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2637746464427032951
+--- !u!1 &5281242494648607925
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -135,37 +135,46 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5646087541654485559}
-  - component: {fileID: 4316300762373431544}
-  m_Layer: 6
-  m_Name: CandyBasslet
+  - component: {fileID: 5590235658331661989}
+  - component: {fileID: 2139837303163251327}
+  - component: {fileID: 8456723798980915453}
+  m_Layer: 0
+  m_Name: default
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5646087541654485559
+--- !u!4 &5590235658331661989
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2637746464427032951}
+  m_GameObject: {fileID: 5281242494648607925}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.02222222, y: 0.02222222, z: 0.025}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 8821477397781219527}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!137 &4316300762373431544
-SkinnedMeshRenderer:
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 90}
+--- !u!33 &2139837303163251327
+MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2637746464427032951}
+  m_GameObject: {fileID: 5281242494648607925}
+  m_Mesh: {fileID: -2432090755550338912, guid: 5405dd8cd124db444b1a4e242f43f19f, type: 3}
+--- !u!23 &8456723798980915453
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5281242494648607925}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -174,12 +183,13 @@ SkinnedMeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 3
+  m_RayTracingMode: 2
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 506dfb43f6869a944bff364b8567b958, type: 2}
+  - {fileID: -156486658544998735, guid: 5405dd8cd124db444b1a4e242f43f19f, type: 3}
+  - {fileID: 5865586234719623449, guid: 5405dd8cd124db444b1a4e242f43f19f, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -200,24 +210,7 @@ SkinnedMeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  serializedVersion: 2
-  m_Quality: 0
-  m_UpdateWhenOffscreen: 0
-  m_SkinnedMotionVectors: 1
-  m_Mesh: {fileID: -6754388260189167838, guid: a6300cdac99ca18469ad6a452f3d6a1f, type: 3}
-  m_Bones:
-  - {fileID: 2350256673100018109}
-  - {fileID: 2037836081006076712}
-  - {fileID: 6452191346497452164}
-  - {fileID: 8365430883867838262}
-  - {fileID: 8447800715824942467}
-  - {fileID: 8773988161764974004}
-  m_BlendShapeWeights: []
-  m_RootBone: {fileID: 2350256673100018109}
-  m_AABB:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 0.0008375965, y: 0.0018245813, z: 0.00063799304}
-  m_DirtyAABB: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &5578741572169257729
 GameObject:
   m_ObjectHideFlags: 0
@@ -279,11 +272,11 @@ Transform:
   m_GameObject: {fileID: 8153765304729817725}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.126, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
-  - {fileID: 5646087541654485559}
+  - {fileID: 5590235658331661989}
   - {fileID: 2167876173437321432}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
@@ -300,13 +293,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fishID: 100
-  fishName: "\uC8FC\uB204"
+  fishName: "\uBCFC\uB77D"
   baseWeight: 0.05
   strength: 0.5
   basePrice: 150
   minSizeMultiplier: 0.75
   maxSizeMultiplier: 1.25
-  appearanceWeight: 25
+  appearanceWeight: 5
   finalSizeMultiplier: 0
   finalWeight: 0
   finalPrice: 0
