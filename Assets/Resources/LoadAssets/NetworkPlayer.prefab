@@ -2529,11 +2529,12 @@ MonoBehaviour:
   vibrationAmplitude: 0.7
   vibrationDuration: 1
   retrievalDistance: 5
-  fixedReelInSpeed: 5.5
+  fixedReelInSpeed: 6
   bobberHangOffset: 0.2
   hookVelocityThreshold: 2
   gaugeDecreasePerSec: 50
   caughtFishRotationSpeed: 50
+  fishRotationSpeed: 5
   maxFishDistance: 55
   castingSound: {fileID: 8300000, guid: 85586092138df9f478fd4e3997806ab9, type: 3}
   reelingSoundWinningBig: {fileID: 8300000, guid: 187a9047cf8007440beedd74e9f23012,

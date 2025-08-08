@@ -24,8 +24,11 @@ public class BobberController : NetworkBehaviour
     [SerializeField] private TextMeshProUGUI hitText;
     [Tooltip("MISS, 실패 등 다른 메시지를 표시할 UI")]
     [SerializeField] private TextMeshProUGUI messageText;
+    [Tooltip("물고기와의 거리를 표시할 UI")]
+    [SerializeField] private TextMeshProUGUI distanceText;
     [Tooltip("물고기가 기절했을 때 보여줄 이미지 오브젝트")]
     [SerializeField] private GameObject stunEffectObject;
+    
 
     [Header("챔질 이펙트 프리팹")]
     [Tooltip("PERFECT 시 생성할 이펙트 프리팹")]
@@ -163,16 +166,23 @@ public class BobberController : NetworkBehaviour
 
     public void UpdateDistanceText(string text)
     {
-        if (hitText == null) return;
-        if (!hitText.gameObject.activeSelf) hitText.gameObject.SetActive(true);
-        if (messageText != null && messageText.gameObject.activeSelf) messageText.gameObject.SetActive(false); // 다른 메시지는 숨김
-        hitText.text = text;
+        // [수정] 이제 hitText 대신 distanceText를 사용합니다.
+        if (distanceText == null) return;
+        if (!distanceText.gameObject.activeSelf) distanceText.gameObject.SetActive(true);
+
+        // 다른 메시지들은 숨깁니다.
+        if (hitText != null && hitText.gameObject.activeSelf) hitText.gameObject.SetActive(false);
+        if (messageText != null && messageText.gameObject.activeSelf) messageText.gameObject.SetActive(false);
+
+        distanceText.text = text;
     }
 
     public void HideAllTexts()
     {
         if (hitText != null) hitText.gameObject.SetActive(false);
         if (messageText != null) messageText.gameObject.SetActive(false);
+        // [수정] distanceText도 함께 숨깁니다.
+        if (distanceText != null) distanceText.gameObject.SetActive(false);
     }
 
     // --- [RPC 수정] ---

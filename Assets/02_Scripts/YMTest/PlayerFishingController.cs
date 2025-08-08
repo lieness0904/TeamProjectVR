@@ -43,6 +43,9 @@ public class PlayerFishingController : NetworkBehaviour
     [Tooltip("잡은 후 보여줄 때 물고기가 천천히 회전하는 속도")]
     [SerializeField] private float caughtFishRotationSpeed = 50f;
 
+    [Tooltip("물고기가 방향을 전환하는 속도입니다.")]
+    [SerializeField] private float fishRotationSpeed = 5f;
+
     [Header("낚시 실패 조건")]
     [Tooltip("물고기가 이 거리 이상 멀어지면 낚시에 실패합니다.")]
     [SerializeField] private float maxFishDistance = 30f;
@@ -178,16 +181,13 @@ public class PlayerFishingController : NetworkBehaviour
             }
             _lastControllerPos = currentPos;
         }
-
-        // --- [수정된 구조] ---
-        // BobberController 컴포넌트를 맨 위에서 한 번만 가져와서 재사용합니다.
+        
         BobberController bobber = null;
         if (CurrentBobber != null)
         {
             CurrentBobber.TryGetComponent<BobberController>(out bobber);
         }
-
-        // bobber가 성공적으로 찾아졌을 때만 관련 로직을 실행합니다.
+        
         if (bobber != null)
         {
             // 2. MISS 판정 로직
@@ -215,7 +215,6 @@ public class PlayerFishingController : NetworkBehaviour
                 }
             }
         }
-        // --- [여기까지 수정] ---
 
         if (_missWindowActive && Time.time > _missWindowEndTime)
             _missWindowActive = false;
@@ -233,6 +232,8 @@ public class PlayerFishingController : NetworkBehaviour
                 bobber.UpdateDistanceText($"{distance:F1}m");
             }
         }
+
+        HandleFishRotation();
 
         // 잡힌 물고기 회전 로직
         if (HasInputAuthority && HookedFish != null && !IsFighting)
@@ -284,7 +285,7 @@ public class PlayerFishingController : NetworkBehaviour
         {
             // --- 1. 힘겨루기 사운드 로직 (기존 로직) ---
             AudioClip clipToPlay = null;
-            switch (currentReelingSoundState) // FixedUpdateNetwork에서 계산된 상태 사용
+            switch (currentReelingSoundState)
             {
                 case ReelingSoundState.WinningBig:
                     clipToPlay = reelingSoundWinningBig;
@@ -428,50 +429,36 @@ public class PlayerFishingController : NetworkBehaviour
 
                 // 2. 힘겨루기 및 찌 움직임 계산
                 var fishData = HookedFish.GetComponent<FishData>();
-                if (fishData != null)
+                if (fishData != null && CurrentBobber.TryGetComponent<Rigidbody>(out var bobberRigidbody))
                 {
                     // 플레이어가 릴을 감고 있을 때
                     if (IsReeling)
                     {
-                        // a. 물고기의 총 저항력을 계산합니다.
                         float fishResistance = fishData.finalWeight * (2f / 3f);
                         if (IsCurrentlyFleeing)
                         {
                             fishResistance += fishData.strength;
                         }
-
-                        // b. 플레이어의 릴링 속도와 물고기 저항력을 빼서 최종 속도를 계산합니다.
                         float netSpeed = fixedReelInSpeed - fishResistance;
                         float moveAmount = netSpeed * Runner.DeltaTime;
 
-                        // c. 계산된 만큼 찌와 바늘을 움직입니다.
-                        if (CurrentBobber.TryGetComponent<Rigidbody>(out var bobberRigidbody) && _rodTip != null)
+                        // [수정] 다시 '찌'를 움직입니다.
+                        if (_rodTip != null)
                         {
                             Vector3 directionToRod = (_rodTip.position - bobberRigidbody.position).normalized;
                             bobberRigidbody.MovePosition(bobberRigidbody.position + directionToRod * moveAmount);
-
-                            var rodLine = SpawnedRod?.GetComponentInChildren<RodLineController>();
-                            var hookTransform = rodLine?.GetCurrentHookTransform();
-                            if (hookTransform != null && hookTransform.TryGetComponent<Rigidbody>(out var hookRigidbody))
-                            {
-                                hookRigidbody.MovePosition(hookRigidbody.position + directionToRod * moveAmount);
-                            }
                         }
 
-                        // [수정] d. 물고기 상태에 따라 게이지 증감 처리
                         if (IsCurrentlyFleeing)
                         {
-                            // '도망' 상태일 때만 게이지 증가
                             float increasePerSecond = 10f * fishData.finalWeight;
                             tensionGauge = Mathf.Min(tensionGauge + increasePerSecond * Runner.DeltaTime, maxGauge);
                         }
                         else
                         {
-                            // '기절' 상태일 때는 릴을 감아도 게이지 감소
                             tensionGauge = Mathf.Max(tensionGauge - gaugeDecreasePerSec * Runner.DeltaTime, 0f);
                         }
 
-                        // 찌 회수 여부를 체크합니다.
                         CheckAndHandleRetrieval();
                     }
                     else // 플레이어가 릴을 감고 있지 않을 때
@@ -480,11 +467,9 @@ public class PlayerFishingController : NetworkBehaviour
 
                         if (IsCurrentlyFleeing)
                         {
-                            if (CurrentBobber.TryGetComponent<Rigidbody>(out var bobberRigidbody))
-                            {
-                                float fleeDistance = fishData.strength * Runner.DeltaTime;
-                                bobberRigidbody.MovePosition(bobberRigidbody.position + FleeDirection * fleeDistance);
-                            }
+                            // [수정] 다시 '찌'를 움직입니다.
+                            float fleeDistance = (fishData.strength * 2f) * Runner.DeltaTime; // 도망가는 힘 조절 (필요시 이 값을 변경)
+                            bobberRigidbody.MovePosition(bobberRigidbody.position + FleeDirection * fleeDistance);
                         }
                     }
                 }
@@ -751,21 +736,18 @@ public class PlayerFishingController : NetworkBehaviour
 
     private void AttachFishToHook()
     {
-        var rodLine = SpawnedRod != null ? SpawnedRod.GetComponentInChildren<RodLineController>() : null;
+        var rodLine = SpawnedRod?.GetComponentInChildren<RodLineController>();
         if (rodLine == null) return;
         Transform hookTransform = rodLine.GetCurrentHookTransform();
         if (hookTransform == null) return;
         Transform attachPoint = FindDeepChild(hookTransform, "FishAttachPoint");
         if (attachPoint == null) return;
+
         if (HookedFish != null)
         {
+            // 부모 설정 및 물리 효과 비활성화만 수행
             var fishTransform = HookedFish.transform;
-            Transform headEnd = FindDeepChild(fishTransform, "HEAD_end");
-            if (headEnd == null) return;
             fishTransform.SetParent(attachPoint);
-            fishTransform.localPosition = Vector3.zero;
-            Vector3 offset = attachPoint.position - headEnd.position;
-            fishTransform.position += offset;
             if (fishTransform.TryGetComponent<Rigidbody>(out var fishRb))
             {
                 fishRb.isKinematic = true;
@@ -1030,6 +1012,76 @@ public class PlayerFishingController : NetworkBehaviour
             {
                 HandleSuccessfulCatch();
             }
+        }
+    }
+    // PlayerFishingController.cs 클래스 내부 아무 곳에나 추가 (맨 아래 추천)
+
+    private void HandleFishRotation()
+    {
+        // 싸우는 중이 아니거나, 잡힌 물고기 또는 그 부모(AttachPoint)가 없으면 아무것도 하지 않음
+        if (!IsFighting || HookedFish == null || HookedFish.transform.parent == null) return;
+
+        // 목표 방향을 담을 변수
+        Vector3 targetDirection;
+
+        // 1. 물고기 상태에 따라 목표 방향 결정
+        if (IsCurrentlyFleeing)
+        {
+            // 도망치는 중일 때: FleeDirection을 목표로 함
+            targetDirection = FleeDirection;
+        }
+        else
+        {
+            // 기절 또는 끌려오는 중일 때: 낚싯대 끝(_rodTip)을 목표로 함
+            if (_rodTip == null) return; // 낚싯대가 없으면 중단
+            targetDirection = _rodTip.position - HookedFish.transform.position;
+        }
+
+        // y축(수직) 회전은 무시하여 물고기가 위아래로 뒤집히지 않게 함
+        targetDirection.y = 0;
+
+        // 2. 목표 방향으로 부드럽게 회전 (로컬 회전으로 수정)
+        if (targetDirection.sqrMagnitude > 0.01f)
+        {
+            // a. 월드 공간에서의 목표 회전값을 계산
+            Quaternion worldTargetRotation = Quaternion.LookRotation(targetDirection);
+
+            // b. 월드 회전값을 부모 기준의 로컬 회전값으로 변환
+            //    (부모의 회전값을 역으로 곱해줌으로써 월드 회전 효과를 상쇄)
+            Quaternion localTargetRotation = Quaternion.Inverse(HookedFish.transform.parent.rotation) * worldTargetRotation;
+
+            // c. 현재 로컬 각도에서 목표 로컬 각도로 부드럽게 회전 (Slerp)
+            HookedFish.transform.localRotation = Quaternion.Slerp(
+                HookedFish.transform.localRotation,
+                localTargetRotation,
+                Runner.DeltaTime * fishRotationSpeed
+            );
+        }
+    }
+
+    private void LateUpdate()
+    {
+        // 입력 권한이 있는 플레이어만, 그리고 전투 중에만 실행
+        if (HasInputAuthority && IsFighting)
+        {
+            UpdateFishAttachment();
+        }
+    }
+
+    // PlayerFishingController.cs 클래스 맨 아래에 새 함수 추가
+    private void UpdateFishAttachment()
+    {
+        if (HookedFish == null || HookedFish.transform.parent == null) return;
+
+        // 바늘의 부착 지점(부모)과 물고기의 입 위치를 가져옴
+        Transform attachPoint = HookedFish.transform.parent;
+        Transform headEnd = FindDeepChild(HookedFish.transform, "HEAD_end");
+
+        if (headEnd != null)
+        {
+            // 매 프레임, 물고기 입(headEnd)이 바늘(attachPoint)에 오도록 위치를 강제로 고정
+            Vector3 offset = HookedFish.transform.position - headEnd.position;
+            HookedFish.transform.position = attachPoint.position + offset;
         }
     }
 }
