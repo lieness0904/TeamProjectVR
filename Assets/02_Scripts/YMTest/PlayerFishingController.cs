@@ -50,12 +50,14 @@ public class PlayerFishingController : NetworkBehaviour
     [Header("사운드 설정")]
     [Tooltip("캐스팅 시 재생할 사운드")]
     public AudioClip castingSound;
-    [Tooltip("릴링 사운드 (게이지 낮음)")]
-    public AudioClip reelingSoundLow;
-    [Tooltip("릴링 사운드 (게이지 중간)")]
-    public AudioClip reelingSoundMid;
-    [Tooltip("릴링 사운드 (게이지 높음)")]
-    public AudioClip reelingSoundHigh;
+    [Tooltip("플레이어가 압도적으로 이길 때 (netSpeed >= 2)")]
+    public AudioClip reelingSoundWinningBig;
+    [Tooltip("플레이어가 조금 이길 때 (0 < netSpeed < 2)")]
+    public AudioClip reelingSoundWinningSmall;
+    [Tooltip("플레이어가 지거나 비길 때 (netSpeed <= 0)")]
+    public AudioClip reelingSoundLosing;
+    [Tooltip("게이지 장력에 따라 재생 속도가 변할 릴링 사운드")]
+    public AudioClip tensionReelingSound;
 
     [Tooltip("낚싯줄이 끊어질 때 재생할 사운드")]
     public AudioClip lineSnapSound;
@@ -90,6 +92,7 @@ public class PlayerFishingController : NetworkBehaviour
     [Networked] private TickTimer FleeStateTimer { get; set; }
     [Networked] private NetworkBool IsCurrentlyFleeing { get; set; }
 
+    [Networked] private ReelingSoundState currentReelingSoundState { get; set; } = ReelingSoundState.None;
     [Networked] private TickTimer DistanceDisplayDelayTimer { get; set; }
 
     // --- 로컬 변수 (클라이언트측에서만 사용) ---
@@ -107,7 +110,8 @@ public class PlayerFishingController : NetworkBehaviour
     private float _hapticTimer = 0f;
     private AudioSource sfxAudioSource; // 캐스팅 같은 단발성 효과음 용
     private AudioSource reelingAudioSource; // 릴링 같이 반복되는 소리 용
-
+    private AudioSource tensionAudioSource;  // 게이지 장력 사운드 용
+    private enum ReelingSoundState { None, WinningBig, WinningSmall, Losing }
     #endregion
 
     private void Awake()
@@ -133,27 +137,31 @@ public class PlayerFishingController : NetworkBehaviour
         InitializeAudioSources();
     }
 
-   
+
     private void InitializeAudioSources()
     {
-        // AudioSource가 2개 필요하므로, 기존 AudioSource들을 모두 가져옵니다.
+        // AudioSource가 3개 필요하므로, 없으면 추가해줍니다.
+        while (GetComponents<AudioSource>().Length < 3)
+        {
+            gameObject.AddComponent<AudioSource>();
+        }
+
         AudioSource[] sources = GetComponents<AudioSource>();
 
-        // 단발 효과음용 AudioSource 설정
-        if (sources.Length > 0)
-            sfxAudioSource = sources[0];
-        else
-            sfxAudioSource = gameObject.AddComponent<AudioSource>();
+        // 1. 단발 효과음용 AudioSource 설정
+        sfxAudioSource = sources[0];
         sfxAudioSource.playOnAwake = false;
         sfxAudioSource.loop = false;
 
-        // 릴링 사운드용 AudioSource 설정
-        if (sources.Length > 1)
-            reelingAudioSource = sources[1];
-        else
-            reelingAudioSource = gameObject.AddComponent<AudioSource>();
+        // 2. 힘겨루기 릴링 사운드용 AudioSource 설정
+        reelingAudioSource = sources[1];
         reelingAudioSource.playOnAwake = false;
-        reelingAudioSource.loop = true; // 릴링 사운드는 반복 재생되어야 합니다.
+        reelingAudioSource.loop = true; // 반복 재생
+
+        // 3. 게이지 장력 사운드용 AudioSource 설정
+        tensionAudioSource = sources[2];
+        tensionAudioSource.playOnAwake = false;
+        tensionAudioSource.loop = true; // 반복 재생
     }
 
     private void Update()
@@ -268,45 +276,83 @@ public class PlayerFishingController : NetworkBehaviour
     // --- [이 함수 전체를 클래스 내부에 추가하세요] ---
     private void HandleReelingSounds()
     {
-        // 입력 권한이 없거나, AudioSource가 준비 안됐으면 실행하지 않음
-        if (!HasInputAuthority || reelingAudioSource == null) return;
+        // 입력 권한이 없거나, 오디오 소스들이 준비 안됐으면 실행하지 않음
+        if (!HasInputAuthority || reelingAudioSource == null || tensionAudioSource == null) return;
 
-        // 전투 중이고 릴을 감고 있을 때만 소리 재생
-        if (IsFighting && IsReeling)
+        // 전투 중일 때만 모든 사운드 로직을 실행
+        if (IsFighting)
         {
-            float normalizedGauge = tensionGauge / maxGauge;
+            // --- 1. 힘겨루기 사운드 로직 (기존 로직) ---
             AudioClip clipToPlay = null;
+            switch (currentReelingSoundState) // FixedUpdateNetwork에서 계산된 상태 사용
+            {
+                case ReelingSoundState.WinningBig:
+                    clipToPlay = reelingSoundWinningBig;
+                    break;
+                case ReelingSoundState.WinningSmall:
+                    clipToPlay = reelingSoundWinningSmall;
+                    break;
+                case ReelingSoundState.Losing:
+                    clipToPlay = reelingSoundLosing;
+                    break;
+                case ReelingSoundState.None:
+                default:
+                    clipToPlay = null;
+                    break;
+            }
 
-            // 게이지 상태에 따라 재생할 클립 결정
-            if (normalizedGauge >= 0.8f)
-            {
-                clipToPlay = reelingSoundHigh;
-            }
-            else if (normalizedGauge >= 0.5f)
-            {
-                clipToPlay = reelingSoundMid;
-            }
-            else
-            {
-                clipToPlay = reelingSoundLow;
-            }
-
-            // 현재 재생중인 클립과 다르거나, 재생이 멈춰있으면 새로 재생
             if (reelingAudioSource.clip != clipToPlay || !reelingAudioSource.isPlaying)
             {
                 reelingAudioSource.clip = clipToPlay;
-                if (clipToPlay != null) // 재생할 클립이 있을 때만 Play
+                if (clipToPlay != null)
                 {
                     reelingAudioSource.Play();
                 }
+                else
+                {
+                    reelingAudioSource.Stop();
+                }
+            }
+
+            // --- 2. 게이지 장력 사운드 로직 (pitch 변경) ---
+            float normalizedGauge = tensionGauge / maxGauge;
+
+            // 게이지가 50% 이상이고, 릴을 감고 있을 때만 재생
+            if (normalizedGauge >= 0.5f && IsReeling)
+            {
+                if (tensionAudioSource.clip != tensionReelingSound)
+                {
+                    tensionAudioSource.clip = tensionReelingSound;
+                }
+
+                float progress = (normalizedGauge - 0.5f) / 0.5f;
+                tensionAudioSource.pitch = 1.0f + progress;
+
+                if (!tensionAudioSource.isPlaying && tensionReelingSound != null)
+                {
+                    tensionAudioSource.Play();
+                }
+            }
+            else
+            {
+                if (tensionAudioSource.isPlaying)
+                {
+                    tensionAudioSource.Stop();
+                }
+                tensionAudioSource.pitch = 1.0f;
             }
         }
         else
         {
-            // 전투 중이 아니거나 릴을 감지 않으면 소리를 끔
+            // 전투 중이 아니면 모든 릴링 관련 사운드를 끔
             if (reelingAudioSource.isPlaying)
             {
                 reelingAudioSource.Stop();
+            }
+            if (tensionAudioSource.isPlaying)
+            {
+                tensionAudioSource.Stop();
+                tensionAudioSource.pitch = 1.0f;
             }
         }
     }
@@ -442,6 +488,45 @@ public class PlayerFishingController : NetworkBehaviour
                         }
                     }
                 }
+
+                // --- [새로 추가된 사운드 상태 결정 로직] ---
+                if (IsReeling && HookedFish != null)
+                {
+                    // fishData는 위에서 이미 찾아놨으므로 재사용합니다.
+                    if (fishData != null)
+                    {
+                        float fishResistance = fishData.finalWeight * (2f / 3f);
+                        if (IsCurrentlyFleeing)
+                        {
+                            fishResistance += fishData.strength;
+                        }
+                        float netSpeed = fixedReelInSpeed - fishResistance;
+
+                        if (netSpeed >= 2f)
+                        {
+                            currentReelingSoundState = ReelingSoundState.WinningBig;
+                        }
+                        else if (netSpeed > 0f)
+                        {
+                            currentReelingSoundState = ReelingSoundState.WinningSmall;
+                        }
+                        else
+                        {
+                            currentReelingSoundState = ReelingSoundState.Losing;
+                        }
+                    }
+                }
+                else
+                {
+                    // 릴을 감고 있지 않으면 사운드 상태를 None으로 변경
+                    currentReelingSoundState = ReelingSoundState.None;
+                }
+                // --- [여기까지] ---
+            }
+            else // IsFighting이 아닐 때
+            {
+                // 싸우고 있지 않을 때도 사운드 상태를 None으로 확실하게 변경
+                currentReelingSoundState = ReelingSoundState.None;
             }
 
             // --- 낚시 실패 조건 체크 ---
@@ -478,6 +563,7 @@ public class PlayerFishingController : NetworkBehaviour
 
     public override void Render()
     {
+        // --- 1. 입질 감지 및 챔질 MISS 판정 로직 (기존과 동일) ---
         if (HasInputAuthority && CurrentBobber != null)
         {
             var bobber = CurrentBobber.GetComponent<BobberController>();
@@ -496,7 +582,31 @@ public class PlayerFishingController : NetworkBehaviour
                 }
             }
         }
+
+        // --- 2. 게이지 UI 업데이트 (기존과 동일) ---
         UpdateGaugeUI();
+
+
+        // --- 3. [새로 추가된 로직] 물고기 기절 효과 UI 제어 ---
+        if (CurrentBobber != null)
+        {
+            // 찌(Bobber)에 붙어있는 BobberController를 가져옵니다.
+            var bobber = CurrentBobber.GetComponent<BobberController>();
+            if (bobber != null)
+            {
+                // 현재 물고기와 싸우는 중인지 확인합니다.
+                if (IsFighting)
+                {
+                    // IsCurrentlyFleeing이 false일 때(기절 상태일 때) 이미지를 활성화합니다.
+                    bobber.SetStunEffectActive(!IsCurrentlyFleeing);
+                }
+                else
+                {
+                    // 싸움이 끝나면 이미지를 비활성화합니다.
+                    bobber.SetStunEffectActive(false);
+                }
+            }
+        }
     }
     #endregion
 
@@ -507,6 +617,7 @@ public class PlayerFishingController : NetworkBehaviour
     }
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+   
     private void RPC_SetFishingState(NetworkBool isFishing)
     {
         IsFishing = isFishing;
@@ -532,14 +643,24 @@ public class PlayerFishingController : NetworkBehaviour
         }
         else
         {
+            // 기존 릴링 사운드 정지
             if (reelingAudioSource != null && reelingAudioSource.isPlaying)
             {
                 reelingAudioSource.Stop();
             }
-            if (SpawnedRod != null) Runner.Despawn(SpawnedRod);
+
+            // --- [추가된 부분] ---
+            // 새로운 장력 사운드도 함께 정지
+            if (tensionAudioSource != null && tensionAudioSource.isPlaying)
+            {
+                tensionAudioSource.Stop();
+            }
+            // --- [여기까지] ---
+
             if (SpawnedRod != null) Runner.Despawn(SpawnedRod);
             if (CurrentBobber != null) Runner.Despawn(CurrentBobber);
             if (HookedFish != null) Runner.Despawn(HookedFish);
+
             SpawnedRod = null;
             CurrentBobber = null;
             HookedFish = null;
@@ -551,7 +672,7 @@ public class PlayerFishingController : NetworkBehaviour
         RPC_UpdateVisuals(isFishing, SpawnedRod);
     }
 
-    
+
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void RPC_AttemptHook(NetworkObject fishToHook)
     {
@@ -563,10 +684,8 @@ public class PlayerFishingController : NetworkBehaviour
             CurrentBobber.TryGetComponent(out bobber);
         }
 
-        // 찌를 찾지 못했거나, 입질 타이머가 돌고 있지 않으면 함수 종료 (비정상적인 호출 방지)
         if (bobber == null || !bobber.BiteActiveTimer.IsRunning) return;
 
-        // --- [새로운 로직] 챔질 타이밍 계산 ---
         float reactionTime = bobber.biteDuration - (bobber.BiteActiveTimer.RemainingTime(Runner) ?? bobber.biteDuration);
 
         HookedFish = fishToHook;
@@ -583,21 +702,19 @@ public class PlayerFishingController : NetworkBehaviour
                 SetLayerRecursively(HookedFish.gameObject, outlineLayer);
             }
 
-            // --- [수정된 로직] 챔질 메시지 및 보상 처리 ---
             if (reactionTime <= 0.2f)
             {
-                // PERFECT!
                 bobber.RPC_ShowHookResultMessage("PERFECT!", 1.5f);
-                // 즉시 기절 상태로 만듦
+                bobber.RPC_ShowHookEffect(2); // [추가] PERFECT 이펙트(타입 2) 호출
+
                 IsCurrentlyFleeing = false;
-                // 기절 시간은 절반 (1.5 ~ 2.5초)
                 FleeStateTimer = TickTimer.CreateFromSeconds(Runner, Random.Range(1.5f, 2.5f));
             }
             else if (reactionTime <= 0.3f)
             {
-                // GREAT!
                 bobber.RPC_ShowHookResultMessage("GREAT!", 1.5f);
-                // 일반적인 전투 시작 (도망가는 상태)
+                bobber.RPC_ShowHookEffect(1); // [추가] GREAT 이펙트(타입 1) 호출
+
                 IsCurrentlyFleeing = true;
                 FleeStateTimer = TickTimer.CreateFromSeconds(Runner, Random.Range(3f, 6f));
                 Vector3 awayDirection = (CurrentBobber.transform.position - transform.position);
@@ -607,9 +724,9 @@ public class PlayerFishingController : NetworkBehaviour
             }
             else
             {
-                // HIT!
                 bobber.RPC_ShowHookResultMessage("HIT!", 1.5f);
-                // 일반적인 전투 시작 (도망가는 상태)
+                bobber.RPC_ShowHookEffect(0); // [추가] HIT 이펙트(타입 0) 호출
+
                 IsCurrentlyFleeing = true;
                 FleeStateTimer = TickTimer.CreateFromSeconds(Runner, Random.Range(3f, 6f));
                 Vector3 awayDirection = (CurrentBobber.transform.position - transform.position);
@@ -618,7 +735,6 @@ public class PlayerFishingController : NetworkBehaviour
                 FleeDirection = randomRotation * awayDirection.normalized;
             }
 
-            // 찌의 상태를 정리합니다.
             bobber.HasFishOn = false;
             bobber.HookedFish = null;
 

@@ -24,14 +24,32 @@ public class BobberController : NetworkBehaviour
     [SerializeField] private TextMeshProUGUI hitText;
     [Tooltip("MISS, 실패 등 다른 메시지를 표시할 UI")]
     [SerializeField] private TextMeshProUGUI messageText;
+    [Tooltip("물고기가 기절했을 때 보여줄 이미지 오브젝트")]
+    [SerializeField] private GameObject stunEffectObject;
+
+    [Header("챔질 이펙트 프리팹")]
+    [Tooltip("PERFECT 시 생성할 이펙트 프리팹")]
+    [SerializeField] private GameObject perfectEffectPrefab;
+    [Tooltip("GREAT 시 생성할 이펙트 프리팹")]
+    [SerializeField] private GameObject greatEffectPrefab;
+    [Tooltip("HIT 시 생성할 이펙트 프리팹")]
+    [SerializeField] private GameObject hitEffectPrefab;
 
     [Header("사운드")]
     [Tooltip("물이 튀는 '퐁당' 사운드")]
     [SerializeField] private AudioClip splashSound;
 
-    [Tooltip("'HIT' 시 재생될 사운드")] // <-- 이 줄을 추가하세요
+    [Tooltip("'PERFECT' 시 재생될 사운드")]
+    [SerializeField] private AudioClip perfectHookSound;
+
+    [Tooltip("'GREAT' 시 재생될 사운드")]
+    [SerializeField] private AudioClip greatHookSound;
+
+    [Tooltip("'HIT' 시 재생될 사운드")]
     [SerializeField] private AudioClip hitSound;
-    private AudioSource audioSource;
+
+    [Tooltip("위 이펙트들이 생성될 위치")]
+    [SerializeField] private Transform effectSpawnPoint;
 
     [Networked] public NetworkBool IsInFishingZone { get; set; }
     [Networked] public NetworkBool HasFishOn { get; set; }
@@ -39,13 +57,14 @@ public class BobberController : NetworkBehaviour
     [Networked] private TickTimer BitingTimer { get; set; }
     [Networked] public TickTimer BiteActiveTimer { get; set; }
 
-
+    private AudioSource audioSource;
     private FishingZone currentZone;
 
     public override void Spawned()
     {
         // 시작할 때 모든 텍스트를 숨깁니다.
         HideAllTexts();
+        if (stunEffectObject != null) stunEffectObject.SetActive(false);
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
         {
@@ -108,18 +127,32 @@ public class BobberController : NetworkBehaviour
         }
     }
 
-    // --- [새로운 공개 함수들] ---
-
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     public void RPC_ShowHookResultMessage(string message, float duration)
     {
-        // 모든 클라이언트에서 'HIT' 사운드를 재생합니다.
-        if (audioSource != null && hitSound != null)
+        // 전달받은 메시지에 따라 다른 사운드를 선택하여 재생합니다.
+        AudioClip clipToPlay = null;
+        switch (message)
         {
-            audioSource.PlayOneShot(hitSound, 5.0f);
+            case "PERFECT!":
+                clipToPlay = perfectHookSound;
+                break;
+            case "GREAT!":
+                clipToPlay = greatHookSound;
+                break;
+            case "HIT!":
+                clipToPlay = hitSound;
+                break;
         }
 
-        // 전달받은 메시지를 UI에 보여줍니다.
+        // 선택된 사운드가 있다면 재생합니다.
+        if (audioSource != null && clipToPlay != null)
+        {
+            // 낚시찌 위치에서 소리가 나도록 PlayOneShot을 사용합니다.
+            audioSource.PlayOneShot(clipToPlay, 20.0f);
+        }
+
+        // 기존처럼 텍스트를 표시하는 코루틴을 실행합니다.
         StartCoroutine(ShowTextRoutine(hitText, message, duration));
     }
 
@@ -172,11 +205,9 @@ public class BobberController : NetworkBehaviour
         yield return new WaitForSeconds(duration);
         textUI.gameObject.SetActive(false);
     }
-
-    // --- 기존 로직들 ---
+    
     private GameObject SelectFishByWeight(System.Collections.Generic.List<GameObject> fishPrefabs)
-    {
-        // ... (내용 변경 없음)
+    {        
         if (fishPrefabs == null || fishPrefabs.Count == 0) return null;
         int totalWeight = 0;
         foreach (var prefab in fishPrefabs)
@@ -232,6 +263,48 @@ public class BobberController : NetworkBehaviour
                     }
                 }
             }
+        }
+    }
+
+    public void SetStunEffectActive(bool isActive)
+    {
+        Debug.Log($"SetStunEffectActive 호출! 활성화 상태: {isActive}");
+        if (stunEffectObject != null && stunEffectObject.activeSelf != isActive)
+        {
+            stunEffectObject.SetActive(isActive);
+        }
+    }
+
+    // BobberController.cs 클래스 내부 아무 곳에나 추가 (맨 아래 추천)
+
+    /// <summary>
+    /// 챔질 결과에 맞는 이펙트 프리팹을 생성합니다. (PlayerFishingController에서 호출됨)
+    /// </summary>
+    /// <param name="effectType">0=HIT, 1=GREAT, 2=PERFECT</param>
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPC_ShowHookEffect(int effectType)
+    {
+        GameObject prefabToSpawn = null;
+        switch (effectType)
+        {
+            case 2: // PERFECT
+                prefabToSpawn = perfectEffectPrefab;
+                break;
+            case 1: // GREAT
+                prefabToSpawn = greatEffectPrefab;
+                break;
+            case 0: // HIT
+                prefabToSpawn = hitEffectPrefab;
+                break;
+        }
+
+        if (prefabToSpawn != null)
+        {
+            // [수정] effectSpawnPoint가 지정되었다면 그 위치에, 아니면 기존처럼 찌 위치에 생성합니다.
+            Vector3 spawnPos = (effectSpawnPoint != null) ? effectSpawnPoint.position : transform.position;
+            Quaternion spawnRot = (effectSpawnPoint != null) ? effectSpawnPoint.rotation : transform.rotation;
+
+            Instantiate(prefabToSpawn, spawnPos, spawnRot);
         }
     }
 }
