@@ -2187,9 +2187,8 @@ GameObject:
   - component: {fileID: 5906618414608869536}
   - component: {fileID: 5478361849334808893}
   - component: {fileID: 801435519028041206}
-
-  - component: {fileID: 6631849431229126687}
   - component: {fileID: 6686004372295290068}
+  - component: {fileID: 1665639740629555987}
   m_Layer: 0
   m_Name: NetworkPlayer
   m_TagString: Player
@@ -2720,21 +2719,6 @@ MonoBehaviour:
     Max: 1000
     SpeedUpPerc: 5
   restartOnDeviceChange: 1
---- !u!114 &1665639740629555987
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 763074577358944841}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6320a9a8bad0773468419d8d505c56b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-
-  xrOrigin: {fileID: 5442783378356437880}
-  networkPlayer: {fileID: 4097064386834629628}
 --- !u!114 &6686004372295290068
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2751,7 +2735,20 @@ MonoBehaviour:
   climbProvider: {fileID: 0}
   moveProviders: []
   networkCharacterController: {fileID: 5356605634537307701}
-
+--- !u!114 &1665639740629555987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763074577358944841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6320a9a8bad0773468419d8d505c56b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cc: {fileID: 0}
+  rb: {fileID: 0}
 --- !u!1 &769997040941160783
 GameObject:
   m_ObjectHideFlags: 0
@@ -13221,7 +13218,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3666787266190310598}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 496880615cd240be960d436c1c8ae570, type: 3}
   m_Name: 
