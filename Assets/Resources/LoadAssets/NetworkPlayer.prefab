@@ -2187,6 +2187,7 @@ GameObject:
   - component: {fileID: 5906618414608869536}
   - component: {fileID: 5478361849334808893}
   - component: {fileID: 801435519028041206}
+
   - component: {fileID: 6631849431229126687}
   - component: {fileID: 6686004372295290068}
   m_Layer: 0
@@ -2237,6 +2238,7 @@ MonoBehaviour:
   - {fileID: 5479044659269707123}
   - {fileID: 222207354456290721}
   - {fileID: 5906618414608869536}
+  - {fileID: 1665639740629555987}
   - {fileID: 5806925153492259145}
   - {fileID: 7819527730710472739}
   ForceRemoteRenderTimeframe: 0
@@ -2718,7 +2720,7 @@ MonoBehaviour:
     Max: 1000
     SpeedUpPerc: 5
   restartOnDeviceChange: 1
---- !u!114 &6631849431229126687
+--- !u!114 &1665639740629555987
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2727,9 +2729,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 763074577358944841}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb33c6c8f85b7be4485b3606e18401b7, type: 3}
+  m_Script: {fileID: 11500000, guid: 6320a9a8bad0773468419d8d505c56b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+
   xrOrigin: {fileID: 5442783378356437880}
   networkPlayer: {fileID: 4097064386834629628}
 --- !u!114 &6686004372295290068
@@ -2741,11 +2744,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 763074577358944841}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5627b3955843fae43a939bd6d3c919cf, type: 3}
+  m_Script: {fileID: 11500000, guid: 9855ed022b1b2eb44a3d0fe9a84693f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveThreshold: 0.05
-  allowedDuration: 0.2
+  xrOrigin: {fileID: 6939421325689394132}
+  climbProvider: {fileID: 0}
+  moveProviders: []
+  networkCharacterController: {fileID: 5356605634537307701}
+
 --- !u!1 &769997040941160783
 GameObject:
   m_ObjectHideFlags: 0
@@ -31425,7 +31431,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5765344242803818289}
   - component: {fileID: 4825718269504086446}
-  - component: {fileID: 667065941051141661}
   m_Layer: 2
   m_Name: Climb
   m_TagString: Untagged
@@ -31468,19 +31473,6 @@ MonoBehaviour:
       m_AllowFreeYMovement: 1
       m_AllowFreeZMovement: 1
     m_Variable: {fileID: 0}
---- !u!114 &667065941051141661
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7848228084121866867}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 08665868aa5b7a24d9deb447e65c4dd7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  characterController: {fileID: 825498535684447473}
 --- !u!1 &7872151457315727751
 GameObject:
   m_ObjectHideFlags: 0
