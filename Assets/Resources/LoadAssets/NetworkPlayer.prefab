@@ -2187,8 +2187,9 @@ GameObject:
   - component: {fileID: 5906618414608869536}
   - component: {fileID: 5478361849334808893}
   - component: {fileID: 801435519028041206}
-  - component: {fileID: 1665639740629555987}
-  - component: {fileID: 5689309678555303617}
+
+  - component: {fileID: 6631849431229126687}
+  - component: {fileID: 6686004372295290068}
   m_Layer: 0
   m_Name: NetworkPlayer
   m_TagString: Player
@@ -2731,9 +2732,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6320a9a8bad0773468419d8d505c56b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cc: {fileID: 0}
-  rb: {fileID: 0}
---- !u!114 &5689309678555303617
+
+  xrOrigin: {fileID: 5442783378356437880}
+  networkPlayer: {fileID: 4097064386834629628}
+--- !u!114 &6686004372295290068
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2749,6 +2751,7 @@ MonoBehaviour:
   climbProvider: {fileID: 0}
   moveProviders: []
   networkCharacterController: {fileID: 5356605634537307701}
+
 --- !u!1 &769997040941160783
 GameObject:
   m_ObjectHideFlags: 0
