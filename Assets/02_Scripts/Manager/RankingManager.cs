@@ -64,7 +64,7 @@ public class RankingManager : MonoBehaviour
                             var pointText = rankSlots[i].transform.Find(pointObjectName)?.GetComponent<TextMeshProUGUI>();
 
                             if (nameText != null) nameText.text = entry.userId;
-                            if (pointText != null) pointText.text = entry.points.ToString();
+                            if (pointText != null) pointText.text = entry.points.ToString() + "point";
                         }
                         else
                         {

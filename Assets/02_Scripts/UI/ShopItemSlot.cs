@@ -31,7 +31,7 @@ public class ShopItemSlot : MonoBehaviour
         nameText.text = "이름 : " + data.name;
         categoryText.text = "타입 : " + EnumHelper.GetDescription(data.itemType);
         descText.text = "설명 : " + data.description;
-        priceText.text = "가격 : " + data.value + "포인트";
+        priceText.text = "가격 : " + data.price + "포인트";
 
         // 아이콘 로드 예외 처리
         Sprite icon = Resources.Load<Sprite>(data.iconPath);
