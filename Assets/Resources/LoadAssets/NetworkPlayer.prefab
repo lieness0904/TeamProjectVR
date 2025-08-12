@@ -2372,7 +2372,7 @@ MonoBehaviour:
   jumpImpulse: 8
   acceleration: 10
   braking: 10
-  maxSpeed: 2
+  maxSpeed: 10
   rotationSpeed: 1
 --- !u!114 &2844160205959358355
 MonoBehaviour:
@@ -35047,7 +35047,7 @@ MonoBehaviour:
   m_EnableTurnAround: 1
   m_DelayTime: 0.2
   m_LeftHandSnapTurnAction:
-    m_UseReference: 1
+    m_UseReference: 0
     m_Action:
       m_Name: Left Hand Snap Turn
       m_Type: 0
