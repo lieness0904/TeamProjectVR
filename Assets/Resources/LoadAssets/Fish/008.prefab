@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65af5b5f544243a4fb4faa1e02d3ab63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fishID: 107
+  fishID: 312
   fishName: "\uB364\uBCF4"
   baseWeight: 0.08
   strength: 0.5

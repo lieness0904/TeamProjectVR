@@ -81,10 +81,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65af5b5f544243a4fb4faa1e02d3ab63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fishID: 105
-  fishName: "\uB3C4\uBBF8\uB3C4\uBBF8\uB3C4\uB808\uBBF8"
+  fishID: 310
+  fishName: "\uB3C4\uBBF8"
   baseWeight: 0.7
-  strength: 2
+  strength: 0.5
   basePrice: 2200
   minSizeMultiplier: 0.75
   maxSizeMultiplier: 1.25
