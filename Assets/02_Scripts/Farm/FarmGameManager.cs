@@ -62,7 +62,6 @@ public class FarmGameManager : MonoBehaviour
     {
         if (IsGameStarted) return;
 
-        // 싱글플레이 테스트에서만 프리팹 스폰
         if (spawnPlayerForSingle && LocalPlayer == null && xrOriginPrefab != null)
         {
             var xrOriginGO = Instantiate(xrOriginPrefab);
@@ -71,6 +70,11 @@ public class FarmGameManager : MonoBehaviour
                 RegisterLocalPlayer(detector);
         }
 
+        // HUD 켜기
+        var hud = GameObject.FindObjectOfType<UIGameHUD>(true); // 비활성 상태도 찾기
+        if (hud != null)
+            hud.gameObject.SetActive(true);
+
         SessionOrangeCount = 0;
         OnSessionOrangeCountChanged?.Invoke(SessionOrangeCount);
 
@@ -78,6 +82,7 @@ public class FarmGameManager : MonoBehaviour
         IsGameStarted = true;
         OnGameStarted?.Invoke();
     }
+
 
     public void EndGame()
     {
