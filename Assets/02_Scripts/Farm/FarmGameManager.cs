@@ -58,10 +58,12 @@ public class FarmGameManager : MonoBehaviour
         if (LocalPlayer == player) LocalPlayer = null;
     }
 
+    // FarmGameManager.cs (StartGame 내부에 추가)
     public void StartGame()
     {
         if (IsGameStarted) return;
 
+        // XR Origin 생성
         if (spawnPlayerForSingle && LocalPlayer == null && xrOriginPrefab != null)
         {
             var xrOriginGO = Instantiate(xrOriginPrefab);
@@ -70,10 +72,30 @@ public class FarmGameManager : MonoBehaviour
                 RegisterLocalPlayer(detector);
         }
 
-        // HUD 켜기
-        var hud = GameObject.FindObjectOfType<UIGameHUD>(true); // 비활성 상태도 찾기
+        // === HUD 켜면서 카메라 강제 세팅 ===
+        var hud = FindObjectOfType<UIGameHUD>(true); // 비활성 포함 검색
         if (hud != null)
-            hud.gameObject.SetActive(true);
+        {
+            var canvas = hud.GetComponent<Canvas>();
+            if (canvas != null && canvas.renderMode == RenderMode.ScreenSpaceCamera)
+            {
+                // XR 카메라 찾기 (프리팹 내부 포함)
+                Camera xrCam = null;
+                if (LocalPlayer != null)
+                    xrCam = LocalPlayer.GetComponentInChildren<Camera>(true);
+                if (xrCam == null)
+                    xrCam = Camera.main; // 혹시 이미 MainCamera 태그가 붙어있다면
+
+                if (xrCam == null)
+                    xrCam = FindObjectOfType<Camera>(true);
+
+                if (xrCam != null)
+                    canvas.worldCamera = xrCam;
+                else
+                    Debug.LogWarning("HUD 카메라 못 찾음. XR 카메라에 MainCamera 태그 붙였는지 확인.");
+            }
+            hud.gameObject.SetActive(true); // 여기서 켜라
+        }
 
         SessionOrangeCount = 0;
         OnSessionOrangeCountChanged?.Invoke(SessionOrangeCount);

@@ -7,9 +7,9 @@ public class DolhareubangWatcher : MonoBehaviour
     [Header("회전 시간")]
     public float turnDuration = 1f;
 
-    // 정면(y = -90), 뒤(y = 90)
-    public Vector3 forwardRotation = new Vector3(0, -90, 0);
-    public Vector3 backwardRotation = new Vector3(0, 90, 0);
+    // 월드 기준 고정 각도
+    public Vector3 forwardRotation = new Vector3(0, -90, 0); // 시작각
+    public Vector3 backwardRotation = new Vector3(0, 90, 0); // 뒤돌았을 때
 
     [Header("감시 시간")]
     public float minWatchTime = 2f;
@@ -23,10 +23,13 @@ public class DolhareubangWatcher : MonoBehaviour
 
     [Header("감시 반복 횟수")]
     public int maxRounds = 10;
-    private int currentRoundIndex = 0; // 0에서 시작, 뒤돌 때 +1
+    private int currentRoundIndex = 0;
 
     private void Start()
     {
+        // 시작 시 월드 기준 각도 강제 세팅
+        transform.rotation = Quaternion.Euler(forwardRotation);
+
         Debug.Log("돌하르방 감시 시작");
         StartCoroutine(WatchingLoop());
     }
@@ -47,15 +50,15 @@ public class DolhareubangWatcher : MonoBehaviour
                 yield break;
             }
 
-            // 1) 휴식 상태
+            // 1) 휴식(정면=-90°)
             IsWatching = false;
             FarmGameManager.Instance.BroadcastWatcherFacingBack(false);
             yield return new WaitForSeconds(Random.Range(minRestTime, maxRestTime));
 
-            // 2) 회전해서 뒤돌기 (회전 중 상태를 UI에 띄우고 싶으면 여기서 한 번 브로드캐스트 추가해도 됨)
+            // 2) 뒤돌기(= +90° 절대값)
             yield return RotateTo(backwardRotation);
 
-            // 3) 감시 시작 = 라운드 시작
+            // 3) 감시 시작
             currentRoundIndex++;
             IsWatching = true;
             FarmGameManager.Instance.BroadcastWatcherFacingBack(true);
@@ -64,7 +67,7 @@ public class DolhareubangWatcher : MonoBehaviour
             // 4) 감시 유지
             yield return new WaitForSeconds(Random.Range(minWatchTime, maxWatchTime));
 
-            // 5) 다시 정면으로 회전
+            // 5) 정면으로(= -90° 절대값)
             yield return RotateTo(forwardRotation);
             IsWatching = false;
             FarmGameManager.Instance.BroadcastWatcherFacingBack(false);
@@ -73,10 +76,10 @@ public class DolhareubangWatcher : MonoBehaviour
         }
     }
 
-    private IEnumerator RotateTo(Vector3 targetEuler)
+    private IEnumerator RotateTo(Vector3 worldEuler)
     {
         Quaternion start = transform.rotation;
-        Quaternion end = Quaternion.Euler(targetEuler);
+        Quaternion end = Quaternion.Euler(worldEuler); // 월드 절대 회전
         float elapsed = 0f;
 
         while (elapsed < turnDuration)
