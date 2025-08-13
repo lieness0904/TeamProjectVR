@@ -23,6 +23,8 @@ public class UIGameHUD : MonoBehaviour
 
     private Coroutine announceCo;
 
+    private bool _startAnnounced = false;
+
     private void OnEnable()
     {
         var gm = FarmGameManager.Instance;
@@ -34,6 +36,9 @@ public class UIGameHUD : MonoBehaviour
         gm.OnWatcherFacingBackChanged += HandleWatcherState;
         gm.OnRoundChanged += HandleRoundChanged;
         gm.OnCaught += HandleCaught;
+
+        if (gm.IsGameStarted && !_startAnnounced)
+            HandleGameStarted();
     }
 
     private void OnDisable()
@@ -47,6 +52,9 @@ public class UIGameHUD : MonoBehaviour
         gm.OnWatcherFacingBackChanged -= HandleWatcherState;
         gm.OnRoundChanged -= HandleRoundChanged;
         gm.OnCaught -= HandleCaught;
+
+        if (gm.IsGameStarted && !_startAnnounced)
+            HandleGameStarted();
     }
 
     private void Start()
@@ -59,11 +67,13 @@ public class UIGameHUD : MonoBehaviour
 
     private void HandleGameStarted()
     {
+        _startAnnounced = true;
         ShowAnnounce("게임 시작!");
     }
 
     private void HandleGameEnded()
     {
+        _startAnnounced = false;
         ShowAnnounce("게임 종료!");
     }
 

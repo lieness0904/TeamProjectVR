@@ -1,0 +1,195 @@
+{
+  "items": [
+    {
+      "id": 100,
+      "name": "일반 낚시대",
+      "itemType": 0,
+      "description": "후진 낚시대",
+      "iconPath": "Sprites/Rod_Sprite",
+      "value": 200,
+      "price": 100
+    },
+    {
+      "id": 200,
+      "name": "미끼",
+      "itemType": 1,
+      "description": "물고기가 싫어할것만 같은 미끼다,,",
+      "iconPath": "Sprites/Bait_Sprite",
+      "value": 20,
+      "price": 20
+    },
+    {
+      "id": 201,
+      "name": "감귤 주스",
+      "itemType": 1,
+      "description": "아~ 시원하고 달달한 감귤 쥬쓰~",
+      "iconPath": "Sprites/MandarinJuice_Sprite",
+      "value": 20,
+      "price": 100
+    },
+    {
+      "id": 202,
+      "name": "아이스 아메리카노",
+      "itemType": 1,
+      "description": "시원한 아이스아메리카노",
+      "iconPath": "Sprites/AHAH_Sprite",
+      "value": 0.5,
+      "price": 100
+    },
+    {
+      "id": 203,
+      "name": "카스",
+      "itemType": 1,
+      "description": "스원한 맥주 한캔 어때요?",
+      "iconPath": "Sprites/Beer_Sprite",
+      "value": 0.6,
+      "price": 200
+    },
+
+    {
+      "id": 300,
+      "name": "방어",
+      "itemType": 2,
+      "description": "방어",
+      "iconPath": "Sprites/Yellowtail_Sprite",
+      "value": 30,
+      "price": 150
+    },
+    {
+      "id": 301,
+      "name": "고등어",
+      "itemType": 2,
+      "description": "고등어",
+      "iconPath": "Sprites/Mackerel_Sprite",
+      "value": 40,
+      "price": 200
+    },
+    {
+      "id": 302,
+      "name": "다금바리",
+      "itemType": 2,
+      "description": "다금바리",
+      "iconPath": "Sprites/Groupers_Sprite",
+      "value": 50,
+      "price": 250
+    },
+    {
+      "id": 303,
+      "name": "갈치",
+      "itemType": 2,
+      "description": "갈치",
+      "iconPath": "Sprites/Cutlassfish_Sprite",
+      "value": 60,
+      "price": 300
+    },
+    {
+      "id": 304,
+      "name": "참돔",
+      "itemType": 2,
+      "description": "참돔",
+      "iconPath": "Sprites/RedSnapper_Sprite",
+      "value": 100,
+      "price": 500
+    },
+    {
+      "id": 305,
+      "name": "니모",
+      "itemType": 2,
+      "description": "니모",
+      "iconPath": "Sprites/305",
+      "value": 100,
+      "price": 50
+    },
+    {
+      "id": 306,
+      "name": "상어",
+      "itemType": 2,
+      "description": "상어",
+      "iconPath": "Sprites/306",
+      "value": 100,
+      "price": 10000
+    },
+    {
+      "id": 307,
+      "name": "참치",
+      "itemType": 2,
+      "description": "참치",
+      "iconPath": "Sprites/307",
+      "value": 100,
+      "price": 5000
+    },
+    {
+      "id": 308,
+      "name": "가오리",
+      "itemType": 2,
+      "description": "가오리",
+      "iconPath": "Sprites/308",
+      "value": 100,
+      "price": 500
+    },
+    {
+      "id": 309,
+      "name": "흑우",
+      "itemType": 2,
+      "description": "흑우",
+      "iconPath": "Sprites/309",
+      "value": 100,
+      "price": 30
+    },
+    {
+      "id": 310,
+      "name": "도미",
+      "itemType": 2,
+      "description": "도미",
+      "iconPath": "Sprites/310",
+      "value": 100,
+      "price": 500
+    },
+    {
+      "id": 311,
+      "name": "쥐치",
+      "itemType": 2,
+      "description": "쥐치",
+      "iconPath": "Sprites/311",
+      "value": 100,
+      "price": 333
+    },
+    {
+      "id": 312,
+      "name": "덤보",
+      "itemType": 2,
+      "description": "덤보",
+      "iconPath": "Sprites/312",
+      "value": 100,
+      "price": 222
+    },
+    {
+      "id": 330,
+      "name": "귤",
+      "itemType": 2,
+      "description": "달콤한 제주산 귤",
+      "iconPath": "Sprites/Mandarin_Sprite",
+      "value": 10,
+      "price": 50
+    },
+    {
+      "id": 331,
+      "name": "한라봉",
+      "itemType": 2,
+      "description": "한라봉",
+      "iconPath": "Sprites/Hallabong_Sprite",
+      "value": 20,
+      "price": 100
+    },
+    {
+      "id": 340,
+      "name": "하르방방",
+      "itemType": 2,
+      "description": "하르방방",
+      "iconPath": "Sprites/Harhang_Sprite",
+      "value": 20,
+      "price": 100
+    }
+    
+  ]
+}

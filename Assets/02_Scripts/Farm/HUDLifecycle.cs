@@ -1,9 +1,12 @@
 // HUDLifecycle.cs
 using UnityEngine;
+using System.Collections;
 
 public class HUDLifecycle : MonoBehaviour
 {
     [SerializeField] private bool hideOnEnd = true;
+    [SerializeField] private float hideDelayOnEnd = 1.6f; // announceHold(1.2)+여유
+
 
     void Awake()
     {
@@ -38,6 +41,14 @@ public class HUDLifecycle : MonoBehaviour
 
     void OnGameEnded()
     {
-        if (hideOnEnd) gameObject.SetActive(false);
+        if (!hideOnEnd) return;
+        StopAllCoroutines();
+        StartCoroutine(CoHide());
+    }
+
+    IEnumerator CoHide()
+    {
+        yield return new WaitForSeconds(hideDelayOnEnd);
+        gameObject.SetActive(false);
     }
 }

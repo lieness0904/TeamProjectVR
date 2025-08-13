@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections; // 코루틴용
 
 public class FarmGameManager : MonoBehaviour
 {
@@ -9,9 +10,13 @@ public class FarmGameManager : MonoBehaviour
     [SerializeField] private bool spawnPlayerForSingle = false;
     [SerializeField] private GameObject xrOriginPrefab;
 
+    [Header("시작/종료 UI")]
+    [SerializeField] private GameObject startCanvas; // 시작/설명 월드캔버스 루트(있으면 드래그)
+
     [Header("HUD (월드 스페이스 캔버스 루트)")]
-    [SerializeField] private GameObject hudCanvas;              // 있으면 드래그, 없으면 자동 탐색
-    [SerializeField] private bool hideHudOnEnd = false;         // 게임 종료 시 HUD 끌지 여부
+    [SerializeField] private GameObject hudCanvas;      // 있으면 드래그, 없으면 자동 탐색
+    [SerializeField] private bool hideHudOnEnd = false; // 종료 시 HUD 끌지 여부
+    [SerializeField] private float hideHudDelay = 1.6f; // 종료 공지 보여줄 시간 (announceHold+여유)
 
     public bool IsGameStarted { get; private set; }
     public PlayerMovementDetector LocalPlayer { get; private set; }
@@ -23,12 +28,12 @@ public class FarmGameManager : MonoBehaviour
     public event Action<int> OnSessionOrangeCountChanged;
     public event Action OnCaught;                         // 들켰을 때
     public event Action<int, int> OnRoundChanged;         // (current, total)
-
-    // XR 카메라 준비 이벤트 (월드 HUD가 따라붙어야 할 때 유용)
-    public event Action<Transform> OnLocalCameraReady;
+    public event Action<Transform> OnLocalCameraReady;    // XR 카메라 Transform 전달
 
     // === 이번 게임(세션) 동안 딴 귤 ===
     public int SessionOrangeCount { get; private set; }
+
+    private bool _isStarting = false;
 
     private void Awake()
     {
@@ -47,7 +52,7 @@ public class FarmGameManager : MonoBehaviour
 
         Debug.Log("로컬 플레이어 등록 완료");
 
-        RaiseLocalCameraReady(); // 카메라 알림
+        RaiseLocalCameraReady(); // 카메라 알림(월드 HUD/바인더가 이거 듣고 바인딩)
     }
 
     public void UnregisterLocalPlayer(PlayerMovementDetector player)
@@ -55,9 +60,21 @@ public class FarmGameManager : MonoBehaviour
         if (LocalPlayer == player) LocalPlayer = null;
     }
 
+    // === 게임 시작: 시퀀스로 변경 (돌하르방이 먼저 등장하고 난 뒤 시작) ===
     public void StartGame()
     {
-        if (IsGameStarted) return;
+        if (!gameObject.activeInHierarchy) return;
+        StartCoroutine(StartGameSequence());
+    }
+
+    private IEnumerator StartGameSequence()
+    {
+        if (_isStarting || IsGameStarted) yield break;
+        _isStarting = true;
+
+        // 0) 시작 UI 끄기
+        if (startCanvas != null && startCanvas.activeSelf)
+            startCanvas.SetActive(false);
 
         // 1) XR Origin 생성 및 등록
         if (spawnPlayerForSingle && LocalPlayer == null && xrOriginPrefab != null)
@@ -68,30 +85,60 @@ public class FarmGameManager : MonoBehaviour
                 RegisterLocalPlayer(detector);
         }
 
-        // 혹시 외부에서 이미 등록돼 있더라도 한 번 더 카메라 알림
+        // 2) 카메라 알림 & HUD 켜기/바인딩
         RaiseLocalCameraReady();
-
-        // 2) HUD 켜고(없으면 찾아서) Event Camera 바인딩
         EnsureHUDVisibleAndBound();
 
-        // 3) 세션 카운트 초기화 + 이벤트
+        // 3) 돌하르방 등장(지하 → 지면). 모두 끝날 때까지 대기
+        var watchers = FindObjectsOfType<DolhareubangWatcher>(true);
+        foreach (var w in watchers)
+        {
+            // Emerge가 없다면 만들어야 함(앞서 준 Watcher 수정본 참고)
+            yield return w.StartCoroutine(w.Emerge());
+        }
+
+        // 4) 세션 초기화 & "게임 시작" 브로드캐스트
         SessionOrangeCount = 0;
         OnSessionOrangeCountChanged?.Invoke(SessionOrangeCount);
 
-        // 4) 게임 시작 브로드캐스트
         IsGameStarted = true;
         OnGameStarted?.Invoke();
         Debug.Log("게임 시작: 무궁화 꽃이 피었습니다");
+
+        _isStarting = false;
     }
 
     public void EndGame()
     {
+        if (!IsGameStarted) return;
+
         Debug.Log("게임 종료!");
         IsGameStarted = false;
         OnGameEnded?.Invoke();
 
+        // 종료 후 HUD는 공지 보여줄 시간만큼 기다렸다가 선택적으로 끔
         if (hideHudOnEnd && hudCanvas != null && hudCanvas.activeSelf)
-            hudCanvas.SetActive(false);
+            StartCoroutine(CoHideHudAfterDelay(hideHudDelay));
+
+        // 돌하르방 퇴장(지면 → 지하). 병렬이 필요하면 따로 요청해줘.
+        StartCoroutine(SinkAllWatchers());
+
+        // 시작 UI 다시 켜주기
+        if (startCanvas != null && !startCanvas.activeSelf)
+            startCanvas.SetActive(true);
+    }
+
+    private IEnumerator CoHideHudAfterDelay(float delay)
+    {
+        if (delay > 0f) yield return new WaitForSeconds(delay);
+        if (hudCanvas != null) hudCanvas.SetActive(false);
+    }
+
+    private IEnumerator SinkAllWatchers()
+    {
+        var watchers = FindObjectsOfType<DolhareubangWatcher>(true);
+        foreach (var w in watchers)
+            yield return w.StartCoroutine(w.Sink());
     }
 
     // === 브로드캐스트 유틸 ===
