@@ -1,3 +1,4 @@
+// DolhareubangWatcher.cs
 using UnityEngine;
 using System.Collections;
 
@@ -6,7 +7,7 @@ public class DolhareubangWatcher : MonoBehaviour
     [Header("회전 시간")]
     public float turnDuration = 1f;
     public Vector3 forwardRotation = Vector3.zero;
-    public Vector3 backwardRotation = new Vector3(0, 180, 0);
+    public Vector3 backwardRotation = new Vector3(0, 90, 0);
 
     [Header("감시 시간")]
     public float minWatchTime = 2f;
@@ -20,7 +21,7 @@ public class DolhareubangWatcher : MonoBehaviour
 
     [Header("감시 반복 횟수")]
     public int maxRounds = 10;
-    private int currentRound = 0;
+    private int currentRoundIndex = 0; // 0에서 시작, 뒤돌 때 +1
 
     private void Start()
     {
@@ -32,35 +33,41 @@ public class DolhareubangWatcher : MonoBehaviour
     {
         while (true)
         {
-            if (!FarmGameManager.Instance.IsGameStarted)
+            if (!FarmGameManager.Instance || !FarmGameManager.Instance.IsGameStarted)
             {
                 yield return null;
                 continue;
             }
 
-            if (currentRound >= maxRounds)
+            if (currentRoundIndex >= maxRounds)
             {
                 FarmGameManager.Instance.EndGame();
                 yield break;
             }
 
-            // 1. 휴식 상태
+            // 1) 휴식 상태
             IsWatching = false;
+            FarmGameManager.Instance.BroadcastWatcherFacingBack(false);
             yield return new WaitForSeconds(Random.Range(minRestTime, maxRestTime));
 
-            // 2. 회전해서 뒤돌기
+            // 2) 회전해서 뒤돌기 (회전 중 상태를 UI에 띄우고 싶으면 여기서 한 번 브로드캐스트 추가해도 됨)
             yield return RotateTo(backwardRotation);
-            IsWatching = true;
 
-            // 3. 감시 시간 유지
+            // 3) 감시 시작 = 라운드 시작
+            currentRoundIndex++;
+            IsWatching = true;
+            FarmGameManager.Instance.BroadcastWatcherFacingBack(true);
+            FarmGameManager.Instance.BroadcastRoundChanged(currentRoundIndex, maxRounds);
+
+            // 4) 감시 유지
             yield return new WaitForSeconds(Random.Range(minWatchTime, maxWatchTime));
 
-            // 4. 다시 정면으로 회전
+            // 5) 다시 정면으로 회전
             yield return RotateTo(forwardRotation);
             IsWatching = false;
+            FarmGameManager.Instance.BroadcastWatcherFacingBack(false);
 
-            currentRound++;
-            Debug.Log($"라운드 {currentRound}");
+            Debug.Log($"라운드 {currentRoundIndex} 종료");
         }
     }
 
@@ -76,7 +83,6 @@ public class DolhareubangWatcher : MonoBehaviour
             elapsed += Time.deltaTime;
             yield return null;
         }
-
         transform.rotation = end;
     }
 }

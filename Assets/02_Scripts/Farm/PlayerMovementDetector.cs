@@ -69,6 +69,7 @@ public class PlayerMovementDetector : MonoBehaviour
     private void TriggerCaught()
     {
         Debug.Log("들켰다! 귤을 뺏깁니다!");
+        FarmGameManager.Instance?.CaughtByWatcher(); // 세션 귤 0으로 리셋 + OnCaught 이벤트
         // TODO: 패널티 처리
     }
 }

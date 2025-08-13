@@ -11,14 +11,13 @@ public class CollectibleItem : MonoBehaviour
     public void Collect()
     {
         PlayerInventory inventory = FindObjectOfType<PlayerInventory>();
-        if (inventory == null)
-        {// 플레이어 인벤토리를 찾을 수 없는 경우
-            //Debug.LogError("[CollectibleItem] PlayerInventory를 찾을 수 없습니다.");
-            return;
-        }
+        if (inventory != null)
+            inventory.AddItem(itemId, amount);
 
-        inventory.AddItem(itemId, amount);
-        Destroy(gameObject); // 아이템 획득 성공 시 오브젝트 제거
-        //Debug.Log($"[CollectibleItem] 아이템 {itemId}을(를) {amount}개 획득했습니다.");
+        // 세션 카운트 반영
+        if (FarmGameManager.Instance != null)
+            FarmGameManager.Instance.AddSessionOranges(amount);
+
+        Destroy(gameObject);
     }
 }
