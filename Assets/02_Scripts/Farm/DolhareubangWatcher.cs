@@ -7,9 +7,9 @@ public class DolhareubangWatcher : MonoBehaviour
     [Header("회전 시간")]
     public float turnDuration = 1f;
 
-    // 월드 기준 고정 각도
-    public Vector3 forwardRotation = new Vector3(0, -90, 0); // 시작각
-    public Vector3 backwardRotation = new Vector3(0, 90, 0); // 뒤돌았을 때
+    // 월드 기준 고정 각도 (정면 0°, 뒤 180°)
+    public Vector3 forwardRotation = new Vector3(0, 0, 0);     // 시작 각도
+    public Vector3 backwardRotation = new Vector3(0, 180, 0);  // 뒤돌았을 때
 
     [Header("감시 시간")]
     public float minWatchTime = 2f;
@@ -27,7 +27,7 @@ public class DolhareubangWatcher : MonoBehaviour
 
     private void Start()
     {
-        // 시작 시 월드 기준 각도 강제 세팅
+        // 시작 시 월드 기준 각도 강제 세팅 (정면 0°)
         transform.rotation = Quaternion.Euler(forwardRotation);
 
         Debug.Log("돌하르방 감시 시작");
@@ -50,12 +50,12 @@ public class DolhareubangWatcher : MonoBehaviour
                 yield break;
             }
 
-            // 1) 휴식(정면=-90°)
+            // 1) 휴식(정면=0°)
             IsWatching = false;
             FarmGameManager.Instance.BroadcastWatcherFacingBack(false);
             yield return new WaitForSeconds(Random.Range(minRestTime, maxRestTime));
 
-            // 2) 뒤돌기(= +90° 절대값)
+            // 2) 뒤돌기(= 180° 절대값)
             yield return RotateTo(backwardRotation);
 
             // 3) 감시 시작
@@ -67,7 +67,7 @@ public class DolhareubangWatcher : MonoBehaviour
             // 4) 감시 유지
             yield return new WaitForSeconds(Random.Range(minWatchTime, maxWatchTime));
 
-            // 5) 정면으로(= -90° 절대값)
+            // 5) 정면으로(= 0° 절대값)
             yield return RotateTo(forwardRotation);
             IsWatching = false;
             FarmGameManager.Instance.BroadcastWatcherFacingBack(false);
