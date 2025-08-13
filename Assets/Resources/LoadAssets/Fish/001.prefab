@@ -293,11 +293,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fishID: 100
+  weightExponent: 1.5
   fishName: "\uBCFC\uB77D"
   baseWeight: 0.3
   strength: 0.5
-  basePrice: 150
-  minSizeMultiplier: 0.75
+  basePrice: 500
+  minSizeMultiplier: 0.85
   maxSizeMultiplier: 1.8
   appearanceWeight: 5
   finalSizeMultiplier: 0

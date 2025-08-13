@@ -203,7 +203,7 @@ MonoBehaviour:
   fishName: "\uAD11\uC5B4"
   baseWeight: 1.2
   strength: 3
-  basePrice: 200
+  basePrice: 2000
   minSizeMultiplier: 0.75
   maxSizeMultiplier: 3
   appearanceWeight: 5

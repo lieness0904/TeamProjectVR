@@ -2529,7 +2529,7 @@ MonoBehaviour:
   vibrationAmplitude: 0.7
   vibrationDuration: 1
   retrievalDistance: 5
-  fixedReelInSpeed: 6
+  baseReelSpeed: 3
   bobberHangOffset: 0.2
   hookVelocityThreshold: 2
   gaugeDecreasePerSec: 50
@@ -2542,15 +2542,13 @@ MonoBehaviour:
   reelingSoundWinningSmall: {fileID: 8300000, guid: 0047be6b31d34e84fab1626cbde93c52,
     type: 3}
   reelingSoundLosing: {fileID: 8300000, guid: 38e6b6cf651d2c1449c86676a7f66f3f, type: 3}
-  tensionReelingSound: {fileID: 8300000, guid: 2e57ba9b9415cf341b15cc983035d758, type: 3}
+  tensionReelingSound: {fileID: 8300000, guid: db285a0b9781a424b9da6f16d5c5c738, type: 3}
   lineSnapSound: {fileID: 8300000, guid: 4e0201b499338f247b1b891f52832b87, type: 3}
   retrievalSound: {fileID: 8300000, guid: 760fbb06631a96847bbecec9f7c3aef4, type: 3}
   lowTensionVibeAmplitude: 0.2
   midTensionVibeAmplitude: 0.4
   highTensionVibeAmplitude: 0.7
   vibeDuration: 0.1
-  _IsReeling:
-    _value: 0
   _IsFishing:
     _value: 0
   _CurrentBobber: {fileID: 0}
@@ -26079,12 +26077,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
-  m_WarningMessage: "\nBinding warning: Some generic clip(s) animate transforms that
-    are already bound by a Humanoid avatar. These transforms can only be changed
-    by Humanoid clips.\n\tTransform 'CC_BaseRing1.R'\n\tTransform 'CC_BaseMid2.L'\n\tTransform
-    'CC_BaseThumb2.R'\n\tTransform 'CC_BaseMid1.L'\n\tTransform 'CC_BaseThumb1.L'\n\tTransform
-    'CC_BaseForearm.L'\n\tTransform 'CC_BaseHand.L'\n\tTransform 'CC_BaseMid1.R'\n\tTransform
-    'CC_BaseMid2.R'\n\tTransform 'CC_BaseThumb2.L'\n\tand more ..."
+  m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0

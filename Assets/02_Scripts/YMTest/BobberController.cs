@@ -278,14 +278,12 @@ public class BobberController : NetworkBehaviour
 
     public void SetStunEffectActive(bool isActive)
     {
-        Debug.Log($"SetStunEffectActive 호출! 활성화 상태: {isActive}");
+        
         if (stunEffectObject != null && stunEffectObject.activeSelf != isActive)
         {
             stunEffectObject.SetActive(isActive);
         }
     }
-
-    // BobberController.cs 클래스 내부 아무 곳에나 추가 (맨 아래 추천)
 
     /// <summary>
     /// 챔질 결과에 맞는 이펙트 프리팹을 생성합니다. (PlayerFishingController에서 호출됨)
@@ -309,8 +307,7 @@ public class BobberController : NetworkBehaviour
         }
 
         if (prefabToSpawn != null)
-        {
-            // [수정] effectSpawnPoint가 지정되었다면 그 위치에, 아니면 기존처럼 찌 위치에 생성합니다.
+        {            
             Vector3 spawnPos = (effectSpawnPoint != null) ? effectSpawnPoint.position : transform.position;
             Quaternion spawnRot = (effectSpawnPoint != null) ? effectSpawnPoint.rotation : transform.rotation;
 

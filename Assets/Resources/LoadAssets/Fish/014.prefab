@@ -60,7 +60,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.018, y: 0.018, z: 0.018}
+  m_LocalScale: {x: 0.013, y: 0.013, z: 0.013}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 2688354493008991577}
@@ -326,10 +326,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fishID: 112
+  weightExponent: 1.5
   fishName: "\uC131\uB300"
-  baseWeight: 1.1
-  strength: 1.5
-  basePrice: 200
+  baseWeight: 0.4
+  strength: 1
+  basePrice: 250
   minSizeMultiplier: 0.75
   maxSizeMultiplier: 1.35
   appearanceWeight: 5
@@ -428,7 +429,7 @@ Transform:
   m_GameObject: {fileID: 9149018085077315319}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.00002, y: 0.000505, z: -0.00002}
+  m_LocalPosition: {x: 0.00002, y: 0.00014, z: -0.00002}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

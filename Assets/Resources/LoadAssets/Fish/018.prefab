@@ -112,10 +112,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fishID: 116
+  weightExponent: 1.5
   fishName: "\uC464\uAE30\uBBF8"
   baseWeight: 0.5
   strength: 2
-  basePrice: 200
+  basePrice: 450
   minSizeMultiplier: 0.75
   maxSizeMultiplier: 1.5
   appearanceWeight: 5

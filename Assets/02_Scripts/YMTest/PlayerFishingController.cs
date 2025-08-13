@@ -26,7 +26,7 @@ public class PlayerFishingController : NetworkBehaviour
     [SerializeField] private float retrievalDistance = 1.5f;
 
     [Tooltip("찌를 1초에 감아들이는 거리(미터)입니다.")]
-    public float fixedReelInSpeed = 2f;
+    public float baseReelSpeed = 2f;
 
     [Header("낚시 디테일 설정")]
     [Tooltip("낚싯대에 찌가 매달릴 때의 기본 거리입니다.")]
@@ -81,7 +81,7 @@ public class PlayerFishingController : NetworkBehaviour
     // --- 네트워크 동기화 변수 ---
     [Networked] private float tensionGauge { get; set; } = 0f;
     private const float maxGauge = 100f;
-    [Networked] public NetworkBool IsReeling { get; set; }
+    [Networked] private float CurrentReelSpeed { get; set; }
 
     [Networked] public NetworkBool IsFishing { get; set; }
     [Networked] private NetworkObject SpawnedRod { get; set; }
@@ -250,7 +250,7 @@ public class PlayerFishingController : NetworkBehaviour
 
     private void HandleReelingHaptics()
     {
-        if (!IsFighting || !IsReeling) return;
+        if (!IsFighting || CurrentReelSpeed <= 0) return;
         float normalizedGauge = tensionGauge / maxGauge;
         _hapticTimer -= Time.deltaTime;
         if (normalizedGauge >= 0.8f)
@@ -319,7 +319,7 @@ public class PlayerFishingController : NetworkBehaviour
             float normalizedGauge = tensionGauge / maxGauge;
 
             // 게이지가 50% 이상이고, 릴을 감고 있을 때만 재생
-            if (normalizedGauge >= 0.5f && IsReeling)
+            if (normalizedGauge >= 0.5f && CurrentReelSpeed > 0)
             {
                 if (tensionAudioSource.clip != tensionReelingSound)
                 {
@@ -384,11 +384,11 @@ public class PlayerFishingController : NetworkBehaviour
     {
         if (HasStateAuthority)
         {
-            // --- [새로 추가] 물고기와 싸우지 않을 때의 릴링 처리 ---
-            if (IsReeling && !IsFighting && CurrentBobber != null)
+            // --- [변경] 물고기와 싸우지 않을 때의 릴링 처리 ---
+            if (CurrentReelSpeed > 0 && !IsFighting && CurrentBobber != null)
             {
-                // 1. 기본 속도로 찌와 바늘을 움직입니다.
-                float moveAmount = fixedReelInSpeed * Runner.DeltaTime;
+                // 1. CurrentReelSpeed를 이용해 찌와 바늘을 움직입니다.
+                float moveAmount = CurrentReelSpeed * Runner.DeltaTime;
                 if (CurrentBobber.TryGetComponent<Rigidbody>(out var bobberRigidbody) && _rodTip != null)
                 {
                     Vector3 directionToRod = (_rodTip.position - bobberRigidbody.position).normalized;
@@ -431,18 +431,26 @@ public class PlayerFishingController : NetworkBehaviour
                 var fishData = HookedFish.GetComponent<FishData>();
                 if (fishData != null && CurrentBobber.TryGetComponent<Rigidbody>(out var bobberRigidbody))
                 {
-                    // 플레이어가 릴을 감고 있을 때
-                    if (IsReeling)
+                    // [변경] 플레이어가 릴을 감고 있을 때 (속도가 0보다 클 때)
+                    if (CurrentReelSpeed > 0)
                     {
-                        float fishResistance = fishData.finalWeight * (2f / 3f);
-                        if (IsCurrentlyFleeing)
+                        float effectiveWeight = fishData.finalWeight; // 기본값은 원래 무게
+                        if (!IsCurrentlyFleeing) // 기절 상태일 때
+                        {
+                            effectiveWeight /= 3f; // 무게를 1/3으로 줄입니다.
+                        }
+
+                        // 2. 유효 무게를 기반으로 저항력을 계산합니다.
+                        float fishResistance = effectiveWeight * (2f / 3f);
+                        if (IsCurrentlyFleeing) // 도망 상태일 때만 힘을 추가합니다.
                         {
                             fishResistance += fishData.strength;
                         }
-                        float netSpeed = fixedReelInSpeed - fishResistance;
+
+                        // 3. 최종 속도를 계산합니다.
+                        float netSpeed = CurrentReelSpeed - fishResistance;
                         float moveAmount = netSpeed * Runner.DeltaTime;
 
-                        // [수정] 다시 '찌'를 움직입니다.
                         if (_rodTip != null)
                         {
                             Vector3 directionToRod = (_rodTip.position - bobberRigidbody.position).normalized;
@@ -467,17 +475,15 @@ public class PlayerFishingController : NetworkBehaviour
 
                         if (IsCurrentlyFleeing)
                         {
-                            // [수정] 다시 '찌'를 움직입니다.
-                            float fleeDistance = (fishData.strength * 2f) * Runner.DeltaTime; // 도망가는 힘 조절 (필요시 이 값을 변경)
+                            float fleeDistance = (fishData.strength * 2f) * Runner.DeltaTime;
                             bobberRigidbody.MovePosition(bobberRigidbody.position + FleeDirection * fleeDistance);
                         }
                     }
                 }
 
-                // --- [새로 추가된 사운드 상태 결정 로직] ---
-                if (IsReeling && HookedFish != null)
+                // --- [변경] 사운드 상태 결정 로직 ---
+                if (CurrentReelSpeed > 0 && HookedFish != null)
                 {
-                    // fishData는 위에서 이미 찾아놨으므로 재사용합니다.
                     if (fishData != null)
                     {
                         float fishResistance = fishData.finalWeight * (2f / 3f);
@@ -485,7 +491,8 @@ public class PlayerFishingController : NetworkBehaviour
                         {
                             fishResistance += fishData.strength;
                         }
-                        float netSpeed = fixedReelInSpeed - fishResistance;
+                        // [변경] netSpeed 계산에 CurrentReelSpeed 사용
+                        float netSpeed = CurrentReelSpeed - fishResistance;
 
                         if (netSpeed >= 2f)
                         {
@@ -503,14 +510,11 @@ public class PlayerFishingController : NetworkBehaviour
                 }
                 else
                 {
-                    // 릴을 감고 있지 않으면 사운드 상태를 None으로 변경
                     currentReelingSoundState = ReelingSoundState.None;
                 }
-                // --- [여기까지] ---
             }
             else // IsFighting이 아닐 때
             {
-                // 싸우고 있지 않을 때도 사운드 상태를 None으로 확실하게 변경
                 currentReelingSoundState = ReelingSoundState.None;
             }
 
@@ -640,7 +644,7 @@ public class PlayerFishingController : NetworkBehaviour
             {
                 tensionAudioSource.Stop();
             }
-            // --- [여기까지] ---
+            
 
             if (SpawnedRod != null) Runner.Despawn(SpawnedRod);
             if (CurrentBobber != null) Runner.Despawn(CurrentBobber);
@@ -653,6 +657,7 @@ public class PlayerFishingController : NetworkBehaviour
             _rodTip = null;
             _rodTipRb = null;
             tensionGauge = 0f;
+
         }
         RPC_UpdateVisuals(isFishing, SpawnedRod);
     }
@@ -780,9 +785,11 @@ public class PlayerFishingController : NetworkBehaviour
     }
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    public void RPC_SetReelingState(NetworkBool state)
+    public void RPC_SetReelSpeed(float newSpeed)
     {
-        IsReeling = state;
+        // ReelController에서 받은 속도 값을 네트워크 변수에 저장합니다.
+        // baseReelSpeed의 1.5배를 최대 속도로 제한하여 비정상적인 값을 막습니다.
+        CurrentReelSpeed = Mathf.Clamp(newSpeed, 0, baseReelSpeed * 1.5f);
     }
 
     private IEnumerator DelayedDespawnRoutine(NetworkObject fishToDespawn)
