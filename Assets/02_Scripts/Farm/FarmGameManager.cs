@@ -5,36 +5,29 @@ public class FarmGameManager : MonoBehaviour
 {
     public static FarmGameManager Instance { get; private set; }
 
-    [Header("선택사항: 싱글플레이 테스트용 스폰")]
+    [Header("싱글 테스트용 XR Origin 스폰")]
     [SerializeField] private bool spawnPlayerForSingle = false;
     [SerializeField] private GameObject xrOriginPrefab;
 
-    [SerializeField] private GameObject hudCanvas; // XR 카메라 밑의 HUDCanvas를 드래그해서 넣어
+    [Header("HUD (월드 스페이스 캔버스 루트)")]
+    [SerializeField] private GameObject hudCanvas;              // 있으면 드래그, 없으면 자동 탐색
+    [SerializeField] private bool hideHudOnEnd = false;         // 게임 종료 시 HUD 끌지 여부
 
     public bool IsGameStarted { get; private set; }
     public PlayerMovementDetector LocalPlayer { get; private set; }
 
-    public event Action<int, int> OnRoundChanged; // (current, total)
-
-    public void BroadcastWatcherFacingBack(bool isWatching)
-    {
-        OnWatcherFacingBackChanged?.Invoke(isWatching);
-    }
-
-    // 돌하르방에서 라운드 시작 시 호출 (1부터 시작 권장)
-    public void BroadcastRoundChanged(int current, int total)
-    {
-        OnRoundChanged?.Invoke(current, total);
-    }
-
     // === 이벤트들 ===
     public event Action OnGameStarted;
     public event Action OnGameEnded;
-    public event Action<bool> OnWatcherFacingBackChanged; // true=뒤돌아감(감시중), false=정면(감시 아님)
+    public event Action<bool> OnWatcherFacingBackChanged; // true=감시중(뒤돌아감), false=정면
     public event Action<int> OnSessionOrangeCountChanged;
-    public event Action OnCaught; // 들켰을 때(UI 깜빡임 등)
+    public event Action OnCaught;                         // 들켰을 때
+    public event Action<int, int> OnRoundChanged;         // (current, total)
 
-    // === 이번 게임(시작~종료) 동안 딴 귤 ===
+    // XR 카메라 준비 이벤트 (월드 HUD가 따라붙어야 할 때 유용)
+    public event Action<Transform> OnLocalCameraReady;
+
+    // === 이번 게임(세션) 동안 딴 귤 ===
     public int SessionOrangeCount { get; private set; }
 
     private void Awake()
@@ -53,6 +46,8 @@ public class FarmGameManager : MonoBehaviour
             LocalPlayer.SetWatcher(watchers[0]);
 
         Debug.Log("로컬 플레이어 등록 완료");
+
+        RaiseLocalCameraReady(); // 카메라 알림
     }
 
     public void UnregisterLocalPlayer(PlayerMovementDetector player)
@@ -60,12 +55,11 @@ public class FarmGameManager : MonoBehaviour
         if (LocalPlayer == player) LocalPlayer = null;
     }
 
-    // FarmGameManager.cs (StartGame 내부에 추가)
     public void StartGame()
     {
         if (IsGameStarted) return;
 
-        // XR Origin이 런타임에 생성된다면, 먼저 생성하고 RegisterLocalPlayer까지 끝낸 뒤에:
+        // 1) XR Origin 생성 및 등록
         if (spawnPlayerForSingle && LocalPlayer == null && xrOriginPrefab != null)
         {
             var xrOriginGO = Instantiate(xrOriginPrefab);
@@ -74,37 +68,44 @@ public class FarmGameManager : MonoBehaviour
                 RegisterLocalPlayer(detector);
         }
 
-        // === HUD 켜기 ===
-        if (hudCanvas == null)
-        {
-            // 혹시 인스펙터에 안 넣었으면, 로컬 플레이어 카메라 자식에서 찾아본다
-            var hud = LocalPlayer
-                ? LocalPlayer.GetComponentInChildren<UIGameHUD>(true)
-                : FindObjectOfType<UIGameHUD>(true);
+        // 혹시 외부에서 이미 등록돼 있더라도 한 번 더 카메라 알림
+        RaiseLocalCameraReady();
 
-            if (hud) hudCanvas = hud.gameObject;
-        }
+        // 2) HUD 켜고(없으면 찾아서) Event Camera 바인딩
+        EnsureHUDVisibleAndBound();
 
-        if (hudCanvas != null && !hudCanvas.activeSelf)
-            hudCanvas.SetActive(true);
-
+        // 3) 세션 카운트 초기화 + 이벤트
         SessionOrangeCount = 0;
         OnSessionOrangeCountChanged?.Invoke(SessionOrangeCount);
 
+        // 4) 게임 시작 브로드캐스트
         IsGameStarted = true;
         OnGameStarted?.Invoke();
-        Debug.Log("게임 시작");
+        Debug.Log("게임 시작: 무궁화 꽃이 피었습니다");
     }
-
 
     public void EndGame()
     {
         Debug.Log("게임 종료!");
         IsGameStarted = false;
         OnGameEnded?.Invoke();
+
+        if (hideHudOnEnd && hudCanvas != null && hudCanvas.activeSelf)
+            hudCanvas.SetActive(false);
     }
 
-    // 이번 게임(세션) 동안 귤 획득 반영
+    // === 브로드캐스트 유틸 ===
+    public void BroadcastWatcherFacingBack(bool isWatching)
+    {
+        OnWatcherFacingBackChanged?.Invoke(isWatching);
+    }
+
+    public void BroadcastRoundChanged(int current, int total)
+    {
+        OnRoundChanged?.Invoke(current, total);
+    }
+
+    // === 세션 카운트 ===
     public void AddSessionOranges(int amount)
     {
         if (!IsGameStarted) return;
@@ -113,7 +114,6 @@ public class FarmGameManager : MonoBehaviour
         OnSessionOrangeCountChanged?.Invoke(SessionOrangeCount);
     }
 
-    // 들킴 처리: 세션 카운트 0으로 리셋
     public void CaughtByWatcher()
     {
         if (!IsGameStarted) return;
@@ -123,5 +123,71 @@ public class FarmGameManager : MonoBehaviour
         OnCaught?.Invoke();
 
         Debug.Log("들켰다! 이번 라운드에서 딴 귤 몰수!");
+    }
+
+    // === 내부 헬퍼 ===
+    private void EnsureHUDVisibleAndBound()
+    {
+        // 1) HUD 오브젝트 확보
+        if (hudCanvas == null)
+        {
+            // 로컬 플레이어 자식에서 먼저 찾기
+            if (LocalPlayer != null)
+            {
+                var hud = LocalPlayer.GetComponentInChildren<UIGameHUD>(true);
+                if (hud != null) hudCanvas = hud.gameObject;
+            }
+            // 그래도 없으면 씬 전체에서 찾기
+            if (hudCanvas == null)
+            {
+                var hud = FindObjectOfType<UIGameHUD>(true);
+                if (hud != null) hudCanvas = hud.gameObject;
+            }
+        }
+
+        if (hudCanvas == null)
+        {
+            Debug.LogWarning("[FarmGameManager] HUDCanvas를 못 찾음. 인스펙터에 할당하거나 씬/프리팹 구조 확인해.");
+            return;
+        }
+
+        // 2) Event Camera 바인딩 (World Space/ScreenSpaceCamera 모두)
+        var canvas = hudCanvas.GetComponent<Canvas>();
+        if (canvas != null &&
+            (canvas.renderMode == RenderMode.WorldSpace || canvas.renderMode == RenderMode.ScreenSpaceCamera))
+        {
+            if (canvas.worldCamera == null)
+            {
+                var cam = GetLocalCamera();
+                if (cam != null)
+                    canvas.worldCamera = cam;
+                else
+                    Debug.LogWarning("[FarmGameManager] HUD Event Camera 못 찾음. XR 카메라 존재/태그 확인.");
+            }
+        }
+
+        // 3) HUD 켜기 (월드 스페이스면 위치는 HUDFollower가 잡음)
+        if (!hudCanvas.activeSelf)
+            hudCanvas.SetActive(true);
+    }
+
+    private Camera GetLocalCamera()
+    {
+        if (LocalPlayer != null)
+        {
+            var cam = LocalPlayer.GetComponentInChildren<Camera>(true);
+            if (cam != null) return cam;
+        }
+        if (Camera.main != null) return Camera.main;
+
+        var any = FindObjectOfType<Camera>(true);
+        return any;
+    }
+
+    private void RaiseLocalCameraReady()
+    {
+        var cam = GetLocalCamera();
+        if (cam != null)
+            OnLocalCameraReady?.Invoke(cam.transform);
     }
 }
