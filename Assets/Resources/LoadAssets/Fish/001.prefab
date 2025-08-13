@@ -299,8 +299,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65af5b5f544243a4fb4faa1e02d3ab63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fishID: 100
-  fishName: "\uC8FC\uB204"
+  fishID: 305
+  fishName: "\uB2C8\uBAA8"
   baseWeight: 0.05
   strength: 0.5
   basePrice: 150

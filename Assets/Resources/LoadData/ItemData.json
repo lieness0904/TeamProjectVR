@@ -92,6 +92,78 @@
       "price": 500
     },
     {
+      "id": 305,
+      "name": "니모",
+      "itemType": 2,
+      "description": "니모",
+      "iconPath": "Sprites/305",
+      "value": 100,
+      "price": 50
+    },
+    {
+      "id": 306,
+      "name": "상어",
+      "itemType": 2,
+      "description": "상어",
+      "iconPath": "Sprites/306",
+      "value": 100,
+      "price": 10000
+    },
+    {
+      "id": 307,
+      "name": "참치",
+      "itemType": 2,
+      "description": "참치",
+      "iconPath": "Sprites/307",
+      "value": 100,
+      "price": 5000
+    },
+    {
+      "id": 308,
+      "name": "가오리",
+      "itemType": 2,
+      "description": "가오리",
+      "iconPath": "Sprites/308",
+      "value": 100,
+      "price": 500
+    },
+    {
+      "id": 309,
+      "name": "흑우",
+      "itemType": 2,
+      "description": "흑우",
+      "iconPath": "Sprites/309",
+      "value": 100,
+      "price": 30
+    },
+    {
+      "id": 310,
+      "name": "도미",
+      "itemType": 2,
+      "description": "도미",
+      "iconPath": "Sprites/310",
+      "value": 100,
+      "price": 500
+    },
+    {
+      "id": 311,
+      "name": "쥐치",
+      "itemType": 2,
+      "description": "쥐치",
+      "iconPath": "Sprites/311",
+      "value": 100,
+      "price": 333
+    },
+    {
+      "id": 312,
+      "name": "덤보",
+      "itemType": 2,
+      "description": "덤보",
+      "iconPath": "Sprites/312",
+      "value": 100,
+      "price": 222
+    },
+    {
       "id": 330,
       "name": "귤",
       "itemType": 2,

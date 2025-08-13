@@ -87,6 +87,7 @@ public class PlayerFishingController : NetworkBehaviour
     private XRBaseController _leftHandXRController;
     private float _hapticTimer = 0f;
 
+    private PlayerInventory playerInventory;
     #endregion
 
     private void Awake()
@@ -531,6 +532,7 @@ public class PlayerFishingController : NetworkBehaviour
                         if (caughtFishUI != null && fishData != null)
                         {
                             caughtFishUI.ShowFishInfo(fishData, 10f);
+                            playerInventory.AddItem(fishData.fishID, 1);
                         }
                         if (HookedFish != null)
                         {
