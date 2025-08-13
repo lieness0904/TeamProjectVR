@@ -6,7 +6,9 @@ public class DolhareubangWatcher : MonoBehaviour
 {
     [Header("회전 시간")]
     public float turnDuration = 1f;
-    public Vector3 forwardRotation = Vector3.zero;
+
+    // 정면(y = -90), 뒤(y = 90)
+    public Vector3 forwardRotation = new Vector3(0, -90, 0);
     public Vector3 backwardRotation = new Vector3(0, 90, 0);
 
     [Header("감시 시간")]
