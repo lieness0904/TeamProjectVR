@@ -9,6 +9,8 @@ public class FarmGameManager : MonoBehaviour
     [SerializeField] private bool spawnPlayerForSingle = false;
     [SerializeField] private GameObject xrOriginPrefab;
 
+    [SerializeField] private GameObject hudCanvas; // XR 카메라 밑의 HUDCanvas를 드래그해서 넣어
+
     public bool IsGameStarted { get; private set; }
     public PlayerMovementDetector LocalPlayer { get; private set; }
 
@@ -63,7 +65,7 @@ public class FarmGameManager : MonoBehaviour
     {
         if (IsGameStarted) return;
 
-        // XR Origin 생성
+        // XR Origin이 런타임에 생성된다면, 먼저 생성하고 RegisterLocalPlayer까지 끝낸 뒤에:
         if (spawnPlayerForSingle && LocalPlayer == null && xrOriginPrefab != null)
         {
             var xrOriginGO = Instantiate(xrOriginPrefab);
@@ -72,37 +74,26 @@ public class FarmGameManager : MonoBehaviour
                 RegisterLocalPlayer(detector);
         }
 
-        // === HUD 켜면서 카메라 강제 세팅 ===
-        var hud = FindObjectOfType<UIGameHUD>(true); // 비활성 포함 검색
-        if (hud != null)
+        // === HUD 켜기 ===
+        if (hudCanvas == null)
         {
-            var canvas = hud.GetComponent<Canvas>();
-            if (canvas != null && canvas.renderMode == RenderMode.ScreenSpaceCamera)
-            {
-                // XR 카메라 찾기 (프리팹 내부 포함)
-                Camera xrCam = null;
-                if (LocalPlayer != null)
-                    xrCam = LocalPlayer.GetComponentInChildren<Camera>(true);
-                if (xrCam == null)
-                    xrCam = Camera.main; // 혹시 이미 MainCamera 태그가 붙어있다면
+            // 혹시 인스펙터에 안 넣었으면, 로컬 플레이어 카메라 자식에서 찾아본다
+            var hud = LocalPlayer
+                ? LocalPlayer.GetComponentInChildren<UIGameHUD>(true)
+                : FindObjectOfType<UIGameHUD>(true);
 
-                if (xrCam == null)
-                    xrCam = FindObjectOfType<Camera>(true);
-
-                if (xrCam != null)
-                    canvas.worldCamera = xrCam;
-                else
-                    Debug.LogWarning("HUD 카메라 못 찾음. XR 카메라에 MainCamera 태그 붙였는지 확인.");
-            }
-            hud.gameObject.SetActive(true); // 여기서 켜라
+            if (hud) hudCanvas = hud.gameObject;
         }
+
+        if (hudCanvas != null && !hudCanvas.activeSelf)
+            hudCanvas.SetActive(true);
 
         SessionOrangeCount = 0;
         OnSessionOrangeCountChanged?.Invoke(SessionOrangeCount);
 
-        Debug.Log("게임 시작: 무궁화 꽃이 피었습니다");
         IsGameStarted = true;
         OnGameStarted?.Invoke();
+        Debug.Log("게임 시작");
     }
 
 
